@@ -8,48 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Questions Table
-        Schema::create('questions', function (Blueprint $table) {
-            $table->id();
-            $table->enum('type', [
-                'fill_blank',
-                'spelling',
-                'correct_sequence',
-                'linking',
-                'true_false',
-                'mcq',
-                'math',
-                'grouped',
-                'comprehension'
-            ]);
-            $table->text('content');
-            $table->text('explanation')->nullable();
-            $table->json('metadata')->nullable();
-            $table->foreignId('parent_question_id')->nullable()->constrained('questions')->onDelete('cascade');
-            $table->timestamps();
-        });
-
-        // Question Options Table
-        Schema::create('question_options', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->string('label')->nullable(); // A1, B1 etc. for linking
-            $table->text('value');
-            $table->boolean('is_correct')->default(false);
-            $table->json('metadata')->nullable(); // UI-specific (image URL, latex, etc.)
-            $table->timestamps();
-        });
-
-        // Question Answers Table
-        Schema::create('question_answers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->json('answer'); // Could be text, array, mapping
-            $table->string('format')->default('text'); // text, ordered, fraction, mapping
-            $table->timestamps();
-        });
-
-        // Question Groups (Comprehension Passages)
+        // 1. Question Groups (Comprehension Passages) – created first
         Schema::create('question_groups', function (Blueprint $table) {
             $table->id();
             $table->string('title')->nullable();
@@ -58,7 +17,50 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Mapping questions into groups (comprehension)
+        // 2. Questions Table – now it can safely reference question_groups
+        Schema::create('questions', function (Blueprint $table) {
+            $table->id();
+            $table->string('title')->nullable();
+            $table->enum('type', [
+                'mcq',
+                'fill_blank',
+                'spelling',
+                'rearrange',
+                'linking',
+                'true_false',
+                'image_mcq',
+                'math',
+                'grouped',
+                'comprehension'
+            ]);
+            $table->text('content');
+            $table->text('explanation')->nullable();
+            $table->json('metadata')->nullable();
+            $table->foreignId('parent_question_id')->nullable()->constrained('questions')->onDelete('cascade');
+            $table->foreignId('group_id')->nullable()->constrained('question_groups')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        // 3. Question Options
+        Schema::create('question_options', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
+            $table->string('label')->nullable();
+            $table->text('value');
+            $table->boolean('is_correct')->default(false);
+            $table->timestamps();
+        });
+
+        // 4. Question Answers
+        Schema::create('question_answers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
+            $table->json('answer');
+            $table->string('format')->default('text');
+            $table->timestamps();
+        });
+
+        // 5. Mapping Questions into Groups (Comprehension)
         Schema::create('question_group_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained('question_groups')->onDelete('cascade');
@@ -67,7 +69,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Tagging Questions by subject, topic, etc.
+        // 6. Question Tags
         Schema::create('question_tags', function (Blueprint $table) {
             $table->id();
             $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
@@ -76,14 +78,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Optional difficulty table (if used separately from tags)
+        // 7. Question Difficulties
         Schema::create('question_difficulties', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->enum('difficulty', ['easy', 'medium', 'hard']);
             $table->timestamps();
         });
 
-        // Pivot table for question <-> tag (many-to-many tagging system)
+        // 8. Pivot table for question <-> tag (many-to-many tagging system)
         Schema::create('question_question_tag', function (Blueprint $table) {
             $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->foreignId('question_tag_id')->constrained('question_tags')->onDelete('cascade');
@@ -93,6 +96,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Drop the pivot table first to avoid foreign key errors
         Schema::dropIfExists('question_question_tag');
         Schema::dropIfExists('question_difficulties');
         Schema::dropIfExists('question_tags');

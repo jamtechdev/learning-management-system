@@ -14,41 +14,31 @@
 
     <!-- Styles and Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Page-specific styles --}}
-    @stack('styles')
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 font-sans antialiased">
+<body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <div class="flex min-h-screen">
 
         <!-- Sidebar (Static) -->
-        <div class="w-64 bg-white dark:bg-gray-800 border-r hidden md:block">
+        <div class="hidden w-64 bg-white border-r dark:bg-gray-800 md:block">
             @include('layouts.sidebar')
         </div>
-
         <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col">
-
+        <div class="flex flex-col flex-1">
             <!-- Top Navigation Bar -->
-            <div class="bg-white dark:bg-gray-800 shadow">
+            <div class="bg-white shadow dark:bg-gray-800">
                 @include('layouts.navigation')
             </div>
-
             <!-- Page Content -->
             <main class="flex-1 p-4">
                 {{ $slot }}
             </main>
-
             <!-- Footer -->
-            <footer class="bg-white dark:bg-gray-800 border-t">
+            <footer class="bg-white border-t dark:bg-gray-800">
                 @include('layouts.footer')
             </footer>
         </div>
     </div>
-
-    {{-- Page-specific scripts --}}
-    @stack('scripts')
 </body>
 
 </html>

@@ -17,12 +17,12 @@
             </li>
 
 
-            {{-- <li class="w-full border-b border-gray-300 dark:border-gray-700">
-                <x-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')"
-                            class="block w-full px-4 py-2 text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-indigo-100 dark:hover:bg-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    Settings
+            <li class="w-full border-b border-gray-300 dark:border-gray-700">
+                <x-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')"
+                    class="block w-full px-4 py-2 text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-indigo-100 dark:hover:bg-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400">
+                    Questions
                 </x-nav-link>
-            </li> --}}
+            </li>
         </ul>
     </nav>
 </aside>
