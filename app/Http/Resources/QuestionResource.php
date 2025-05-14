@@ -11,13 +11,7 @@ class QuestionResource extends JsonResource
     {
         return [
             'id'                 => $this->id,
-            'type'               => $this->type,
-            'content'            => $this->content,
-            'explanation'        => $this->explanation,
-            'metadata'           => $this->metadata,
-            'parent_question_id' => $this->parent_question_id,
-            'created_at'         => $this->created_at?->toDateTimeString(),
-            'updated_at'         => $this->updated_at?->toDateTimeString(),
+            'question'           => $this->metadata,
         ];
     }
 }

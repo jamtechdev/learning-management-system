@@ -32,7 +32,7 @@ class QuestionCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'questions' => $this->collection,
+            'questions_array' => $this->collection,
             'pagination' => $this->pagination
         ];
     }
