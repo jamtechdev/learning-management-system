@@ -32,7 +32,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/{id}', [QuestionController::class, 'show'])->name('show');         // Show one
         Route::get('/{id}/edit', [QuestionController::class, 'edit'])->name('edit');    // Show edit form
         Route::put('/{id}', [QuestionController::class, 'update'])->name('update');     // Update question
-        Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy');// Delete
+        Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy'); // Delete
     });
 });
 

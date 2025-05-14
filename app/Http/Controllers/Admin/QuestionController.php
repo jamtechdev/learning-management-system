@@ -23,43 +23,41 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->input('question_data');  // Get the data
-
+        $data = $request->input('question_data');
         switch ($data['type']) {
             case 'mcq':
-                $this->saveMcqQuestion($data);  // Only dump the data for MCQ type
+                $this->saveMcqQuestion($data);
                 break;
 
             case 'fill_blank':
-                $this->saveFillBlankQuestion($data);  // Only dump the data for Fill Blank
-                break;
-
-            case 'spelling':
-                dd($this->saveSpellingCorrection($data));  // Only dump the data for Spelling
-                break;
-
-            case 'rearrange':
-                dd($this->saveRearrangeQuestion($data));  // Only dump the data for Rearrange
-                break;
-
-            case 'linking':
-                dd($this->saveLinkingQuestion($data));  // Only dump the data for Linking
+                $this->saveFillBlankQuestion($data);
                 break;
 
             case 'true_false':
-                dd($this->saveTrueFalseQuestion($data));  // Only dump the data for True/False
+                $this->saveTrueFalseQuestion($data);
                 break;
 
+            case 'linking':
+                $this->saveLinkingQuestion($data);
+                break;
+
+            case 'spelling':
+                dd($this->saveSpellingCorrection($data));
+                break;
+
+            case 'rearrange':
+                dd($this->saveRearrangeQuestion($data));
+                break;
             case 'image_mcq':
-                dd($this->saveImageMcqQuestion($data));  // Only dump the data for Image MCQ
+                dd($this->saveImageMcqQuestion($data));
                 break;
 
             case 'math':
-                dd($this->saveMathQuestion($data));  // Only dump the data for Math
+                dd($this->saveMathQuestion($data));
                 break;
 
             case 'grouped':
-                dd($this->saveGroupedQuestion($data));  // Only dump the data for Grouped
+                dd($this->saveGroupedQuestion($data));
                 break;
 
             case 'comprehension':
@@ -132,10 +130,33 @@ class QuestionController extends Controller
         $question->metadata = $data;
         $question->save();
 
-        return response()->json(['success' => 'Fill-in-the-blank saved successfully!']);
+        return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
     }
 
-
+    // Save True/False Question
+    private function saveTrueFalseQuestion($data)
+    {
+        $transformed = [
+            'type' => 'true_false',
+            'content' => $data['content'],
+            'options' => [
+                ['value' => 'True'],
+                ['value' => 'False'],
+            ],
+            'answer' => [
+                'choice' => $data['answer']['choice'] ?? null,
+                'explanation' => $data['explanation'] ?? null,
+                'format' => $data['format'] ?? 'text',
+            ],
+        ];
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->content = $data['content'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
+        $question->save();
+        return redirect()->route('admin.questions.index')->with('success', 'True/False type question saved successfully!');
+    }
     // Save Spelling Correction Question
     private function saveSpellingCorrection($data)
     {
@@ -198,17 +219,8 @@ class QuestionController extends Controller
         return response()->json(['success' => 'Linking saved successfully!']);
     }
 
-    // Save True/False Question
-    private function saveTrueFalseQuestion($data)
-    {
-        $question = new Question();
-        $question->type = 'true_false';
-        $question->content = $data['content'];
-        $question->answer = json_encode($data['answer']);
-        $question->save();
 
-        return response()->json(['success' => 'True/False saved successfully!']);
-    }
+
 
     // Save Image MCQ Question
     private function saveImageMcqQuestion($data)

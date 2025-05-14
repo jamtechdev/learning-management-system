@@ -2,7 +2,7 @@
     <div class="py-6">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="p-6 overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 sm:rounded-lg"
-                 x-data="{
+                x-data="{
                     type: '{{ old('question_data.type') }}',
                     questionContent: '{{ old('question_data.content') }}',
                     answers: @json(old('question_data.answer', [])),
@@ -26,7 +26,8 @@
 
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Create Question</h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Choose question type and fill relevant fields.</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Choose question type and fill relevant
+                        fields.</p>
                 </header>
 
                 <form method="POST" action="{{ route('admin.questions.store') }}" class="mt-6 space-y-6">
@@ -37,14 +38,24 @@
                         <x-input-label for="question_data_type" value="Type" />
                         <select id="question_data_type" name="question_data[type]" x-model="type" class="w-full mt-1">
                             <option value="">Select Type</option>
-                            <option value="mcq" {{ old('question_data.type') == 'mcq' ? 'selected' : '' }}>MCQ</option>
-                            <option value="fill_blank" {{ old('question_data.type') == 'fill_blank' ? 'selected' : '' }}>Fill in the Blank</option>
-                            <option value="true_false" {{ old('question_data.type') == 'true_false' ? 'selected' : '' }}>True/False</option>
-                            <option value="linking" {{ old('question_data.type') == 'linking' ? 'selected' : '' }}>Linking</option>
-                            <option value="spelling" {{ old('question_data.type') == 'spelling' ? 'selected' : '' }}>Spelling</option>
-                            <option value="math" {{ old('question_data.type') == 'math' ? 'selected' : '' }}>Math</option>
-                            <option value="grouped" {{ old('question_data.type') == 'grouped' ? 'selected' : '' }}>Grouped</option>
-                            <option value="comprehension" {{ old('question_data.type') == 'comprehension' ? 'selected' : '' }}>Comprehension</option>
+                            <option value="mcq" {{ old('question_data.type') == 'mcq' ? 'selected' : '' }}>MCQ
+                            </option>
+                            <option value="fill_blank"
+                                {{ old('question_data.type') == 'fill_blank' ? 'selected' : '' }}>Fill in the Blank
+                            </option>
+                            <option value="true_false"
+                                {{ old('question_data.type') == 'true_false' ? 'selected' : '' }}>True/False</option>
+                            <option value="linking" {{ old('question_data.type') == 'linking' ? 'selected' : '' }}>
+                                Linking</option>
+                            <option value="spelling" {{ old('question_data.type') == 'spelling' ? 'selected' : '' }}>
+                                Spelling</option>
+                            <option value="math" {{ old('question_data.type') == 'math' ? 'selected' : '' }}>Math
+                            </option>
+                            <option value="grouped" {{ old('question_data.type') == 'grouped' ? 'selected' : '' }}>
+                                Grouped</option>
+                            <option value="comprehension"
+                                {{ old('question_data.type') == 'comprehension' ? 'selected' : '' }}>Comprehension
+                            </option>
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('question_data.type')" />
                     </div>
@@ -72,9 +83,9 @@
                             removeOption(index) {
                                 this.options.splice(index, 1);
                             }
-                        }"
-                        x-init="@if(old('question_data.options')) options = @json(array_values(old('question_data.options'))); @endif"
-                        class="mt-4 space-y-2">
+                        }" x-init="@if(old('question_data.options'))
+                        options = @json(array_values(old('question_data.options')));
+                        @endif" class="mt-4 space-y-2">
                             <x-input-label value="MCQ Options" />
 
                             <template x-for="(option, index) in options" :key="index">
@@ -83,7 +94,8 @@
                                         :name="`question_data[options][${index}][value]`" x-model="option.value" />
 
                                     <label class="flex items-center gap-1">
-                                        <input type="checkbox" :checked="option.is_correct" @change="setCorrect(index)" />
+                                        <input type="checkbox" :checked="option.is_correct"
+                                            @change="setCorrect(index)" />
                                         <input type="hidden" :name="`question_data[options][${index}][is_correct]`"
                                             :value="option.is_correct ? 1 : 0" />
                                         Correct
@@ -99,7 +111,8 @@
                                     :disabled="options.length >= 4">
                                     Add Option
                                 </button>
-                                <p x-show="options.length >= 4" class="text-xs text-gray-500">Maximum 4 options allowed.</p>
+                                <p x-show="options.length >= 4" class="text-xs text-gray-500">Maximum 4 options allowed.
+                                </p>
                             </div>
 
                             <input type="hidden" name="question_data[format]" value="text">
@@ -120,8 +133,7 @@
                                 <x-input-label value="Blank Answers" />
                                 <template x-for="(answer, index) in answers" :key="index">
                                     <input type="text" :name="'question_data[answer][' + index + ']'"
-                                        :placeholder="'Answer ' + (index + 1)"
-                                        class="w-full px-2 py-1 border rounded"
+                                        :placeholder="'Answer ' + (index + 1)" class="w-full px-2 py-1 border rounded"
                                         x-model="answers[index]" />
                                 </template>
                             </div>
@@ -129,6 +141,72 @@
                             <input type="hidden" name="question_data[format]" value="text">
                         </div>
                     </template>
+
+                    <!-- True / False with Textbox Explanation -->
+                    <template x-if="type === 'true_false'">
+                        <div class="space-y-4">
+                            <div>
+                                <x-input-label value="Select Answer" />
+                                <select name="question_data[answer][choice]" class="w-full">
+                                    <option value="True"
+                                        {{ old('question_data.answer.choice') == 'True' ? 'selected' : '' }}>True
+                                    </option>
+                                    <option value="False"
+                                        {{ old('question_data.answer.choice') == 'False' ? 'selected' : '' }}>False
+                                    </option>
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('question_data.answer.choice')" />
+                            </div>
+
+                            <input type="hidden" name="question_data[format]" value="text">
+                        </div>
+                    </template>
+
+
+                    <!-- Linking -->
+                    <div x-show="type === 'linking'" class="space-y-2">
+                        <x-input-label value="Matching Pairs" />
+                        @for ($i = 0; $i < 4; $i++)
+                            <div class="flex gap-2">
+                                <input type="text" name="options[{{ $i }}][label]"
+                                    value="{{ old('options.' . $i . '.label') }}"
+                                    placeholder="Label {{ $i + 1 }}" class="w-1/3" />
+                                <input type="text" name="options[{{ $i }}][value]"
+                                    value="{{ old('options.' . $i . '.value') }}"
+                                    placeholder="Match Value {{ $i + 1 }}" class="w-2/3" />
+                            </div>
+                        @endfor
+                    </div>
+
+
+
+
+
+
+                    <!-- Spelling -->
+                    <div x-show="type === 'spelling'" class="space-y-2">
+                        <x-input-label value="Correct Spelling" />
+                        <input type="text" name="answer[]" value="{{ old('answer.0') }}" class="w-full" />
+                        <input type="hidden" name="format" value="text" />
+                    </div>
+
+                    <!-- Math -->
+                    <div x-show="type === 'math'" class="space-y-2">
+                        <x-input-label value="Math Answer" />
+                        <input type="text" name="answer[]" value="{{ old('answer.0') }}" class="w-full" />
+                        <input type="hidden" name="format" value="text" />
+                    </div>
+
+                    <!-- Grouped -->
+                    <div x-show="type === 'grouped'" class="space-y-2">
+                        <x-input-label value="(Info only) Save this as a grouped parent. Add children later." />
+                    </div>
+
+                    <!-- Comprehension -->
+                    <div x-show="type === 'comprehension'" class="space-y-2">
+                        <x-input-label value="Passage for Comprehension" />
+                        <textarea name="passage" rows="4" class="w-full">{{ old('passage') }}</textarea>
+                    </div>
 
                     <!-- Explanation -->
                     <div>
