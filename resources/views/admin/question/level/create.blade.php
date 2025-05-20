@@ -1,14 +1,26 @@
 <x-app-layout>
     <div class="max-w-4xl p-6 mx-auto mt-10 bg-white shadow-md rounded-xl">
-        <h2 class="pb-2 mb-6 text-3xl font-bold text-gray-800 border-b">Create Question Level</h2>
+        <h2 class="pb-2 mb-2 text-3xl font-bold text-gray-800 border-b">Create Question Level</h2>
 
-        <form method="POST" action="{{ route('admin.levels.store') }}" x-data="levelForm()" x-init="init()">
+        <!-- User Guide Note -->
+        <div class="p-4 mb-6 text-blue-700 border border-blue-200 rounded bg-blue-50">
+            <p><strong>How to use this form:</strong></p>
+            <ol class="space-y-1 text-sm list-decimal list-inside">
+                <li>Select the <em>Education Type</em> from the dropdown (Primary or Secondary).</li>
+                <li>Once selected, enter a new level name in the input box below.</li>
+                <li>Click the <em>Add</em> button or press <em>Enter</em> to add the level.</li>
+                <li>Added levels appear below where you can remove any by clicking the red ✕ button.</li>
+                <li>When done, click <em>Submit</em> to save all added levels for the selected education type.</li>
+            </ol>
+        </div>
+
+        <form method="POST" action="{{ route('admin.levels.store') }}" x-data="levelForm()">
             @csrf
 
             <!-- Education Type -->
             <div class="mb-6">
                 <label for="education_type" class="block font-medium text-gray-700">Education Type</label>
-                <select id="education_type" name="education_type" x-model="educationType" @change="filterLevels()"
+                <select id="education_type" name="education_type" x-model="educationType"
                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('education_type') border-red-500 @enderror">
                     <option value="">-- Select --</option>
                     <option value="Primary">Primary</option>
@@ -76,23 +88,6 @@
                 selectedLevels: @json(old('name') ?? []),
                 newLevel: '',
                 errorMessage: '',
-                usedLevels: @json(collect($existingLevels)->mapWithKeys(function ($collection, $type) {
-                        return [$type => $collection->pluck('name')->map(fn($n) => strtolower($n))->unique()->values()];
-                    })),
-
-                init() {
-                    this.filterLevels();
-                },
-
-                filterLevels() {
-                    const eduKey = this.educationType;
-                    const used = this.usedLevels[eduKey] || [];
-                    this.selectedLevels = this.selectedLevels.filter(level => !used.includes(level.toLowerCase()));
-                },
-
-                isUsed(level) {
-                    return this.usedLevels[this.educationType]?.includes(level.toLowerCase());
-                },
 
                 addLevel() {
                     const level = this.newLevel.trim();
@@ -111,11 +106,6 @@
 
                     if (this.selectedLevels.map(l => l.toLowerCase()).includes(lowerLevel)) {
                         this.errorMessage = 'This level is already added.';
-                        return;
-                    }
-
-                    if (this.isUsed(level)) {
-                        this.errorMessage = 'This level already exists for this education type.';
                         return;
                     }
 

@@ -4,7 +4,7 @@
             <div class="p-6 bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
                 <!-- Header -->
                 <div class="flex flex-col items-center justify-between mb-8 md:flex-row">
-                    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white md:text-left">
                         Manage All Question Levels
                     </h2>
                     <a href="{{ route('admin.levels.create') }}"
@@ -19,19 +19,19 @@
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th scope="col"
-                                    class="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                                     #
                                 </th>
                                 <th scope="col"
-                                    class="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Level Name
                                 </th>
                                 <th scope="col"
-                                    class="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Education Type
                                 </th>
                                 <th scope="col"
-                                    class="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-300">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Actions
                                 </th>
                             </tr>
@@ -40,16 +40,16 @@
                             @forelse ($levels as $index => $level)
                                 <tr class="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
                                     <td
-                                        class="w-1/4 px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                        class="px-6 py-4 text-sm font-medium text-left text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                         {{ $index + 1 }}
                                     </td>
-                                    <td class="w-1/4 px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                    <td class="px-6 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
                                         {{ $level->name }}
                                     </td>
-                                    <td class="w-1/4 px-6 py-4 text-sm text-gray-700 capitalize dark:text-gray-300">
+                                    <td class="px-6 py-4 text-sm text-center text-gray-700 capitalize dark:text-gray-300">
                                         {{ $level->education_type }}
                                     </td>
-                                    <td class="w-1/4 px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
                                         <a href="{{ route('admin.levels.edit', $level->id) }}"
                                             class="inline-block px-3 py-1 mr-2 text-sm text-blue-600 transition bg-blue-100 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1">
                                             Edit

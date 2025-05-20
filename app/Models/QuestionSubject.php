@@ -8,7 +8,11 @@ class QuestionSubject extends Model
 {
     protected $table = 'question_subjects';
 
-    protected $fillable = ['level_id', 'name'];
+    protected $fillable = [
+        'education_type',
+        'level_id',
+        'name'
+    ];
 
     public function level()
     {

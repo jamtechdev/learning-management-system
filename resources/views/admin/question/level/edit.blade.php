@@ -1,10 +1,19 @@
 <x-app-layout>
-    <div class="max-w-3xl p-6 mx-auto mt-10 bg-white shadow-md rounded-xl">
-        <h2 class="pb-2 mb-6 text-3xl font-bold text-gray-800 border-b">Edit Question Level</h2>
+    <div class="p-6 mx-auto mt-10 bg-white shadow-md max-w-7xl rounded-xl">
+        <h2 class="pb-2 mb-2 text-3xl font-bold text-gray-800 border-b">Edit Question Level</h2>
+
+        <!-- User Guide Note -->
+        <div class="p-4 mb-6 text-yellow-700 border border-yellow-300 rounded bg-yellow-50">
+            <p><strong>How to edit a question level:</strong></p>
+            <ol class="space-y-1 text-sm list-decimal list-inside">
+                <li>The <em>Education Type</em> is fixed and cannot be changed.</li>
+                <li>Update the <em>Level Name</em> in the input field below as needed.</li>
+                <li>Click the <em>Update</em> button to save your changes.</li>
+            </ol>
+        </div>
 
         <form method="POST" action="{{ route('admin.levels.update', $level->id) }}">
             @csrf
-
 
             <!-- Education Type (Read-only) -->
             <div class="mb-6">

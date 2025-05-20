@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('question_subjects', function (Blueprint $table) {
             $table->id();
+            $table->enum('education_type', ['primary', 'secondary']);
             $table->foreignId('level_id')->nullable()->constrained('question_levels')->onDelete('cascade');
             $table->string('name');
             $table->timestamps();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
+use App\Models\QuestionSubject;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -87,45 +88,30 @@ class LevelController extends Controller
     // Update single level
     public function update(Request $request, $id)
     {
-        // Normalize input name for case-insensitive validation
-        $inputName = strtolower(trim($request->name));
+        $inputName = strtolower($request->name);
 
-        // Validate
         $request->validate([
-            'education_type' => ['required', 'in:primary,secondary'],
+            'education_type' => ['required', 'in:Primary,Secondary'],
+            'level_id' => 'required|exists:question_levels,id',
             'name' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('question_levels', 'name')
+                Rule::unique('question_subjects', 'name')
                     ->ignore($id)
                     ->where(function ($query) use ($request, $inputName) {
-                        return $query->where('education_type', strtolower($request->education_type))
-                                     ->whereRaw('LOWER(name) = ?', [$inputName]);
+                        return $query->where('education_type', $request->education_type)
+                            ->whereRaw('LOWER(name) = ?', [$inputName]);
                     }),
             ],
         ]);
 
-        try {
-            $level = QuestionLevel::findOrFail($id);
-            DB::beginTransaction();
+        $subject = QuestionSubject::findOrFail($id);
+        $subject->update($request->all());
 
-            // Convert name to Title Case before saving
-            $capitalName = Str::title($inputName);
-
-            $level->update([
-                'name' => $capitalName,
-                'education_type' => strtolower($request->education_type),
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('admin.levels.index')->with('success', 'Level updated successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->withErrors(['error' => 'Failed to update level: ' . $e->getMessage()]);
-        }
+        return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
     }
+
 
     // Delete a level by ID
     public function destroy($id)
