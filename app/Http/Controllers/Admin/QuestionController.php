@@ -12,14 +12,20 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        $questions = Question::all();
+        $questions = Question::with(['options', 'level', 'subject'])->get();
+
         return view('admin.question.index', compact('questions'));
     }
 
+
     public function create()
     {
-        return view('admin.question.create');
+        // Load levels with subjects eager loaded
+        $levels = \App\Models\QuestionLevel::with('subjects')->get()->groupBy('education_type');
+
+        return view('admin.question.create', compact('levels'));
     }
+
 
     public function store(Request $request)
     {
@@ -38,7 +44,7 @@ class QuestionController extends Controller
                 break;
 
             case 'linking':
-                $this->saveLinkingQuestion($data);
+                $this->saveLinkingQuestion($data, $request);
                 break;
 
             case 'spelling':
@@ -157,6 +163,72 @@ class QuestionController extends Controller
         $question->save();
         return redirect()->route('admin.questions.index')->with('success', 'True/False type question saved successfully!');
     }
+
+    // Save Linking Question
+    private function saveLinkingQuestion($data, $request)
+    {
+        $answer = [];
+
+        foreach ($data['options'] as $index => $option) {
+            $leftImageUri = '';
+            $rightImageUri = '';
+
+            // Upload left image
+            if (($option['match_type'] ?? '') === 'image' &&
+                $request->hasFile("question_data.options.$index.label_image")
+            ) {
+                $leftImage = $request->file("question_data.options.$index.label_image");
+                $leftImageUri = $leftImage->store('uploads/linking', 'public');
+            }
+
+            // Upload right image
+            if (($option['value_type'] ?? '') === 'image' &&
+                $request->hasFile("question_data.options.$index.value_image")
+            ) {
+                $rightImage = $request->file("question_data.options.$index.value_image");
+                $rightImageUri = $rightImage->store('uploads/linking', 'public');
+            }
+
+            $answer[] = [
+                'left' => [
+                    'word' => $option['label_text'] ?? '',
+                    'image_uri' => asset('storage/' . $leftImageUri),
+                    'match_type' => $option['match_type'] ?? 'text',
+                ],
+                'right' => [
+                    'word' => $option['value_text'] ?? '',
+                    'image_uri' => asset('storage/' . $rightImageUri),
+                    'match_type' => $option['value_type'] ?? 'text',
+                ],
+            ];
+        }
+
+        $transformed = [
+            'type' => 'linking',
+            'content' => $data['content'] ?? '',
+            'explanation' => $data['explanation'] ?? '',
+            'format' => 'mapping',
+            'answer' => $answer,
+        ];
+
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->content = $data['content'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
+        $question->save();
+
+        return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
+    }
+
+
+
+
+
+
+
+
+
     // Save Spelling Correction Question
     private function saveSpellingCorrection($data)
     {
@@ -178,7 +250,6 @@ class QuestionController extends Controller
         return response()->json(['success' => 'Spelling correction saved successfully!']);
     }
 
-
     // Save Rearrange Question
     private function saveRearrangeQuestion($data)
     {
@@ -198,28 +269,6 @@ class QuestionController extends Controller
 
         return response()->json(['success' => 'Rearrange saved successfully!']);
     }
-
-    // Save Linking Question
-    private function saveLinkingQuestion($data)
-    {
-        $question = new Question();
-        $question->type = 'linking';
-        $question->content = $data['content'];
-        $question->answer = json_encode($data['answer']);
-        $question->save();
-
-        foreach ($data['options'] as $option) {
-            $optionModel = new QuestionOption();
-            $optionModel->question_id = $question->id;
-            $optionModel->value = $option['value'];
-            $optionModel->label = $option['label'];
-            $optionModel->save();
-        }
-
-        return response()->json(['success' => 'Linking saved successfully!']);
-    }
-
-
 
 
     // Save Image MCQ Question

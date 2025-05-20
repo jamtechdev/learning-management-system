@@ -2,27 +2,44 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    use HasFactory;
+    protected $table = 'questions';
 
-    protected $fillable = ['type', 'content', 'explanation', 'metadata', 'parent_question_id'];
+    protected $fillable = [
+        'content',
+        'type',
+        'explanation',
+        'metadata',
+        'parent_question_id',
+        'group_id',
+        'level_id',
+        'subject_id',
+    ];
 
+    public function level()
+    {
+        return $this->belongsTo(QuestionLevel::class, 'level_id');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(QuestionSubject::class, 'subject_id');
+    }
     protected $casts = [
         'metadata' => 'array',
     ];
 
     public function options()
     {
-        return $this->hasMany(QuestionOption::class);
+        return $this->hasMany(QuestionOption::class,'question_id','id');
     }
 
     public function answers()
     {
-        return $this->hasMany(QuestionAnswer::class);
+        return $this->hasMany(QuestionAnswer::class,'question_id','id');
     }
 
     public function parent()

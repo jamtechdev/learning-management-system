@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 
 class QuestionSeeder extends Seeder
@@ -13,7 +12,33 @@ class QuestionSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // Create some Question Groups (for Comprehension)
+        // Step 1: Seed Levels
+        $levelIds = [];
+        foreach (['primary', 'secondary'] as $eduType) {
+            for ($i = 1; $i <= 2; $i++) {
+                $levelIds[] = DB::table('question_levels')->insertGetId([
+                    'education_type' => $eduType,
+                    'name' => ucfirst($eduType) . " Level $i",
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // Step 2: Seed Subjects
+        $subjectIds = [];
+        foreach ($levelIds as $levelId) {
+            foreach (['Math', 'English', 'Science'] as $subjectName) {
+                $subjectIds[] = DB::table('question_subjects')->insertGetId([
+                    'level_id' => $levelId,
+                    'name' => $subjectName,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // Step 3: Create some Question Groups (for Comprehension)
         $groupIds = [];
         for ($i = 0; $i < 3; $i++) {
             $groupIds[] = DB::table('question_groups')->insertGetId([
@@ -25,34 +50,31 @@ class QuestionSeeder extends Seeder
             ]);
         }
 
-        // Create some Questions
+        // Step 4: Create Questions
         $questionIds = [];
         for ($i = 0; $i < 10; $i++) {
             $type = collect([
-                'mcq',
-                'fill_blank',
-                'spelling',
-                'rearrange',
-                'linking',
-                'true_false',
-                'image_mcq',
-                'math',
-                'grouped',
-                'comprehension'
+                'mcq', 'fill_blank', 'spelling', 'rearrange', 'linking',
+                'true_false', 'image_mcq', 'math', 'grouped', 'comprehension'
             ])->random();
+
+            $levelId = $levelIds[array_rand($levelIds)];
+            $subjectId = collect($subjectIds)->random(); // Optional: Filter subject for that level if needed
+
             $questionIds[] = DB::table('questions')->insertGetId([
-                'title' => $faker->sentence(),
                 'type' => $type,
                 'content' => $faker->paragraph(),
                 'explanation' => $faker->text(200),
                 'metadata' => json_encode(['difficulty' => 'medium']),
                 'group_id' => $type === 'comprehension' ? $groupIds[array_rand($groupIds)] : null,
+                'level_id' => $levelId,
+                'subject_id' => $subjectId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
-        // Create Question Options for each Question (Only for MCQs)
+        // Step 5: Create Options for MCQs
         foreach ($questionIds as $questionId) {
             if (DB::table('questions')->where('id', $questionId)->value('type') === 'mcq') {
                 DB::table('question_options')->insert([
@@ -61,7 +83,6 @@ class QuestionSeeder extends Seeder
                         'label' => 'A',
                         'value' => $faker->word(),
                         'is_correct' => rand(0, 1),
-
                         'created_at' => now(),
                         'updated_at' => now(),
                     ],
@@ -70,7 +91,6 @@ class QuestionSeeder extends Seeder
                         'label' => 'B',
                         'value' => $faker->word(),
                         'is_correct' => rand(0, 1),
-
                         'created_at' => now(),
                         'updated_at' => now(),
                     ],
@@ -79,7 +99,6 @@ class QuestionSeeder extends Seeder
                         'label' => 'C',
                         'value' => $faker->word(),
                         'is_correct' => rand(0, 1),
-
                         'created_at' => now(),
                         'updated_at' => now(),
                     ],
@@ -87,7 +106,7 @@ class QuestionSeeder extends Seeder
             }
         }
 
-        // Create Question Answers
+        // Step 6: Answers
         foreach ($questionIds as $questionId) {
             DB::table('question_answers')->insert([
                 'question_id' => $questionId,
@@ -98,7 +117,7 @@ class QuestionSeeder extends Seeder
             ]);
         }
 
-        // Tagging Questions
+        // Step 7: Tags
         foreach ($questionIds as $questionId) {
             DB::table('question_tags')->insert([
                 [
@@ -118,7 +137,7 @@ class QuestionSeeder extends Seeder
             ]);
         }
 
-        // Difficulty Levels for Questions
+        // Step 8: Difficulties
         foreach ($questionIds as $questionId) {
             DB::table('question_difficulties')->insert([
                 'question_id' => $questionId,

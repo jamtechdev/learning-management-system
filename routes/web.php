@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\QuestionController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\SubjectController;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -24,15 +26,37 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         return view('dashboard');
     })->middleware(['verified'])->name('dashboard');
 
-    // Question CRUD routes
+    // Question Management: Questions
     Route::prefix('questions')->name('admin.questions.')->group(function () {
-        Route::get('/', [QuestionController::class, 'index'])->name('index');          // List all
-        Route::get('/create', [QuestionController::class, 'create'])->name('create');   // Show create form
-        Route::post('/', [QuestionController::class, 'store'])->name('store');          // Save new question
-        Route::get('/{id}', [QuestionController::class, 'show'])->name('show');         // Show one
-        Route::get('/{id}/edit', [QuestionController::class, 'edit'])->name('edit');    // Show edit form
-        Route::put('/{id}', [QuestionController::class, 'update'])->name('update');     // Update question
-        Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy'); // Delete
+        Route::get('/', [QuestionController::class, 'index'])->name('index');
+        Route::get('/create', [QuestionController::class, 'create'])->name('create');
+        Route::post('/', [QuestionController::class, 'store'])->name('store');
+        Route::get('/{id}', [QuestionController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [QuestionController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [QuestionController::class, 'update'])->name('update');
+        Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy');
+    });
+
+    // Question Management: Levels
+    Route::prefix('levels')->name('admin.levels.')->group(function () {
+        Route::get('/', [LevelController::class, 'index'])->name('index');
+        Route::get('/create', [LevelController::class, 'create'])->name('create');
+        Route::post('/', [LevelController::class, 'store'])->name('store');
+        // For edit and update, use educationType as URL parameter (Primary or Secondary)
+        Route::get('levels/{educationType}/edit', [LevelController::class, 'edit'])->name('edit');
+        Route::post('levels/{educationType}', [LevelController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LevelController::class, 'destroy'])->name('destroy');
+    });
+
+    // Question Management: Subjects
+    Route::prefix('subjects')->name('admin.subjects.')->group(function () {
+        Route::get('/', [SubjectController::class, 'index'])->name('index');
+        Route::get('/create', [SubjectController::class, 'create'])->name('create');
+        Route::post('/', [SubjectController::class, 'store'])->name('store');
+        Route::get('/{id}', [SubjectController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [SubjectController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [SubjectController::class, 'update'])->name('update');
+        Route::delete('/{id}', [SubjectController::class, 'destroy'])->name('destroy');
     });
 });
 

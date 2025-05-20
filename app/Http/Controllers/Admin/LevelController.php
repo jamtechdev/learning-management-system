@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\QuestionLevel;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
+class LevelController extends Controller
+{
+    // List all levels
+    public function index()
+    {
+        $levels = QuestionLevel::withCount(['subjects', 'questions'])->get();
+        return view('admin.question.level.index', compact('levels'));
+    }
+
+    // Show create form
+    public function create()
+    {
+        $existingLevels = QuestionLevel::all()->groupBy('education_type');
+        return view('admin.question.level.create', compact('existingLevels'));
+    }
+
+    // Store new levels (supports multiple)
+    public function store(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'education_type' => ['required', 'in:Primary,Secondary'],
+            'name' => ['required', 'array', 'min:1'],
+            'name.*' => ['required', 'string', 'max:100'],
+        ]);
+
+        // Normalize education_type to lowercase for consistent queries
+        $educationType = strtolower($request->education_type);
+
+        // Normalize, trim, title-case submitted names and make unique
+        $submittedNames = collect($request->input('name'))
+            ->map(fn($name) => Str::title(strtolower(trim($name))))
+            ->unique()
+            ->values();
+
+        // Fetch existing names for this education_type (case insensitive)
+        $existingNames = QuestionLevel::where('education_type', $educationType)
+            ->pluck('name')
+            ->map(fn($name) => strtolower($name));
+
+        // Check for duplicates in DB
+        $duplicates = $submittedNames->filter(fn($name) => $existingNames->contains(strtolower($name)));
+
+        if ($duplicates->isNotEmpty()) {
+            return back()->withInput()->withErrors([
+                'name' => 'The following level names already exist: ' . $duplicates->join(', ')
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($submittedNames as $levelName) {
+                QuestionLevel::create([
+                    'education_type' => $educationType,
+                    'name' => $levelName,
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.levels.index')->with('success', 'Level(s) created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Failed to create levels: ' . $e->getMessage()]);
+        }
+    }
+
+    // Show edit form for a single level by ID
+    public function edit($id)
+    {
+        $level = QuestionLevel::findOrFail($id);
+        return view('admin.question.level.edit', compact('level'));
+    }
+
+    // Update single level
+    public function update(Request $request, $id)
+    {
+        // Normalize input name for case-insensitive validation
+        $inputName = strtolower(trim($request->name));
+
+        // Validate
+        $request->validate([
+            'education_type' => ['required', 'in:primary,secondary'],
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('question_levels', 'name')
+                    ->ignore($id)
+                    ->where(function ($query) use ($request, $inputName) {
+                        return $query->where('education_type', strtolower($request->education_type))
+                                     ->whereRaw('LOWER(name) = ?', [$inputName]);
+                    }),
+            ],
+        ]);
+
+        try {
+            $level = QuestionLevel::findOrFail($id);
+            DB::beginTransaction();
+
+            // Convert name to Title Case before saving
+            $capitalName = Str::title($inputName);
+
+            $level->update([
+                'name' => $capitalName,
+                'education_type' => strtolower($request->education_type),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.levels.index')->with('success', 'Level updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Failed to update level: ' . $e->getMessage()]);
+        }
+    }
+
+    // Delete a level by ID
+    public function destroy($id)
+    {
+        try {
+            $level = QuestionLevel::findOrFail($id);
+            $level->delete();
+
+            return redirect()->route('admin.levels.index')->with('success', 'Level deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete level: ' . $e->getMessage()]);
+        }
+    }
+}

@@ -20,7 +20,7 @@ return new class extends Migration
         // 2. Questions Table – now it can safely reference question_groups
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
+            $table->text('content');
             $table->enum('type', [
                 'mcq',
                 'fill_blank',
@@ -33,10 +33,11 @@ return new class extends Migration
                 'grouped',
                 'comprehension'
             ]);
-            $table->text('content');
             $table->text('explanation')->nullable();
             $table->json('metadata')->nullable();
             $table->foreignId('parent_question_id')->nullable()->constrained('questions')->onDelete('cascade');
+            $table->foreignId('level_id')->nullable()->constrained('question_levels')->onDelete('cascade');
+            $table->foreignId('subject_id')->nullable()->constrained('question_subjects')->onDelete('cascade');
             $table->foreignId('group_id')->nullable()->constrained('question_groups')->onDelete('cascade');
             $table->timestamps();
         });
