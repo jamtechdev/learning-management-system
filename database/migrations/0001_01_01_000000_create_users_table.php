@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-
+            $table->string('avatar')->nullable();
             $table->string('password');
             $table->string('lock_code', 6)->nullable(); // 4-6 digit lock code for child
 

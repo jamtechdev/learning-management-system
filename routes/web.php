@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\ParentController;
+use App\Http\Controllers\Admin\StudentController;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -58,6 +60,14 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::put('/{id}', [SubjectController::class, 'update'])->name('update');
         Route::delete('/{id}', [SubjectController::class, 'destroy'])->name('destroy');
     });
+    Route::resource('parents', ParentController::class)->names('admin.parents');
+
+    Route::get('parents/{parent}/students', [StudentController::class, 'studentsByParent'])->name('admin.parents.students');
+    Route::get('parents/{parent}/students', [ParentController::class, 'viewStudents'])->name('admin.parents.students');
+    Route::get('/admin/students/{student}/edit', [StudentController::class, 'edit'])->name('admin.student.edit');
+    Route::put('/admin/students/{student}', [StudentController::class, 'update'])->name('admin.student.update');
+
+    Route::resource('student', StudentController::class)->names('admin.student');
 });
 
 require __DIR__ . '/auth.php';
