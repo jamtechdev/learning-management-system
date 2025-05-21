@@ -76,45 +76,34 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'Question created successfully!');
     }
 
-    private function saveMcqQuestion(array $data)
+    public function saveMcqQuestion(array $data)
     {
-        // Prepare the question data
-        $questionData = [
-            'type' => $data['type'],
-            'content' => $data['content'],
-            'explanation' => $data['explanation'] ?? null,
-        ];
+        $correctIndex = (int) $data['correct_option'];
 
-        // Prepare options
-        $options = array_map(function ($option) {
-            if (!isset($option['is_correct'])) {
-                $option['is_correct'] = false;
-            } elseif ($option['is_correct'] == "1") {
-                $option['is_correct'] = true;
-            }
-            return $option;
-        }, $data['options']);
-
-        // Set options and answer in metadata
-        $questionData['options'] = $options;
-
-        $correctAnswer = collect($options)->firstWhere('is_correct', true);
-        if ($correctAnswer) {
-            $questionData['answer'] = [
-                'answer' => $correctAnswer['value'],
-                'format' => 'text',
+        $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
+            return [
+                'value' => $option,
+                'is_correct' => ($index === $correctIndex),
             ];
-        }
-        // Save question
-        $question = new Question();
+        }, $data['options'], array_keys($data['options']));
+
+        $answer = [
+            'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
+            'format' => 'text',
+        ];
+        $payload = $data;
+        $payload['options'] = $structuredOptions;
+        $payload['answer'] = $answer;
+        unset($payload['correct_option']);
+        $question = new \App\Models\Question();
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
-        $question->metadata = $questionData;
+        $question->metadata = $payload;
         $question->save();
 
-        // Save options in the question_options table
-        foreach ($options as $index => $option) {
+        // Save each option
+        foreach ($structuredOptions as $index => $option) {
             \App\Models\QuestionOption::create([
                 'question_id' => $question->id,
                 'label' => chr(65 + $index), // A, B, C...
@@ -123,8 +112,11 @@ class QuestionController extends Controller
             ]);
         }
 
-        return $questionData;
+         return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
     }
+
+
+
 
     private function saveFillBlankQuestion($data)
     {
