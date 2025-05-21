@@ -20,6 +20,7 @@ return new class extends Migration
         // 2. Questions Table – now it can safely reference question_groups
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
+            $table->enum('education_type', ['primary', 'secondary']);
             $table->text('content');
             $table->enum('type', [
                 'mcq',
