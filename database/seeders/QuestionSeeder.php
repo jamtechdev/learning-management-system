@@ -12,23 +12,30 @@ class QuestionSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // Step 1: Seed Levels
+        // Step 1: Seed Levels (Primary 1–5, Secondary 6–12)
         $levelIds = [];
-        foreach (['primary', 'secondary'] as $eduType) {
-            for ($i = 1; $i <= 2; $i++) {
-                $levelIds[] = DB::table('question_levels')->insertGetId([
+        $levelMap = [];
+
+        foreach (['primary' => range(1, 5), 'secondary' => range(6, 12)] as $eduType => $levels) {
+            foreach ($levels as $levelNumber) {
+                $levelName = ucfirst($eduType) . " Level $levelNumber";
+                $id = DB::table('question_levels')->insertGetId([
                     'education_type' => $eduType,
-                    'name' => ucfirst($eduType) . " Level $i",
+                    'name' => $levelName,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+                $levelIds[] = $id;
+                $levelMap[$id] = $levelName;
             }
         }
 
-        // Step 2: Seed Subjects
+        // Step 2: Seed Subjects for each level
         $subjectIds = [];
+        $subjects = ['English', 'Math', 'Science', 'Chinese'];
+
         foreach ($levelIds as $levelId) {
-            foreach (['Math', 'English', 'Science'] as $subjectName) {
+            foreach ($subjects as $subjectName) {
                 $subjectIds[] = DB::table('question_subjects')->insertGetId([
                     'level_id' => $levelId,
                     'name' => $subjectName,
@@ -38,35 +45,21 @@ class QuestionSeeder extends Seeder
             }
         }
 
-        // Step 3: Create some Question Groups (for Comprehension)
-        $groupIds = [];
-        for ($i = 0; $i < 3; $i++) {
-            $groupIds[] = DB::table('question_groups')->insertGetId([
-                'title' => 'Passage ' . ($i + 1),
-                'passage' => $faker->text(500),
-                'metadata' => json_encode(['source' => 'textbook', 'difficulty' => 'medium']),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Step 4: Create Questions
+        // Step 3: Create Questions (allowed types)
+        $allowedTypes = ['mcq', 'fill_blank', 'true_false', 'linking'];
         $questionIds = [];
-        for ($i = 0; $i < 10; $i++) {
-            $type = collect([
-                'mcq', 'fill_blank', 'spelling', 'rearrange', 'linking',
-                'true_false', 'image_mcq', 'math', 'grouped', 'comprehension'
-            ])->random();
 
-            $levelId = $levelIds[array_rand($levelIds)];
-            $subjectId = collect($subjectIds)->random(); // Optional: Filter subject for that level if needed
+        for ($i = 0; $i < 20; $i++) {
+            $type = collect($allowedTypes)->random();
+            $levelId = collect($levelIds)->random();
+            $subjectId = collect($subjectIds)->random();
 
             $questionIds[] = DB::table('questions')->insertGetId([
                 'type' => $type,
-                'content' => $faker->paragraph(),
-                'explanation' => $faker->text(200),
+                'content' => $faker->sentence(),
+                'explanation' => $faker->text(150),
                 'metadata' => json_encode(['difficulty' => 'medium']),
-                'group_id' => $type === 'comprehension' ? $groupIds[array_rand($groupIds)] : null,
+                'group_id' => null,
                 'level_id' => $levelId,
                 'subject_id' => $subjectId,
                 'created_at' => now(),
@@ -74,70 +67,64 @@ class QuestionSeeder extends Seeder
             ]);
         }
 
-        // Step 5: Create Options for MCQs
+        // Step 4: MCQ Options
         foreach ($questionIds as $questionId) {
-            if (DB::table('questions')->where('id', $questionId)->value('type') === 'mcq') {
-                DB::table('question_options')->insert([
-                    [
+            $question = DB::table('questions')->where('id', $questionId)->first();
+
+            if ($question->type === 'mcq') {
+                $labels = ['A', 'B', 'C', 'D'];
+                foreach ($labels as $label) {
+                    DB::table('question_options')->insert([
                         'question_id' => $questionId,
-                        'label' => 'A',
+                        'label' => $label,
                         'value' => $faker->word(),
-                        'is_correct' => rand(0, 1),
+                        'is_correct' => 0,
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ],
-                    [
-                        'question_id' => $questionId,
-                        'label' => 'B',
-                        'value' => $faker->word(),
-                        'is_correct' => rand(0, 1),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ],
-                    [
-                        'question_id' => $questionId,
-                        'label' => 'C',
-                        'value' => $faker->word(),
-                        'is_correct' => rand(0, 1),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ],
-                ]);
+                    ]);
+                }
+
+                // Mark one option as correct
+                DB::table('question_options')
+                    ->where('question_id', $questionId)
+                    ->inRandomOrder()
+                    ->limit(1)
+                    ->update(['is_correct' => 1]);
             }
         }
 
-        // Step 6: Answers
+        // Step 5: Answers
         foreach ($questionIds as $questionId) {
             DB::table('question_answers')->insert([
                 'question_id' => $questionId,
-                'answer' => json_encode(['answer' => $faker->sentence()]),
+                'answer' => json_encode(['answer' => $faker->word()]),
                 'format' => 'text',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
-        // Step 7: Tags
+        // Step 6: Tags
         foreach ($questionIds as $questionId) {
             DB::table('question_tags')->insert([
                 [
                     'question_id' => $questionId,
                     'tag_type' => 'subject',
-                    'value' => 'Math',
+                    'value' => $faker->randomElement($subjects),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
                 [
                     'question_id' => $questionId,
                     'tag_type' => 'level',
-                    'value' => 'Intermediate',
+                    'value' => $levelMap[DB::table('questions')->where('id', $questionId)->value('level_id')],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
             ]);
         }
 
-        // Step 8: Difficulties
+        // Step 7: Difficulty
         foreach ($questionIds as $questionId) {
             DB::table('question_difficulties')->insert([
                 'question_id' => $questionId,

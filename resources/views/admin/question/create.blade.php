@@ -101,6 +101,7 @@
                     x-ref="questionContent" required></textarea>
             </div>
 
+
             <!-- Type Specific Sections -->
             <template x-if="questionType === 'mcq'">
                 <div>
@@ -120,8 +121,6 @@
                         @click="addOption" x-show="options.length < 6">Add Option</button>
                 </div>
             </template>
-
-
 
             <!-- FILL IN THE BLANK TEMPLATE -->
             <template x-if="questionType === 'fill_blank'">
@@ -166,8 +165,7 @@
                 </div>
             </template>
 
-
-
+            {{-- true false  --}}
             <template x-if="questionType === 'true_false'">
                 <div>
                     <label class="block mb-2 font-medium">Answer</label>
@@ -179,8 +177,7 @@
                 </div>
             </template>
 
-
-
+            {{-- Linking --}}
             <template x-if="questionType === 'linking'">
                 <div>
                     <label class="block mb-2 font-medium">Pairs</label>
@@ -198,8 +195,11 @@
                         @click="addPair" x-show="linkingPairs.length < 6">Add Pair</button>
                 </div>
             </template>
-
-
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Explanation</label>
+                <textarea x-model="explanation" name="question_data[explanation]" rows="3" class="w-full p-3 border rounded-l"
+                    x-ref="explanation" required></textarea>
+            </div>
 
             <!-- Submit -->
             <div class="flex items-center justify-between pt-4 mt-6 border-t">
@@ -297,6 +297,26 @@
                 this.step = 5;
             },
 
+            addOption() {
+                if (this.options.length < 4) {
+                    this.options.push({
+                        value: '',
+                        is_correct: false
+                    });
+                }
+            },
+
+            removeOption(index) {
+                if (this.options.length > 1) {
+                    this.options.splice(index, 1);
+                }
+            },
+
+            setCorrect(index) {
+                this.options.forEach((opt, i) => {
+                    opt.is_correct = (i === index);
+                });
+            },
             addBlank() {
                 const textarea = this.$refs.questionContent;
                 if (!textarea) return;

@@ -41,6 +41,14 @@
                     class="block w-full mt-1 border border-gray-300 rounded-md shadow-sm"
                     required
                 />
+                <input
+                    type="hidden"
+                    id="name"
+                    name="level_id"
+                    value="{{ old('level_id', $level->id) }}"
+                    required
+                />
+
                 <x-input-error class="mt-2 text-sm text-red-500" :messages="$errors->get('name')" />
             </div>
 
