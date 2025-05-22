@@ -27,9 +27,20 @@ class QuestionController extends Controller
     }
 
 
+    public function edit($id)
+    {
+        $question = Question::with(['options', 'level', 'subject'])->findOrFail($id);
+        $levels = \App\Models\QuestionLevel::with('subjects')->get()->groupBy('education_type');
+
+        return view('admin.question.edit', compact('question', 'levels'));
+    }
+
+
+
     public function store(Request $request)
     {
         $data = $request->input('question_data');
+
         switch ($data['type']) {
             case 'mcq':
                 $this->saveMcqQuestion($data);
@@ -67,6 +78,9 @@ class QuestionController extends Controller
             'format' => 'text',
         ];
         $payload = $data;
+
+
+
         $payload['options'] = $structuredOptions;
         $payload['answer'] = $answer;
         unset($payload['correct_option']);
@@ -93,9 +107,6 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
     }
 
-
-
-
     private function saveFillBlankQuestion($data)
     {
         $question = new Question();
@@ -110,7 +121,6 @@ class QuestionController extends Controller
 
         return redirect()->route('admin.questions.index')->with('success', 'Fill in the Blank type question created successfully!');
     }
-
 
     // Save True/False Question
     private function saveTrueFalseQuestion($data)
@@ -143,41 +153,42 @@ class QuestionController extends Controller
             ->with('success', 'True/False type question saved successfully!');
     }
 
-
     // Save Linking Question
     private function saveLinkingQuestion($data, $request)
     {
         $answer = [];
 
         foreach ($data['options'] as $index => $option) {
-            $leftImageUri = '';
-            $rightImageUri = '';
+            $leftImageUri = null;
+            $rightImageUri = null;
 
-            // Upload left image
+            // Upload left image if match_type is 'image' and file is uploaded
             if (($option['match_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.label_image")
             ) {
                 $leftImage = $request->file("question_data.options.$index.label_image");
-                $leftImageUri = $leftImage->store('uploads/linking', 'public');
+                $storedPath = $leftImage->store('uploads/linking', 'public');
+                $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
             }
 
-            // Upload right image
+            // Upload right image if value_type is 'image' and file is uploaded
             if (($option['value_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.value_image")
             ) {
                 $rightImage = $request->file("question_data.options.$index.value_image");
-                $rightImageUri = $rightImage->store('uploads/linking', 'public');
+                $storedPath = $rightImage->store('uploads/linking', 'public');
+                $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
             }
 
             $answer[] = [
                 'left' => [
                     'word' => $option['label_text'] ?? '',
-                    'image_uri' => asset('storage/' . $leftImageUri),
+                    'image_uri' => ($option['match_type'] ?? 'text') === 'image' ? $leftImageUri : null,
                     'match_type' => $option['match_type'] ?? 'text',
                 ],
                 'right' => [
                     'word' => $option['value_text'] ?? '',
-                    'image_uri' => asset('storage/' . $rightImageUri),
+                    'image_uri' => ($option['value_type'] ?? 'text') === 'image' ? $rightImageUri : null,
                     'match_type' => $option['value_type'] ?? 'text',
                 ],
             ];
@@ -191,8 +202,13 @@ class QuestionController extends Controller
             'answer' => $answer,
         ];
 
+        // dd($transformed); // remove after debugging
+
         $question = new Question();
         $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
@@ -201,125 +217,178 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
     }
 
-
-
-
-
-
-
-
-
-    // Save Spelling Correction Question
-    private function saveSpellingCorrection($data)
+    // Update existing question
+    public function update(Request $request, $question)
     {
-        $question = new Question();
-        $question->type = 'spelling';
+        $question = Question::findOrFail($question);
+
+        $data = $request->input('question_data');
+
+        switch ($data['type']) {
+            case 'mcq':
+                $this->updateMcqQuestion($question, $data);
+                break;
+
+            case 'fill_blank':
+                $this->updateFillBlankQuestion($question, $data);
+                break;
+
+            case 'true_false':
+                $this->updateTrueFalseQuestion($question, $data);
+                break;
+
+            case 'linking':
+                $this->updateLinkingQuestion($question, $data, $request);
+                break;
+
+            default:
+                return response()->json(['error' => 'Invalid question type'], 400);
+        }
+
+        return redirect()->route('admin.questions.index')->with('success', 'Question updated successfully!');
+    }
+    public function updateMcqQuestion($question, array $data)
+    {
+        $correctIndex = (int) $data['correct_option']; // Cast to int
+
+        $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
+            return [
+                'value' => $option,
+                'is_correct' => ($index === $correctIndex),
+            ];
+        }, $data['options'], array_keys($data['options']));
+
+        $answer = [
+            'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
+            'format' => 'text',
+        ];
+
+        $payload = $data;
+        $payload['options'] = $structuredOptions;
+        $payload['answer'] = $answer;
+        unset($payload['correct_option']);
+
+        // Save to DB
+        $question->type = $data['type'];
         $question->content = $data['content'];
-        $question->metadata = json_encode($data['metadata']);
+        $question->education_type = $data['education_type'];
+        $question->subject_id = $data['subject_id'];
+        $question->level_id = $data['level_id'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $payload;
         $question->save();
 
-        foreach ($data['metadata']['correction_targets'] as $incorrectWord) {
-            $correction = new saveSpellingCorrection();
-            $correction->question_id = $question->id;
-            $correction->incorrect_word = $incorrectWord;
-            // Assuming you have a logic to determine the correct word, e.g., a predefined list.
-            $correction->correct_word = 'correct_word_here';  // Example
-            $correction->save();
-        }
+        // Update options
+        QuestionOption::where('question_id', $question->id)->delete();
 
-        return response()->json(['success' => 'Spelling correction saved successfully!']);
+        foreach ($structuredOptions as $index => $option) {
+            QuestionOption::create([
+                'question_id' => $question->id,
+                'label' => chr(65 + $index),
+                'value' => $option['value'],
+                'is_correct' => $option['is_correct'],
+            ]);
+        }
     }
 
-    // Save Rearrange Question
-    private function saveRearrangeQuestion($data)
+
+
+
+    public function updateFillBlankQuestion($question, array $data)
     {
-        $question = new Question();
-        $question->type = 'rearrange';
+        $question->type = $data['type'];
         $question->content = $data['content'];
-        $question->answer = json_encode($data['answer']);
+        $question->explanation = $data['explanation'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
+        $question->education_type = $data['education_type'] ?? null;
+        $question->metadata = $data;
         $question->save();
-
-        foreach ($data['options'] as $option) {
-            $optionModel = new QuestionOption();
-            $optionModel->question_id = $question->id;
-            $optionModel->value = $option['value'];
-            $optionModel->is_correct = $option['is_correct'];
-            $optionModel->save();
-        }
-
-        return response()->json(['success' => 'Rearrange saved successfully!']);
     }
 
-
-    // Save Image MCQ Question
-    private function saveImageMcqQuestion($data)
+    public function updateTrueFalseQuestion(Question $question, array $data)
     {
-        $question = new Question();
-        $question->type = 'image_mcq';
+        $transformed = [
+            'type' => 'true_false',
+            'content' => $data['content'],
+            'options' => [
+                ['value' => 'True'],
+                ['value' => 'False'],
+            ],
+            'answer' => [
+                'choice' => $data['true_false_answer'],
+                'explanation' => $data['explanation'] ?? null,
+                'format' => $data['format'] ?? 'text',
+            ],
+        ];
+
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->type = $data['type'];
         $question->content = $data['content'];
-        $question->answer = json_encode($data['answer']);
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
         $question->save();
-
-        foreach ($data['options'] as $option) {
-            $optionModel = new QuestionOption();
-            $optionModel->question_id = $question->id;
-            $optionModel->value = $option['value'];
-            $optionModel->is_correct = $option['is_correct'];
-            $optionModel->save();
-        }
-
-        return response()->json(['success' => 'Image MCQ saved successfully!']);
     }
 
-    // Save Math Question
-    private function saveMathQuestion($data)
+    public function updateLinkingQuestion(Question $question, array $data, Request $request)
     {
-        $question = new Question();
-        $question->type = 'math';
+        $answer = [];
+
+        foreach ($data['options'] as $index => $option) {
+            $leftImageUri = null;
+            $rightImageUri = null;
+
+            if (($option['match_type'] ?? '') === 'image' &&
+                $request->hasFile("question_data.options.$index.label_image")
+            ) {
+                $leftImage = $request->file("question_data.options.$index.label_image");
+                $storedPath = $leftImage->store('uploads/linking', 'public');
+                $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
+            } else if (isset($option['existing_label_image_uri'])) {
+                $leftImageUri = $option['existing_label_image_uri'];
+            }
+
+            if (($option['value_type'] ?? '') === 'image' &&
+                $request->hasFile("question_data.options.$index.value_image")
+            ) {
+                $rightImage = $request->file("question_data.options.$index.value_image");
+                $storedPath = $rightImage->store('uploads/linking', 'public');
+                $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
+            } else if (isset($option['existing_value_image_uri'])) {
+                $rightImageUri = $option['existing_value_image_uri'];
+            }
+
+            $answer[] = [
+                'left' => [
+                    'word' => $option['label_text'] ?? '',
+                    'image_uri' => ($option['match_type'] ?? 'text') === 'image' ? $leftImageUri : null,
+                    'match_type' => $option['match_type'] ?? 'text',
+                ],
+                'right' => [
+                    'word' => $option['value_text'] ?? '',
+                    'image_uri' => ($option['value_type'] ?? 'text') === 'image' ? $rightImageUri : null,
+                    'match_type' => $option['value_type'] ?? 'text',
+                ],
+            ];
+        }
+
+        $transformed = [
+            'type' => 'linking',
+            'content' => $data['content'] ?? '',
+            'explanation' => $data['explanation'] ?? '',
+            'format' => 'mapping',
+            'answer' => $answer,
+        ];
+
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
         $question->content = $data['content'];
-        $question->answer = json_encode($data['answer']);
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
         $question->save();
-
-        return response()->json(['success' => 'Math question saved successfully!']);
-    }
-
-    // Save Grouped Question
-    private function saveGroupedQuestion($data)
-    {
-        $group = new QuestionGroup();
-        $group->title = $data['title'];
-        $group->passage = $data['passage'] ?? null;
-        $group->save();
-
-        foreach ($data['sub_questions'] as $subQuestion) {
-            $question = new Question();
-            $question->type = $subQuestion['type'];
-            $question->content = $subQuestion['content'];
-            $question->answer = json_encode($subQuestion['answer']);
-            $question->group_id = $group->id;
-            $question->save();
-        }
-
-        return response()->json(['success' => 'Grouped question saved successfully!']);
-    }
-
-    // Save Comprehension Question
-    private function saveComprehensionQuestion($data)
-    {
-        $group = new QuestionGroup();
-        $group->title = $data['title'];
-        $group->passage = $data['passage'];
-        $group->save();
-
-        foreach ($data['sub_questions'] as $subQuestion) {
-            $question = new Question();
-            $question->type = $subQuestion['type'];
-            $question->content = $subQuestion['content'];
-            $question->answer = json_encode($subQuestion['answer']);
-            $question->group_id = $group->id;
-            $question->save();
-        }
-
-        return response()->json(['success' => 'Comprehension question saved successfully!']);
     }
 }

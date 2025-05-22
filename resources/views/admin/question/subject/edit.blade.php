@@ -36,7 +36,9 @@
                             required>
                             <option value="">{{ __('-- Select Level --') }}</option>
                             <template x-for="level in filteredLevels" :key="level.id">
-                                <option :value="level.id.toString()" x-text="level.name"></option>
+                            <option :value="level.id + ''" x-text="level.name"
+    :selected="level.id.toString() === selectedLevel"></option>
+
                             </template>
                         </select>
                         <x-input-error :messages="$errors->get('level_id')" class="mt-2" />
