@@ -34,7 +34,9 @@ class AuthController extends Controller
                     ]);
                     $user = User::where('email', $request->email)->firstOrFail();
                     if ($user && Hash::check($request->password, $user->password)) {
-                        return $this->successHandler($request->all(), 200, $user->lock_code_enabled == 1 ? 'Lock Code Enabled' : 'Lock Code Disabled');
+                        return $this->successHandler([
+                            'lock_code_enabled' => $user->lock_code_enabled
+                        ], 200, $user->lock_code_enabled == 1 ? 'Lock Code Enabled' : 'Lock Code Disabled');
                     }
                     return $this->errorHandler(404, 'Invalid Credentials');
                 case 'login':
