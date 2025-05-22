@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\QuestionCollection;
@@ -18,6 +18,5 @@ class QuestionController extends Controller
             200,
             "Questions fetched successfully!"
         );
-        return;
     }
 }
