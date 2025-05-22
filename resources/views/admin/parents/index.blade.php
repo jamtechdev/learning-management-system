@@ -50,8 +50,10 @@
                                         {{ $index + 1 }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center">
-                                        <img src="{{ asset('storage/' . ($parent->avatar ?? 'images/logo/default-avatar.png')) }}"
-                                            alt="Avatar" class="object-cover w-10 h-10 mx-auto rounded-full shadow">
+                                        <img src="{{ asset('/storage/' . $parent->avatar) ?? asset('/images/logo/default-avatar.png') }}"
+                                            onerror="this.onerror=null;this.src='{{ asset('/images/logo/default-avatar.png') }}';"
+                                            alt="{{ $parent?->first_name ?? 'User' }}"
+                                            class="w-8 h-8 border border-gray-300 rounded-full cursor-pointer dark:border-gray-700">
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
                                         {{ $parent->first_name }} {{ $parent->last_name }}
@@ -71,7 +73,7 @@
                                     </td>
 
                                     <td
-                                        class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap flex justify-center gap-4">
+                                        class="flex justify-center gap-4 px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
 
                                         <!-- Edit button -->
                                         <a href="{{ route('admin.parents.edit', $parent->id) }}"

@@ -4,7 +4,7 @@
             <div class="p-6 bg-white shadow-xl sm:rounded-lg">
                 <!-- Header -->
                 <div class="flex flex-col items-center justify-between mb-8 md:flex-row">
-                    <h2 class="text-3xl font-extrabold tracking-tight mb-6 text-center md:text-left">
+                    <h2 class="mb-6 text-3xl font-extrabold tracking-tight text-center md:text-left">
                         @isset($parent)
                             Students of {{ $parent->first_name }} {{ $parent->last_name }}
                         @else
@@ -43,8 +43,11 @@
                                         {{ $index + 1 }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center">
-                                        <img src="{{ asset('storage/' . ($student->avatar ?? 'images/logo/default-avatar.png')) }}"
-                                            alt="Avatar" class="object-cover w-10 h-10 mx-auto rounded-full shadow">
+                                        <img src="{{ asset('/storage/' . $student->avatar) ?? asset('/images/logo/default-avatar.png') }}"
+                                            onerror="this.onerror=null;this.src='{{ asset('/images/logo/default-avatar.png') }}';"
+                                            alt="{{ $student?->first_name ?? 'User' }}"
+                                            class="w-8 h-8 border border-gray-300 rounded-full cursor-pointer dark:border-gray-700"
+                                            @click="showImage = true">
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-700">
                                         {{ $student->first_name }} {{ $student->last_name }}

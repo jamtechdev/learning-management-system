@@ -83,6 +83,7 @@ class StudentController extends Controller
             return redirect()->route('admin.student.index')
                 ->with('success', 'Student created successfully!');
         } catch (\Exception $e) {
+
             // Better error logging instead of dd()
             Log::error('Error creating student: ' . $e->getMessage());
 
