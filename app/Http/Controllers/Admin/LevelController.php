@@ -29,9 +29,10 @@ class LevelController extends Controller
     // Store new levels (supports multiple)
     public function store(Request $request)
     {
+
         // Validate input
         $request->validate([
-            'education_type' => ['required', 'in:Primary,Secondary'],
+            'education_type' => ['required', 'in:primary,secondary'],
             'name' => ['required', 'array', 'min:1'],
             'name.*' => ['required', 'string', 'max:100'],
         ]);
@@ -88,10 +89,12 @@ class LevelController extends Controller
     // Update single level
     public function update(Request $request, $id)
     {
-        $inputName = strtolower($request->name);
+
+        try {
+            $inputName = strtolower($request->name);
 
         $request->validate([
-            'education_type' => ['required', 'in:Primary,Secondary'],
+            'education_type' => ['required', 'in:primary,secondary'],
             'level_id' => 'required|exists:question_levels,id',
             'name' => [
                 'required',
@@ -110,6 +113,9 @@ class LevelController extends Controller
         $subject->update($request->all());
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 
 

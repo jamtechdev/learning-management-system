@@ -121,7 +121,8 @@ class PermissionTableSeeder extends Seeder
                 'last_name' => 'User',
                 'password' => Hash::make('password@123'),
                 'address' => 'Parent Address',
-                'phone' => '1111111111'
+                'phone' => '1111111111',
+                'avatar' => 'images/logo/default-avatar.png',
             ]
         );
         $parent->assignRole($parentRole);
@@ -135,7 +136,8 @@ class PermissionTableSeeder extends Seeder
                 'parent_id' => $parent->id,
                 'lock_code' => '1234',
                 'address' => 'Child Address',
-                'phone' => '2222222222'
+                'phone' => '2222222222',
+                'avatar' => 'images/logo/default-avatar.png',
             ]
         );
         $child->assignRole($childRole);

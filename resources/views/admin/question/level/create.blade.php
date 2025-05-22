@@ -23,8 +23,8 @@
                 <select id="education_type" name="education_type" x-model="educationType"
                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('education_type') border-red-500 @enderror">
                     <option value="">-- Select --</option>
-                    <option value="Primary">Primary</option>
-                    <option value="Secondary">Secondary</option>
+                    <option value="primary">Primary</option>
+                    <option value="secondary">Secondary</option>
                 </select>
                 @error('education_type')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

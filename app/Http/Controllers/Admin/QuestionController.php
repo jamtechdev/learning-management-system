@@ -46,30 +46,6 @@ class QuestionController extends Controller
             case 'linking':
                 $this->saveLinkingQuestion($data, $request);
                 break;
-
-            case 'spelling':
-                dd($this->saveSpellingCorrection($data));
-                break;
-
-            case 'rearrange':
-                dd($this->saveRearrangeQuestion($data));
-                break;
-            case 'image_mcq':
-                dd($this->saveImageMcqQuestion($data));
-                break;
-
-            case 'math':
-                dd($this->saveMathQuestion($data));
-                break;
-
-            case 'grouped':
-                dd($this->saveGroupedQuestion($data));
-                break;
-
-            case 'comprehension':
-                dd($this->saveComprehensionQuestion($data));  // Only dump the data for Comprehension
-                break;
-
             default:
                 return response()->json(['error' => 'Invalid question type'], 400);
         }
@@ -78,15 +54,14 @@ class QuestionController extends Controller
 
     public function saveMcqQuestion(array $data)
     {
-        $correctIndex = (int) $data['correct_option'];
 
+        $correctIndex = (int) $data['correct_option'];
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
                 'value' => $option,
                 'is_correct' => ($index === $correctIndex),
             ];
         }, $data['options'], array_keys($data['options']));
-
         $answer = [
             'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
             'format' => 'text',
@@ -98,6 +73,9 @@ class QuestionController extends Controller
         $question = new \App\Models\Question();
         $question->type = $data['type'];
         $question->content = $data['content'];
+        $question->education_type = $data['education_type'];
+        $question->subject_id = $data['subject_id'];
+        $question->level_id = $data['level_id'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $payload;
         $question->save();
@@ -112,7 +90,7 @@ class QuestionController extends Controller
             ]);
         }
 
-         return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
     }
 
 
@@ -120,16 +98,19 @@ class QuestionController extends Controller
 
     private function saveFillBlankQuestion($data)
     {
-
         $question = new Question();
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
+        $question->education_type = $data['education_type'] ?? null;
         $question->metadata = $data;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'Fill in the Blank type question created successfully!');
     }
+
 
     // Save True/False Question
     private function saveTrueFalseQuestion($data)
@@ -142,19 +123,26 @@ class QuestionController extends Controller
                 ['value' => 'False'],
             ],
             'answer' => [
-                'choice' => $data['answer']['choice'] ?? null,
+                'choice' => $data['true_false_answer'],
                 'explanation' => $data['explanation'] ?? null,
                 'format' => $data['format'] ?? 'text',
             ],
         ];
+
         $question = new Question();
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'True/False type question saved successfully!');
+
+        return redirect()->route('admin.questions.index')
+            ->with('success', 'True/False type question saved successfully!');
     }
+
 
     // Save Linking Question
     private function saveLinkingQuestion($data, $request)

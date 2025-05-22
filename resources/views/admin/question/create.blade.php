@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-5xl p-8 mx-auto bg-white border border-gray-100 shadow-xl rounded-2xl" x-data="questionForm()"
+    <div class="max-w-full p-8 mx-auto bg-white border border-gray-100 shadow-xl rounded-2xl" x-data="questionForm()"
         x-cloak>
         <h1 class="mb-8 text-4xl font-bold text-center text-yellow-600">Create New Question</h1>
 
@@ -13,7 +13,7 @@
         <template x-if="step === 1">
             <div class="text-center">
                 <h2 class="mb-4 text-2xl font-semibold">Select Education Type</h2>
-                <div class="flex justify-center gap-4">
+                <div class="flex flex-col justify-center gap-4">
                     <template x-for="type in ['primary', 'secondary']">
                         <button type="button"
                             class="px-6 py-3 text-lg font-medium transition-all duration-200 border-2 rounded-xl hover:bg-yellow-100"
@@ -28,9 +28,9 @@
 
         <!-- Step 2: Levels -->
         <template x-if="step === 2">
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-center">Select Level</h2>
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            <div class="text-center">
+                <h2 class="mb-4 text-2xl font-semibold">Select Level</h2>
+                <div class="flex flex-col justify-center gap-4">
                     <template x-for="level in levels" :key="level.id">
                         <button
                             class="px-4 py-2 font-medium transition-all duration-200 border-2 rounded-lg hover:bg-yellow-100"
@@ -45,9 +45,10 @@
 
         <!-- Step 3: Subjects -->
         <template x-if="step === 3">
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-center">Select Subject</h2>
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+
+            <div class="text-center">
+                <h2 class="mb-4 text-2xl font-semibold">Select Level</h2>
+                <div class="flex flex-col justify-center gap-4">
                     <template x-for="subject in subjects" :key="subject.id">
                         <button
                             class="px-4 py-2 font-medium transition-all duration-200 border-2 rounded-lg hover:bg-yellow-100"
@@ -65,7 +66,7 @@
         <template x-if="step === 4">
             <div>
                 <h2 class="mb-4 text-2xl font-semibold text-center">Select Question Type</h2>
-                <div class="flex flex-wrap justify-center gap-3">
+                <div class="flex flex-col flex-wrap justify-center gap-3">
                     <template x-for="type in questionTypes" :key="type">
                         <button
                             class="px-4 py-2 font-medium capitalize transition-all duration-200 border-2 rounded-lg hover:bg-yellow-100"
@@ -89,16 +90,17 @@
 
             <!-- Hidden Inputs -->
             <input type="hidden" name="question_data[education_type]" :value="educationType">
-            <input type="hidden" name="question_data[level]" :value="selectedLevel">
-            <input type="hidden" name="question_data[subject]" :value="selectedSubject?.id">
+            <input type="hidden" name="question_data[level_id]" :value="selectedLevelId">
+            <input type="hidden" name="question_data[subject_id]" :value="selectedSubject?.id">
             <input type="hidden" name="question_data[type]" :value="questionType">
 
             <!-- Question Content -->
             <div>
                 <label class="block mb-2 font-medium text-gray-700">Question Content</label>
-                <textarea x-model="questionContent" name="question_data[content]" rows="3" class="w-full p-3 border rounded-lg"
+                <textarea x-model="questionContent" name="question_data[content]" rows="3" class="w-full p-3 border rounded-l"
                     x-ref="questionContent" required></textarea>
             </div>
+
 
             <!-- Type Specific Sections -->
             <template x-if="questionType === 'mcq'">
@@ -120,18 +122,50 @@
                 </div>
             </template>
 
+            <!-- FILL IN THE BLANK TEMPLATE -->
             <template x-if="questionType === 'fill_blank'">
                 <div>
-                    <label class="block mb-2 font-medium">Blank Answers</label>
-                    <template x-for="(answer, idx) in answers" :key="idx">
-                        <input type="text" :name="'question_data[answers][' + idx + ']'" x-model="answers[idx]"
-                            class="w-full p-2 mb-2 border rounded-lg" required>
+                    <template x-for="(blank, index) in blanks" :key="index">
+                        <div class="p-4 mb-4 border rounded bg-gray-50">
+                            <!-- Hidden input to include blank_number -->
+                            <input type="hidden" :name="'question_data[blanks][' + index + '][blank_number]'"
+                                :value="blank.blank_number">
+
+                            <p class="mb-2 font-medium">Blank <span x-text="blank.blank_number"></span> Options:</p>
+
+                            <!-- Options -->
+                            <template x-for="(option, optIndex) in blank.options" :key="optIndex">
+                                <input type="text" class="w-full p-2 mb-2 border rounded"
+                                    :name="'question_data[blanks][' + index + '][options][' + optIndex + ']'"
+                                    x-model="blank.options[optIndex]" required />
+                            </template>
+
+                            <!-- Correct Answer Selection -->
+                            <label class="block mt-2 font-medium">Correct Answer:</label>
+                            <select class="w-full p-2 border rounded"
+                                :name="'question_data[blanks][' + index + '][answer]'" x-model="blank.answer" required>
+                                <option value="" disabled>Select correct answer</option>
+                                <template x-for="opt in blank.options">
+                                    <option x-text="opt" :value="opt"></option>
+                                </template>
+                            </select>
+
+                            <!-- Remove Button -->
+                            <button type="button" class="mt-2 text-red-600" @click="removeBlank(index)">
+                                Remove Blank
+                            </button>
+                        </div>
                     </template>
+
+                    <!-- Add Blank Button -->
                     <button type="button" class="px-4 py-1 mt-2 text-sm bg-yellow-200 rounded hover:bg-yellow-300"
-                        @click="addBlank">Add Blank</button>
+                        @click="addBlank">
+                        Add Blank
+                    </button>
                 </div>
             </template>
 
+            {{-- true false  --}}
             <template x-if="questionType === 'true_false'">
                 <div>
                     <label class="block mb-2 font-medium">Answer</label>
@@ -143,6 +177,7 @@
                 </div>
             </template>
 
+            {{-- Linking --}}
             <template x-if="questionType === 'linking'">
                 <div>
                     <label class="block mb-2 font-medium">Pairs</label>
@@ -160,22 +195,11 @@
                         @click="addPair" x-show="linkingPairs.length < 6">Add Pair</button>
                 </div>
             </template>
-
-            <template x-if="questionType === 'spelling'">
-                <div>
-                    <label class="block mb-2 font-medium">Correct Spelling</label>
-                    <input type="text" name="question_data[spelling_answer]" x-model="spellingAnswer"
-                        class="w-full p-2 border rounded" required>
-                </div>
-            </template>
-
-            <template x-if="questionType === 'math'">
-                <div>
-                    <label class="block mb-2 font-medium">Math Answer (LaTeX)</label>
-                    <textarea name="question_data[math_answer]" x-model="mathAnswer" rows="3" class="w-full p-2 border rounded"
-                        placeholder="e.g. \frac{a}{b} + \sqrt{c}" required></textarea>
-                </div>
-            </template>
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Explanation</label>
+                <textarea x-model="explanation" name="question_data[explanation]" rows="3" class="w-full p-3 border rounded-l"
+                    x-ref="explanation" required></textarea>
+            </div>
 
             <!-- Submit -->
             <div class="flex items-center justify-between pt-4 mt-6 border-t">
@@ -188,32 +212,33 @@
     </div>
 </x-app-layout>
 
-
 <script>
     function questionForm() {
         return {
             step: 1,
             selectedLevel: '',
             educationType: '',
+            selectedLevelId: '',
             levelsByType: @json($levels),
             levels: [],
             subjects: [],
             selectedSubject: null,
 
-            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking', 'spelling', 'math'],
+            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking'],
             questionType: '',
             questionContent: '',
-            answers: [],
+
+            blanks: [],
+
+            // Other question type data
             trueFalseAnswer: 'True',
             linkingPairs: [{
-                    label: '',
-                    value: ''
-                },
-                {
-                    label: '',
-                    value: ''
-                },
-            ],
+                label: '',
+                value: ''
+            }, {
+                label: '',
+                value: ''
+            }],
             spellingAnswer: '',
             mathAnswer: '',
 
@@ -227,10 +252,13 @@
             },
 
             selectLevel(levelName) {
-                this.selectedLevel = levelName;
                 const foundLevel = this.levels.find(l => l.name === levelName);
-                this.subjects = foundLevel?.subjects || [];
-                this.step = 3;
+                if (foundLevel) {
+                    this.selectedLevel = foundLevel.name;
+                    this.selectedLevelId = foundLevel.id;
+                    this.subjects = foundLevel.subjects || [];
+                    this.step = 3;
+                }
             },
 
             selectSubject(subject) {
@@ -242,28 +270,25 @@
                 this.questionType = type;
                 if (type === 'mcq') {
                     this.options = [{
-                            value: '',
-                            is_correct: false
-                        },
-                        {
-                            value: '',
-                            is_correct: false
-                        }
-                    ];
+                        value: '',
+                        is_correct: false
+                    }, {
+                        value: '',
+                        is_correct: false
+                    }];
                 } else if (type === 'fill_blank') {
-                    this.answers = [];
+                    this.questionContent = '';
+                    this.blanks = [];
                 } else if (type === 'true_false') {
                     this.trueFalseAnswer = 'True';
                 } else if (type === 'linking') {
                     this.linkingPairs = [{
-                            label: '',
-                            value: ''
-                        },
-                        {
-                            label: '',
-                            value: ''
-                        }
-                    ];
+                        label: '',
+                        value: ''
+                    }, {
+                        label: '',
+                        value: ''
+                    }];
                 } else if (type === 'spelling') {
                     this.spellingAnswer = '';
                 } else if (type === 'math') {
@@ -292,24 +317,50 @@
                     opt.is_correct = (i === index);
                 });
             },
-
             addBlank() {
-                let textarea = this.$refs.questionContent;
+                const textarea = this.$refs.questionContent;
                 if (!textarea) return;
+
+                const blankNumber = this.blanks.length + 1;
+                const insertText = `${blankNumber}. _____`;
 
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
 
-                this.questionContent = this.questionContent.substring(0, start) +
-                    ' _____ ' +
+                this.questionContent =
+                    this.questionContent.substring(0, start) +
+                    insertText +
                     this.questionContent.substring(end);
 
                 this.$nextTick(() => {
-                    textarea.selectionStart = textarea.selectionEnd = start + 6;
                     textarea.focus();
+                    textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
                 });
 
-                this.answers.push('');
+                this.blanks.push({
+                    blank_number: blankNumber,
+                    options: ['', '', '', ''],
+                    answer: ''
+                });
+            },
+
+            removeBlank(index) {
+                const removed = this.blanks[index];
+                const regex = new RegExp(`\\b${removed.blank_number}\\. _____\\b`);
+                this.questionContent = this.questionContent.replace(regex, '').replace(/\s+/, ' ');
+
+                this.blanks.splice(index, 1);
+
+                // Re-number blanks and update passage
+                this.blanks.forEach((b, i) => {
+                    const oldNumber = b.blank_number;
+                    const newNumber = i + 1;
+                    if (oldNumber !== newNumber) {
+                        const re = new RegExp(`\\b${oldNumber}\\. _____\\b`);
+                        this.questionContent = this.questionContent.replace(re, `${newNumber}. _____`);
+                        b.blank_number = newNumber;
+                    }
+                });
             },
 
             addPair() {
@@ -328,6 +379,8 @@
             },
 
             submitForm() {
+                // Optional: console.log to debug
+                console.log(JSON.stringify(this.blanks, null, 2));
                 this.$root.querySelector('form').submit();
             }
         }

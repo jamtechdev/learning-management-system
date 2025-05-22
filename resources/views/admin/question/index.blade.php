@@ -5,8 +5,8 @@
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Manage All Questions</h2>
                     <a href="{{ route('admin.questions.create') }}"
-                       class="inline-block px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
-                        + Add
+                        class="inline-block px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
+                        + Add Question
                     </a>
                 </div>
 
@@ -27,26 +27,49 @@
                                 <tr>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $index + 1 }}</td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $question->content }}</td>
-                                    <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">{{ str_replace('_', ' ', $question->type) }}</td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $question->level->name ?? '-' }}</td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $question->subject->name ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
+                                        {{ str_replace('_', ' ', $question->type) }}</td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
-                                        @if($question->type === 'mcq' || $question->type === 'image_mcq')
+                                        {{ $question->level->name ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                        {{ $question->subject->name ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                        @if ($question->type === 'mcq')
                                             <ul class="list-disc list-inside">
                                                 @foreach ($question->options as $option)
                                                     <li>
-                                                        {{ $option->text }}
-                                                        @if($option->is_correct)
+                                                        {{ $option->value }}. {{ $option->text }}
+                                                        @if ($option->is_correct)
                                                             <span class="font-semibold text-green-500">(Correct)</span>
                                                         @endif
                                                     </li>
                                                 @endforeach
                                             </ul>
                                         @elseif($question->type === 'true_false')
-                                            <span>{{ $question->options[0]->text ?? 'True' }} / {{ $question->options[1]->text ?? 'False' }}</span>
+                                            <span>{{ $question->options[0]->text ?? 'True' }} /
+                                                {{ $question->options[1]->text ?? 'False' }}</span>
                                         @elseif($question->type === 'fill_blank')
-                                            <span class="italic text-gray-600">(Answer inside blank)</span>
-                                        @elseif($question->type === 'rearrange')
+                                            <span class="italic text-gray-600">Fill in the blanks</span>
+                                            <div class="mt-2 space-y-2">
+                                                @foreach ($question->metadata['blanks'] ?? [] as $blank)
+                                                    <div>
+                                                        <span class="font-medium text-gray-700">Blank
+                                                            {{ $blank['blank_number'] }}:</span>
+                                                        <ul class="ml-4 list-disc list-inside">
+                                                            @foreach ($blank['options'] as $option)
+                                                                <li>
+                                                                    {{ $option }}
+                                                                    @if ($option === $blank['answer'])
+                                                                        <span
+                                                                            class="font-semibold text-green-600">(Correct)</span>
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif($question->type === 'linking')
                                             <ul class="list-decimal list-inside">
                                                 @foreach ($question->options as $option)
                                                     <li>{{ $option->text }}</li>
