@@ -19,9 +19,9 @@ Route::group(['prefix' => 'v1'], function () {
         });
     });
     Route::prefix('questions')->group(function () {
-
         Route::get('levels', [\App\Http\Controllers\API\QuestionController::class, 'getAllLevels']);
-
+        Route::get('subjects', [\App\Http\Controllers\API\QuestionController::class, 'getAllSubjects']);
+        Route::post('getTypeBasedQuestions', [\App\Http\Controllers\API\QuestionController::class, 'getTypeBasedQuestions']);
         Route::get('all', [\App\Http\Controllers\API\QuestionController::class, 'getAllQuestions']);
     });
 });

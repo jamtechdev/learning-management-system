@@ -95,7 +95,7 @@
 
         <!-- Step 5: Question Form -->
         <form method="POST" action="{{ route('admin.questions.store') }}" x-show="step === 5" x-transition
-            @submit.prevent="submitForm" class="mt-12 space-y-8">
+            @submit.prevent="submitForm" class="mt-12 space-y-8" enctype="multipart/form-data">
             @csrf
 
             <!-- Hidden Inputs -->
@@ -159,7 +159,8 @@
                             <label class="block mt-4 mb-2 text-lg font-semibold text-yellow-700">Correct Answer:</label>
                             <select
                                 class="w-full p-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-yellow-200"
-                                :name="'question_data[blanks][' + index + '][answer]'" x-model="blank.answer" required>
+                                :name="'question_data[blanks][' + index + '][answer]'" x-model="blank.answer"
+                                required>
                                 <option value="" disabled>Select correct answer</option>
                                 <template x-for="opt in blank.options">
                                     <option x-text="opt" :value="opt"></option>

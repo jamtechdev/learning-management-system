@@ -162,8 +162,8 @@ class QuestionController extends Controller
             $leftImageUri = null;
             $rightImageUri = null;
 
-            // Upload left image if match_type is 'image' and file is uploaded
-            if (($option['match_type'] ?? '') === 'image' &&
+            // Upload left image if label_type is 'image' and file is uploaded
+            if (($option['label_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.label_image")
             ) {
                 $leftImage = $request->file("question_data.options.$index.label_image");
@@ -183,12 +183,12 @@ class QuestionController extends Controller
             $answer[] = [
                 'left' => [
                     'word' => $option['label_text'] ?? '',
-                    'image_uri' => ($option['match_type'] ?? 'text') === 'image' ? $leftImageUri : null,
-                    'match_type' => $option['match_type'] ?? 'text',
+                    'image_uri' => $leftImageUri,
+                    'match_type' => $option['label_type'] ?? 'text',
                 ],
                 'right' => [
                     'word' => $option['value_text'] ?? '',
-                    'image_uri' => ($option['value_type'] ?? 'text') === 'image' ? $rightImageUri : null,
+                    'image_uri' => $rightImageUri,
                     'match_type' => $option['value_type'] ?? 'text',
                 ],
             ];
@@ -201,9 +201,6 @@ class QuestionController extends Controller
             'format' => 'mapping',
             'answer' => $answer,
         ];
-
-        // dd($transformed); // remove after debugging
-
         $question = new Question();
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
@@ -216,6 +213,7 @@ class QuestionController extends Controller
 
         return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
     }
+
 
     // Update existing question
     public function update(Request $request, $question)
@@ -290,9 +288,6 @@ class QuestionController extends Controller
             ]);
         }
     }
-
-
-
 
     public function updateFillBlankQuestion($question, array $data)
     {
