@@ -8,8 +8,15 @@
                         for {{ $parent->first_name }} {{ $parent->last_name }}
                     @endif
                 </h2>
-
-
+                @if ($errors->any())
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
                 <form action="{{ route('admin.student.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -18,8 +25,8 @@
                     @if (isset($parent))
                         <input type="hidden" name="parent_id" value="{{ $parent->id }}">
                     @endif
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- First Name -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">First Name</label>
@@ -34,7 +41,6 @@
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
 
-
                         <!-- Email -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Email</label>
@@ -46,6 +52,26 @@
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Phone</label>
                             <input type="text" name="phone"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                        </div>
+
+                        <!-- Student Type -->
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700">Student Type</label>
+                            <select name="student_type" required
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                                <option value="">Select type</option>
+                                <option value="primary" {{ old('student_type') == 'primary' ? 'selected' : '' }}>Primary
+                                </option>
+                                <option value="secondary" {{ old('student_type') == 'secondary' ? 'selected' : '' }}>
+                                    Secondary</option>
+                            </select>
+                        </div>
+
+                        <!-- Avatar Upload -->
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700">Avatar (optional)</label>
+                            <input type="file" name="avatar" accept="image/*"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
 
@@ -63,12 +89,7 @@
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
 
-                        <!-- Avatar Upload -->
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700">Avatar (optional)</label>
-                            <input type="file" name="avatar" accept="image/*"
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
-                        </div>
+
 
                         <!-- Lock Code -->
                         <div>
@@ -78,17 +99,16 @@
                         </div>
 
                         <!-- Lock Code Toggle -->
-                        <div class="mt-6 mb-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="lock-code-toggle" class="form-checkbox">
-                                <span class="ml-2 text-sm text-gray-700">Generate Lock Code</span>
-                            </label>
+                        <div class="flex items-center mt-6">
+                            <input type="checkbox" id="lock-code-toggle" name="lock_code_enabled"
+                                class="form-checkbox h-5 w-5 text-indigo-600"
+                                {{ old('lock_code_enabled', $student->lock_code_enabled ?? false) ? 'checked' : '' }}>
+                            <label for="lock-code-toggle" class="ml-2 text-sm text-gray-700">Generate Lock Code</label>
                         </div>
                     </div>
 
-
                     <!-- Submit -->
-                    <div>
+                    <div class="mt-6">
                         <button type="submit"
                             class="px-6 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700 focus:outline-none">
                             Save Student

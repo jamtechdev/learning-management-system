@@ -20,12 +20,13 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
-
+            $table->enum('student_type', ['primary', 'secondary']);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('avatar')->nullable();
             $table->string('password');
             $table->string('lock_code', 6)->nullable(); // 4-6 digit lock code for child
+            $table->boolean('lock_code_enabled')->default(false);
 
             $table->rememberToken();
             $table->timestamps();

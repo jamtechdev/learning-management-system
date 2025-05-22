@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -39,40 +40,41 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
             'email'      => 'required|email|unique:users,email',
             'password'   => 'required|string|min:6|confirmed',
             'phone'      => 'nullable|string|max:20',
+            'student_type' => 'required|in:primary,secondary',
             'parent_id'  => 'nullable|exists:users,id',
             'lock_code'  => 'nullable|digits:6',
-            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Avatar validation
+            'lock_code_enabled' => 'nullable|string',
+            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
-            // Prepare data for user creation
             $data = [
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'phone'      => $request->phone,
+                'student_type' => $request->student_type,
                 'parent_id'  => $request->parent_id,
                 'lock_code'  => $request->lock_code ?: null,
+                'lock_code_enabled' => $request->lock_code_enabled === 'on' ? true : false,
                 'password'   => Hash::make($request->password),
             ];
 
-            // Handle avatar upload if present
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
                 $data['avatar'] = $avatarPath;
             }
 
-            // Create the student
             $student = User::create($data);
             $student->assignRole('child');
 
-            // Redirect based on parent
             if ($request->filled('parent_id')) {
                 return redirect()->route('admin.parents.students', $request->parent_id)
                     ->with('success', 'Student created successfully!');
@@ -81,10 +83,14 @@ class StudentController extends Controller
             return redirect()->route('admin.student.index')
                 ->with('success', 'Student created successfully!');
         } catch (\Exception $e) {
+            // Better error logging instead of dd()
+            Log::error('Error creating student: ' . $e->getMessage());
+
             return back()->withInput()
                 ->with('error', 'Something went wrong while creating the student.');
         }
     }
+
     public function edit(User $student)
     {
         $parent = $student->parent;
@@ -94,13 +100,12 @@ class StudentController extends Controller
 
     public function update(Request $request, User $student)
     {
-        // dd($request->all());
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
             'email'      => 'required|email|unique:users,email,' . $student->id,
             'phone'      => 'nullable|string|max:20',
-            // 'lock_code'  => 'nullable|digits:6',
+            'lock_code_enabled' => 'nullable|string',
             'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'password'   => 'nullable|string|min:6|confirmed',
         ]);
@@ -110,15 +115,26 @@ class StudentController extends Controller
             $student->last_name  = $request->last_name;
             $student->email      = $request->email;
             $student->phone      = $request->phone;
-            // $student->lock_code  = $request->lock_code;
 
-            // Update avatar if new file is uploaded
+            $lockCodeEnabled = $request->has('lock_code_enabled');
+
+            if ($lockCodeEnabled && !$student->lock_code_enabled) {
+                // Only generate new 6-digit code if enabling lock code from disabled state
+                $student->lock_code = random_int(100000, 999999);
+            }
+
+            // If disabling lock code, you may want to clear the lock_code (optional)
+            if (!$lockCodeEnabled) {
+                $student->lock_code = null;
+            }
+
+            $student->lock_code_enabled = $lockCodeEnabled;
+
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
                 $student->avatar = $avatarPath;
             }
 
-            // Only update password if it's provided
             if ($request->filled('password')) {
                 $student->password = Hash::make($request->password);
             }
@@ -137,6 +153,9 @@ class StudentController extends Controller
                 ->with('error', 'Failed to update student.');
         }
     }
+
+
+
 
     public function destroy(User $student)
     {

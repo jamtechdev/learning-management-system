@@ -28,7 +28,9 @@ class User extends Authenticatable
         'avatar',
         'password',
         'parent_id',
-        'lock_code'
+        'lock_code',
+        'lock_code_enabled',
+        'student_type'
     ];
 
     /**
@@ -53,6 +55,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected $casts = [
+        'lock_code_enabled' => 'boolean',
+    ];
+
 
     public function parent()
     {

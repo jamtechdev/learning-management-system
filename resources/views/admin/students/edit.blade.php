@@ -42,27 +42,6 @@
                             <input type="text" name="phone" value="{{ old('phone', $student->phone) }}"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
-
-                        <!-- Lock Code -->
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700">Lock Code</label>
-                            <input type="text" name="lock_code" value="{{ old('lock_code', $student->lock_code) }}"
-                                readonly
-                                class="w-full px-4 py-2 bg-gray-100 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
-                        </div>
-
-
-                        <!-- Avatar Upload -->
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700">Avatar</label>
-                            @if ($student->avatar)
-                                <img src="{{ asset('storage/' . $student->avatar) }}"
-                                    class="w-16 h-16 mb-2 rounded-full shadow" alt="Avatar">
-                            @endif
-                            <input type="file" name="avatar" accept="image/*"
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
-                        </div>
-
                         <!-- Password (Optional) -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">New Password (leave blank to
@@ -76,6 +55,40 @@
                             <input type="password" name="password_confirmation"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
+
+                        <!-- Lock Code -->
+                        @if ($student->lock_code !== null)
+                            <div>
+                                <label class="block mb-1 text-sm font-medium text-gray-700">Lock Code</label>
+                                <input type="text" name="lock_code"
+                                    value="{{ old('lock_code', $student->lock_code) }}" readonly
+                                    class="w-full px-4 py-2 bg-gray-100 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            </div>
+                        @endif
+
+                        <!-- Avatar Upload -->
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700">Avatar</label>
+                            @if ($student->avatar)
+                                <img src="{{ asset('storage/' . $student->avatar) }}"
+                                    class="w-16 h-16 mb-2 rounded-full shadow" alt="Avatar">
+                            @endif
+                            <input type="file" name="avatar" accept="image/*"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                        </div>
+
+
+                        <!-- Lock Code Enabled Toggle -->
+                        <div class="flex items-center mt-6">
+                            <input type="checkbox" id="lock-code-toggle" name="lock_code_enabled"
+                                class="form-checkbox h-5 w-5 text-indigo-600"
+                                {{ old('lock_code_enabled', $student->lock_code_enabled) ? 'checked' : '' }}>
+                            <label for="lock-code-toggle" class="ml-2 text-sm text-gray-700">Enable Lock Code</label>
+                        </div>
+
+
+
+
 
                     </div>
 
