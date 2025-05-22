@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -31,7 +32,11 @@ class AuthController extends Controller
                         'email' => 'required|string|email:rfc,dns|exists:users,email',
                         'password' => 'required|string'
                     ]);
-                    return $this->successHandler($request->all(), 200, 'Valid Email and Password');
+                    $user = User::where('email', $request->email)->firstOrFail();
+                    if ($user && Hash::check($request->password, $user->password)) {
+                        return $this->successHandler($request->all(), 200, $user->lock_code_enabled == 1 ? 'Lock Code Enabled' : 'Lock Code Disabled');
+                    }
+                    return $this->errorHandler(404, 'Invalid Credentials');
                 case 'login':
                     $request->validate([
                         'email' => 'required|string|email:rfc,dns|exists:users,email',
