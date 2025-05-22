@@ -12,7 +12,7 @@
                         @endisset
                     </h2>
 
-                    <a href="{{ route('admin.student.create') }}"
+                    <a href="{{ route('admin.student.create') }}?parent_id={{ $parent->id }}"
                         class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white bg-green-600 rounded-lg shadow md:mt-0 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                         + Add Student
                     </a>
@@ -30,7 +30,7 @@
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Name</th>
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Email</th>
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Phone</th>
-                                <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Parent
+                                <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Lock Code
                                 </th>
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Actions
                                 </th>
@@ -56,8 +56,8 @@
                                         {{ $student->phone }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-700">
-                                        {{ $student->parent->first_name ?? 'N/A' }}
-                                        {{ $student->parent->last_name ?? '' }}
+                                        {{ $student->lock_code ?? 'N/A' }}
+
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
                                         <a href="{{ route('admin.student.edit', $student->id) }}"
