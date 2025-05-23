@@ -18,6 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->renderable(function (NotFoundHttpException $e) {
-            return response()->json(['message' => 'Object not found'], 404);
+            return response()->json(['message' => $e->getMessage().'Object not found'], 404);
         });
     })->create();
