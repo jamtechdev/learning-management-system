@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -24,9 +25,9 @@ Route::middleware('auth')->group(function () {
 // Admin routes
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware(['verified'])->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
 
     // Question Management: Questions
     Route::prefix('questions')->name('admin.questions.')->group(function () {

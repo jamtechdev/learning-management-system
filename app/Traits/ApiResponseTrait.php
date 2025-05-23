@@ -15,12 +15,13 @@ trait ApiResponseTrait
      *
      * @return JsonResponse
      */
-    public function errorHandler(int $code = 500, string $message = null): JsonResponse
+    public function errorHandler(int $code = 403, string $message = null, $data = null): JsonResponse
     {
         $error = [
             'version' => 'v1',
-            'message' => $message,
             'code' => $code,
+            'message' => $message,
+            'data' => $data ?? (object)[], // Ensures "data" is always present, even if null
         ];
 
         return response()->json($error, $code);

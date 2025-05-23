@@ -88,12 +88,8 @@ class AuthController extends Controller
             }
             if ($user->lock_code_enabled) {
                 if (!$request->filled('lock_code')) {
-                    return response()->json([
-                        'message' => 'Lock code is required',
-                        'version' => 'v1',
-                            'code' => 422,
-                        'lock_code_enabled' => true
-                    ], 422);
+                    return $this->errorHandler(403, 'Lock code required', [
+                        'lock_code_enabled' => true]);
                 }
                 if ($user->lock_code !== $request->lock_code) {
                     return $this->errorHandler(403, 'Invalid lock code', [
