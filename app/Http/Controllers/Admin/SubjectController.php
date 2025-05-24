@@ -14,9 +14,7 @@ class SubjectController extends Controller
 
     public function index()
     {
-        // Use paginate directly on the query builder
         $subjects = QuestionSubject::with('level')->paginate(10);
-
         return view('admin.question.subject.index', compact('subjects'));
     }
 

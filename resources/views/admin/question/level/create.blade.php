@@ -73,7 +73,7 @@
             <!-- Submit Button -->
             <div class="mt-6">
                 <button type="submit"
-                    class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
+                    class="px-4 py-2 text-white add-btn disabled:opacity-50"
                     :disabled="!educationType || selectedLevels.length === 0">
                     Submit
                 </button>

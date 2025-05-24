@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index($id)
     {
-        $students = User::role('child')->with('parent')->get();
-        return view('admin.students.index', compact('students'));
+        $parent = User::role('parent')->first();
+        $students = User::role('child')->with('parent')->paginate(10);
+        return view('admin.students.index', compact('students', 'parent'));
     }
 
     public function studentsByParent(User $parent)
@@ -26,14 +27,9 @@ class StudentController extends Controller
         return view('admin.students.index', compact('students', 'parent'));
     }
 
-    public function create(Request $request)
+    public function create(Request $request, $id)
     {
-        $parent = null;
-
-        if ($request->has('parent_id')) {
-            $parent = User::find($request->input('parent_id'));
-        }
-
+        $parent = User::find($id);
         return view('admin.students.create', compact('parent'));
     }
 
@@ -74,16 +70,10 @@ class StudentController extends Controller
 
             $student = User::create($data);
             $student->assignRole('child');
-
-            if ($request->filled('parent_id')) {
-                return redirect()->route('admin.parents.students', $request->parent_id)
-                    ->with('success', 'Student created successfully!');
-            }
-
-            return redirect()->route('admin.student.index')
+            return redirect()->route('admin.student.index', $request->parent_id)
                 ->with('success', 'Student created successfully!');
         } catch (\Exception $e) {
-
+            dd($e->getMessage());
             // Better error logging instead of dd()
             Log::error('Error creating student: ' . $e->getMessage());
 
@@ -147,7 +137,7 @@ class StudentController extends Controller
                     ->with('success', 'Student updated successfully!');
             }
 
-            return redirect()->route('admin.student.index')
+            return redirect()->route('admin.student.index', $student->parent_id)
                 ->with('success', 'Student updated successfully!');
         } catch (\Exception $e) {
             return back()->withInput()
@@ -174,7 +164,7 @@ class StudentController extends Controller
                     ->with('success', 'Student deleted successfully!');
             }
 
-            return redirect()->route('admin.student.index')
+            return redirect()->route('admin.student.index', $parentId)
                 ->with('success', 'Student deleted successfully!');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete the student.');

@@ -12,7 +12,7 @@ class ParentController extends Controller
 {
     public function index()
     {
-        $parents = User::role('Parent')->get();
+        $parents = User::role('Parent')->paginate(10);
         return view('admin.parents.index', compact('parents'));
     }
 

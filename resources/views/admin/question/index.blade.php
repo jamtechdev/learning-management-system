@@ -5,21 +5,21 @@
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Manage All Questions</h2>
                     <a href="{{ route('admin.questions.create') }}"
-                        class="inline-block px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
+                        class="inline-block px-4 py-2 text-sm font-medium text-white add-btn">
                         + Add Question
                     </a>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
+                <div class="w-[100%] overflow-x-scroll ">
+                    <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gradient-to-r from-blue-600 to-blue-800">
                             <tr>
-                                <th class="w-1/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">#</th>
-                                <th class="w-3/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Question</th>
-                                <th class="w-1/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Type</th>
-                                <th class="w-2/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Level</th>
-                                <th class="w-2/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Subject</th>
-                                <th class="w-3/12 px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Options</th>
+                                <th class="w-1/12 px-4 py-3 font-medium text-white dark:text-white">#</th>
+                                <th class="w-3/12 px-4 py-3 font-medium text-white dark:text-white">Question</th>
+                                <th class="w-1/12 px-4 py-3 font-medium text-white dark:text-white">Type</th>
+                                <th class="w-2/12 px-4 py-3 font-medium text-white dark:text-white">Level</th>
+                                <th class="w-2/12 px-4 py-3 font-medium text-white dark:text-white">Subject</th>
+                                <th class="w-3/12 px-4 py-3 font-medium text-white dark:text-white">Options</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
@@ -39,7 +39,7 @@
                                         {{-- MCQ --}}
                                         @if ($question->type === 'mcq')
                                             <label class="block mb-2 font-semibold text-yellow-700">Options</label>
-                                            <ul class="list-disc list-inside">
+                                            <ul class="list-disc list-inside h-[100px] overflow-y-scroll">
                                                 @foreach ($question->options as $option)
                                                     <li>
                                                         {{ $option->value }}. {{ $option->text }}
@@ -54,8 +54,9 @@
                                         @elseif ($question->type === 'true_false')
                                             @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
                                             <label class="block mb-2 font-semibold text-yellow-700">True / False</label>
-                                            <ul class="list-disc list-inside">
-                                                <li class="{{ $correct === 'True' ? 'text-green-600 font-bold' : '' }}">
+                                            <ul class="list-disc list-inside h-[100px] overflow-y-scroll">
+                                                <li
+                                                    class="{{ $correct === 'True' ? 'text-green-600 font-bold' : '' }}">
                                                     True @if ($correct === 'True')
                                                         (Correct)
                                                     @endif
@@ -72,13 +73,13 @@
                                         @elseif ($question->type === 'fill_blank')
                                             <label class="block mb-2 font-semibold text-yellow-700">Fill in the
                                                 Blanks</label>
-                                            @foreach ($question->metadata['blanks'] ?? [] as $blank)
+                                            @foreach ($question->metadata['blanks'] ?? [] as $i => $blank)
                                                 <div class="mb-2">
                                                     <span class="text-sm font-medium">
                                                         Blank {{ $blank['blank_number'] ?? 'N/A' }}:
                                                     </span>
 
-                                                    <ul class="ml-4 list-disc list-inside">
+                                                    <ul class="ml-4 list-disc list-inside h-[100px] overflow-y-scroll">
                                                         @foreach ($blank['options'] as $option)
                                                             <li>
                                                                 {{ $option }}
@@ -97,7 +98,7 @@
                                             <label class="block mb-2 font-semibold text-yellow-700">Match the
                                                 Following</label>
                                             @if (!empty($question->metadata['answer']))
-                                                <div class="space-y-4">
+                                                <div class="space-y-4 h-[180px] overflow-y-scroll">
                                                     @foreach ($question->metadata['answer'] as $pair)
                                                         <div
                                                             class="flex items-center justify-between p-3 transition-all bg-white border shadow rounded-xl hover:shadow-lg">
@@ -146,7 +147,7 @@
                                         {{-- Edit & Delete buttons --}}
                                         <div class="flex mt-4 space-x-2">
                                             <a href="{{ route('admin.questions.edit', $question->id) }}"
-                                                class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                                                class="px-3 py-1 text-sm font-medium text-white add-btn">
                                                 Edit
                                             </a>
 
@@ -172,6 +173,10 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <div class="mt-6">
+                    {{ $questions->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>

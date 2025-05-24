@@ -12,12 +12,13 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{{ asset('/assets/css/global.css') }}">
 
     <!-- Styles and Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+<body class="font-sans antialiased bg-[#edf2fe] dark:bg-gray-900">
     <div class="flex min-h-screen">
 
         <!-- Sidebar (Static) -->
@@ -25,13 +26,34 @@
             @include('layouts.sidebar')
         </div>
         <!-- Main Content Area -->
-        <div class="flex flex-col flex-1">
+        <div class="relative flex flex-col flex-1">
             <!-- Top Navigation Bar -->
-            <div class="bg-white shadow dark:bg-gray-800">
+            <div class="sticky top-0 bg-white shadow dark:bg-gray-800">
                 @include('layouts.navigation')
             </div>
             <!-- Page Content -->
             <main class="flex-1 p-4">
+                @if (session('message'))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
+                        class="relative p-4 mb-4 text-green-700 bg-green-100 rounded">
+                        <p>{{ session('message') }}</p>
+                        <button @click="show = false"
+                            class="absolute text-green-700 top-2 right-2 hover:text-green-900">
+                            &times;
+                        </button>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
+                        class="relative p-4 mb-4 text-red-700 bg-red-100 rounded">
+                        <p>{{ session('error') }}</p>
+                        <button @click="show = false" class="absolute text-red-700 top-2 right-2 hover:text-red-900">
+                            &times;
+                        </button>
+                    </div>
+                @endif
+
                 {{ $slot }}
             </main>
             <!-- Footer -->

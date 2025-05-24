@@ -3,7 +3,7 @@
         <h2 class="pb-2 mb-2 text-3xl font-bold text-gray-800 border-b">Edit Question Level</h2>
 
         <!-- User Guide Note -->
-        <div class="p-4 mb-6 text-yellow-700 border border-yellow-300 rounded bg-yellow-50">
+        <div class="p-4 mb-6 text-blue-700 border border-blue-200 rounded bg-blue-50">
             <p><strong>How to edit a question level:</strong></p>
             <ol class="space-y-1 text-sm list-decimal list-inside">
                 <li>The <em>Education Type</em> is fixed and cannot be changed.</li>

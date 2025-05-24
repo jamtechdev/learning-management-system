@@ -14,9 +14,10 @@ class LevelController extends Controller
     // List all levels
     public function index()
     {
-        $levels = QuestionLevel::withCount(['subjects', 'questions'])->get();
+        $levels = QuestionLevel::withCount(['subjects', 'questions'])->paginate(10);
         return view('admin.question.level.index', compact('levels'));
     }
+
 
     // Show create form
     public function create()
@@ -66,7 +67,7 @@ class LevelController extends Controller
                     ->ignore($id)
                     ->where(function ($query) use ($educationType, $inputName) {
                         return $query->where('education_type', $educationType)
-                                     ->whereRaw('LOWER(name) = ?', [$inputName]);
+                            ->whereRaw('LOWER(name) = ?', [$inputName]);
                     }),
             ];
 
@@ -83,7 +84,6 @@ class LevelController extends Controller
             } catch (\Exception $e) {
                 return back()->withInput()->withErrors(['error' => 'Failed to update level: ' . $e->getMessage()]);
             }
-
         } else {
             // Create mode (multiple levels)
             $rules['name'] = ['required', 'array', 'min:1'];

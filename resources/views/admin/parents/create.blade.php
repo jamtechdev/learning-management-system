@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="py-6 max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 mx-auto max-w-8xl sm:px-6 lg:px-8">
         <div class="p-6 bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
             <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Parent</h2>
 
@@ -7,7 +7,7 @@
                 class="space-y-6">
                 @csrf
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- First Name -->
                     <div>
                         <label for="first_name"

@@ -9,7 +9,7 @@
                         Manage All Parents
                     </h2>
                     <a href="{{ route('admin.parents.create') }}"
-                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white transition bg-green-600 rounded-lg shadow md:mt-0 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white transition add-btn">
                         + Add Parent
                     </a>
                 </div>
@@ -66,9 +66,9 @@
                                     </td>
 
                                     <td class="px-6 py-4 text-sm text-center">
-                                        <a href="{{ route('admin.student.create') }}?parent_id={{ $parent->id }}"
-                                            class="inline-block px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1">
-                                            + Student
+                                        <a href="{{ route('admin.student.index', $parent->id) }}"
+                                            class="text-indigo-600 hover:text-indigo-800" title="View Students">
+                                            <i class="fas fa-users fa-lg"></i>
                                         </a>
                                     </td>
 
@@ -81,11 +81,7 @@
                                             <i class="fas fa-edit fa-lg"></i>
                                         </a>
 
-                                        <!-- View Students button -->
-                                        <a href="{{ route('admin.parents.students', $parent->id) }}"
-                                            class="text-indigo-600 hover:text-indigo-800" title="View Students">
-                                            <i class="fas fa-users fa-lg"></i>
-                                        </a>
+
 
                                         <!-- Delete button -->
                                         <form action="{{ route('admin.parents.destroy', $parent->id) }}" method="POST"
@@ -111,6 +107,9 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-6">
+                    {{ $parents->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>

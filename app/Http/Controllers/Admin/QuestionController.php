@@ -7,12 +7,14 @@ use App\Models\Question;
 use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
     public function index()
     {
-        $questions = Question::with(['options', 'level', 'subject'])->get();
+        $questions = Question::with(['options', 'level', 'subject'])->paginate(5);
 
         return view('admin.question.index', compact('questions'));
     }
@@ -60,7 +62,7 @@ class QuestionController extends Controller
             default:
                 return response()->json(['error' => 'Invalid question type'], 400);
         }
-        return redirect()->route('admin.questions.index')->with('success', 'Question created successfully!');
+        return redirect()->route('admin.questions.index')->with('message', 'Question created successfully!');
     }
 
     public function saveMcqQuestion(array $data)
@@ -109,6 +111,7 @@ class QuestionController extends Controller
 
     private function saveFillBlankQuestion($data)
     {
+
         $question = new Question();
         $question->type = $data['type'];
         $question->content = $data['content'];
@@ -240,10 +243,10 @@ class QuestionController extends Controller
                 break;
 
             default:
-                return response()->json(['error' => 'Invalid question type'], 400);
+                return redirect()->route('admin.questions.index')->with('message', 'Invalid question type!');
         }
 
-        return redirect()->route('admin.questions.index')->with('success', 'Question updated successfully!');
+        return redirect()->route('admin.questions.index')->with('message', 'Question updated successfully!');
     }
     public function updateMcqQuestion($question, array $data)
     {
@@ -385,5 +388,41 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
+    }
+
+
+    public function destroy($id)
+    {
+        $question = Question::findOrFail($id);
+        $type = $question->type;
+
+        // Handle MCQ and TRUE_FALSE: delete related options
+        if (in_array($type, ['mcq', 'true_false'])) {
+            QuestionOption::where('question_id', $question->id)->delete();
+        }
+
+        // Handle LINKING: delete associated images
+        if ($type === 'linking') {
+            $data = json_decode($question->data, true);
+            if (isset($data['answer']) && is_array($data['answer'])) {
+                foreach ($data['answer'] as $item) {
+                    foreach (['left', 'right'] as $side) {
+                        if (
+                            isset($item[$side]['match_type'], $item[$side]['image_uri']) &&
+                            $item[$side]['match_type'] === 'image'
+                        ) {
+                            $imageUrl = $item[$side]['image_uri'];
+                            $path = str_replace(url('/storage'), 'public', $imageUrl);
+
+                            if (Storage::exists($path)) {
+                                Storage::delete($path);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $question->delete();
+        return redirect()->route('admin.questions.index')->with('success', 'Question deleted successfully!');
     }
 }

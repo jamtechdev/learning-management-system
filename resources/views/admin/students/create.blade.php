@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="py-6">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-8xl sm:px-6 lg:px-8">
             <div class="p-6 bg-white shadow-xl sm:rounded-lg">
                 <h2 class="mb-6 text-2xl font-bold text-gray-800">
                     Add New Student
@@ -9,7 +9,7 @@
                     @endif
                 </h2>
                 @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    <div class="p-4 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
                         <ul class="list-disc list-inside">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -17,8 +17,8 @@
                         </ul>
                     </div>
                 @endif
-
-                <form action="{{ route('admin.student.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.student.store', $parent->id) }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
 
                     {{-- Pass parent_id as hidden --}}
@@ -26,7 +26,7 @@
                         <input type="hidden" name="parent_id" value="{{ $parent->id }}">
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- First Name -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">First Name</label>
@@ -101,7 +101,7 @@
                         <!-- Lock Code Toggle -->
                         <div class="flex items-center mt-6">
                             <input type="checkbox" id="lock-code-toggle" name="lock_code_enabled"
-                                class="form-checkbox h-5 w-5 text-indigo-600"
+                                class="w-5 h-5 text-indigo-600 form-checkbox"
                                 {{ old('lock_code_enabled', $student->lock_code_enabled ?? false) ? 'checked' : '' }}>
                             <label for="lock-code-toggle" class="ml-2 text-sm text-gray-700">Generate Lock Code</label>
                         </div>
@@ -110,7 +110,7 @@
                     <!-- Submit -->
                     <div class="mt-6">
                         <button type="submit"
-                            class="px-6 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700 focus:outline-none">
+                            class="px-6 py-2 text-white add-btn focus:outline-none">
                             Save Student
                         </button>
                     </div>

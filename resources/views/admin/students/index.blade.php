@@ -12,8 +12,8 @@
                         @endisset
                     </h2>
 
-                    <a href="{{ route('admin.student.create') }}?parent_id={{ $parent->id }}"
-                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white bg-green-600 rounded-lg shadow md:mt-0 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    <a href="{{ route('admin.student.create', $parent->id) }}"
+                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white add-btn">
                         + Add Student
                     </a>
                 </div>
@@ -64,7 +64,7 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
                                         <a href="{{ route('admin.student.edit', $student->id) }}"
-                                            class="inline-block px-3 py-1 mr-2 text-sm text-blue-600 bg-blue-100 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1">
+                                            class="inline-block px-3 py-1 mr-2 text-sm text-white-600 add-btn">
                                             Edit
                                         </a>
 
@@ -89,6 +89,9 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-6">
+                    {{ $students->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>

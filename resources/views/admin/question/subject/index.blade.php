@@ -7,7 +7,7 @@
                         Manage All Subjects
                     </h2>
                     <a href="{{ route('admin.subjects.create') }}"
-                        class="inline-block px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
+                        class="inline-block px-4 py-2 text-sm font-medium text-white add-btn">
                         + Add Subject
                     </a>
                 </div>
@@ -55,19 +55,19 @@
                                     </td>
                                     <td class="w-1/5 px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">
                                         <a href="{{ route('admin.subjects.edit', $subject->id) }}"
-                                            class="inline-block px-3 py-1 mr-2 text-sm text-blue-600 transition bg-blue-100 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1">
+                                            class="inline-block px-3 py-1 mr-2 text-sm transition text-white-600 add-btn">
                                             Edit
                                         </a>
-                                            <form action="{{ route('admin.subjects.destroy', $subject->id) }}"
-                                                method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-block px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700"
-                                                    onclick="return confirm('Are you sure?')">
-                                                    Delete
-                                                </button>
-                                            </form>
+                                        <form action="{{ route('admin.subjects.destroy', $subject->id) }}"
+                                            method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-block px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700"
+                                                onclick="return confirm('Are you sure?')">
+                                                Delete
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
@@ -82,6 +82,9 @@
                             @endif
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-6">
+                    {{ $subjects->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>
