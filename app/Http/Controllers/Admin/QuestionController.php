@@ -330,65 +330,6 @@ class QuestionController extends Controller
         $question->save();
     }
 
-    // public function updateLinkingQuestion(Question $question, array $data, Request $request)
-    // {
-    //     $answer = [];
-
-    //     foreach ($data['options'] as $index => $option) {
-    //         $leftImageUri = null;
-    //         $rightImageUri = null;
-
-    //         if (($option['match_type'] ?? '') === 'image' &&
-    //             $request->hasFile("question_data.options.$index.label_image")
-    //         ) {
-    //             $leftImage = $request->file("question_data.options.$index.label_image");
-    //             $storedPath = $leftImage->store('uploads/linking', 'public');
-    //             $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
-    //         } else if (isset($option['existing_label_image_uri'])) {
-    //             $leftImageUri = $option['existing_label_image_uri'];
-    //         }
-
-    //         if (($option['value_type'] ?? '') === 'image' &&
-    //             $request->hasFile("question_data.options.$index.value_image")
-    //         ) {
-    //             $rightImage = $request->file("question_data.options.$index.value_image");
-    //             $storedPath = $rightImage->store('uploads/linking', 'public');
-    //             $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
-    //         } else if (isset($option['existing_value_image_uri'])) {
-    //             $rightImageUri = $option['existing_value_image_uri'];
-    //         }
-
-    //         $answer[] = [
-    //             'left' => [
-    //                 'word' => $option['label_text'] ?? '',
-    //                 'image_uri' => ($option['match_type'] ?? 'text') === 'image' ? $leftImageUri : null,
-    //                 'match_type' => $option['match_type'] ?? 'text',
-    //             ],
-    //             'right' => [
-    //                 'word' => $option['value_text'] ?? '',
-    //                 'image_uri' => ($option['value_type'] ?? 'text') === 'image' ? $rightImageUri : null,
-    //                 'match_type' => $option['value_type'] ?? 'text',
-    //             ],
-    //         ];
-    //     }
-
-    //     $transformed = [
-    //         'type' => 'linking',
-    //         'content' => $data['content'] ?? '',
-    //         'explanation' => $data['explanation'] ?? '',
-    //         'format' => 'mapping',
-    //         'answer' => $answer,
-    //     ];
-
-    //     $question->type = $data['type'];
-    //     $question->education_type = $data['education_type'];
-    //     $question->level_id = $data['level_id'];
-    //     $question->subject_id = $data['subject_id'];
-    //     $question->content = $data['content'];
-    //     $question->explanation = $data['explanation'] ?? null;
-    //     $question->metadata = $transformed;
-    //     $question->save();
-    // }
     public function updateLinkingQuestion(Question $question, array $data, Request $request)
     {
         $answer = [];
@@ -397,37 +338,35 @@ class QuestionController extends Controller
             $leftImageUri = null;
             $rightImageUri = null;
 
-            // Handle left image
-            if (($option['label_type'] ?? '') === 'image' &&
+            if (($option['match_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.label_image")
             ) {
                 $leftImage = $request->file("question_data.options.$index.label_image");
                 $storedPath = $leftImage->store('uploads/linking', 'public');
                 $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
-            } elseif (isset($option['existing_label_image_uri'])) {
+            } else if (isset($option['existing_label_image_uri'])) {
                 $leftImageUri = $option['existing_label_image_uri'];
             }
 
-            // Handle right image
             if (($option['value_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.value_image")
             ) {
                 $rightImage = $request->file("question_data.options.$index.value_image");
                 $storedPath = $rightImage->store('uploads/linking', 'public');
                 $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
-            } elseif (isset($option['existing_value_image_uri'])) {
+            } else if (isset($option['existing_value_image_uri'])) {
                 $rightImageUri = $option['existing_value_image_uri'];
             }
 
             $answer[] = [
                 'left' => [
                     'word' => $option['label_text'] ?? '',
-                    'image_uri' => $leftImageUri,
-                    'match_type' => $option['label_type'] ?? 'text',
+                    'image_uri' => ($option['match_type'] ?? 'text') === 'image' ? $leftImageUri : null,
+                    'match_type' => $option['match_type'] ?? 'text',
                 ],
                 'right' => [
                     'word' => $option['value_text'] ?? '',
-                    'image_uri' => $rightImageUri,
+                    'image_uri' => ($option['value_type'] ?? 'text') === 'image' ? $rightImageUri : null,
                     'match_type' => $option['value_type'] ?? 'text',
                 ],
             ];

@@ -32,7 +32,7 @@
             class="xl:w-[45%] md:w-[100%] w-[100%] h-screen bg-white flex-col p-[15px] flex items-center justify-center">
 
             <div
-                class="px-6 py-4 mt-6 w-[100%] max-w-[650px] overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg">
+                class="px-6 py-4 mt-6 w-[100%] max-w-[650px] overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>
