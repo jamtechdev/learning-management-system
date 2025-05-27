@@ -14,62 +14,6 @@ class AuthController extends Controller
 {
     use ApiResponseTrait;
 
-    public function register() {}
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    // public function login(Request $request)
-    // {
-    //     $action = $request?->action;
-    //     try {
-    //         switch ($action) {
-    //             case 'check':
-    //                 $request->validate([
-    //                     'email' => 'required|string|email:rfc,dns|exists:users,email',
-    //                     'password' => 'required|string'
-    //                 ]);
-    //                 $user = User::where('email', $request->email)->firstOrFail();
-    //                 if ($user && Hash::check($request->password, $user->password)) {
-    //                     return $this->successHandler([
-    //                         'lock_code_enabled' => $user->lock_code_enabled
-    //                     ], 200, $user->lock_code_enabled == 1 ? 'Lock Code Enabled' : 'Lock Code Disabled');
-    //                 }
-    //                 return $this->errorHandler(404, 'Invalid Credentials');
-    //             case 'login':
-    //                 $request->validate([
-    //                     'email' => 'required|string|email:rfc,dns|exists:users,email',
-    //                     'password' => 'required|string',
-    //                     'lock_code' => [
-    //                         'required',
-    //                         'string',
-    //                         function ($attribute, $value, $fail) use ($request) {
-    //                             if (!User::where('email', $request->email)->where('lock_code', $value)->exists()) {
-    //                                 $fail('Lock Code does not Verified');
-    //                             }
-    //                         }
-    //                     ]
-    //                 ]);
-    //                 $user = User::where('email', $request->email)->where('lock_code', $request->lock_code)->firstOrFail();
-    //                 $credentials = request(['email', 'password']);
-    //                 $remember = $request->has('remember') ?? false;
-    //                 if ($user && Auth::attempt($credentials, $remember)) {
-    //                     $token = $user->createToken($user->email, ['remember_me' => $remember])->plainTextToken;
-    //                     $user['token'] = $token;
-    //                     return $this->successHandler(
-    //                         new \App\Http\Resources\AuthResource($user),
-    //                         200,
-    //                         'Login Successful'
-    //                     );
-    //                 } else {
-    //                     return $this->unauthorizedHandler();
-    //                 }
-    //         }
-    //         return $this->errorHandler(419, 'invalid credentials');
-    //     } catch (ValidationException $e) {
-    //         return $this->validationErrorHandler((object) $e->errors());
-    //     }
-    // }
 
     public function login(Request $request)
     {
@@ -77,7 +21,6 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|string|email:rfc,dns|exists:users,email',
                 'password' => 'required|string',
-                'lock_code' => 'nullable|string'
             ]);
 
             $user = User::where('email', $request->email)->firstOrFail();
@@ -86,21 +29,17 @@ class AuthController extends Controller
             if (!Hash::check($request->password, $user->password)) {
                 return $this->errorHandler(401, 'Invalid credentials');
             }
-            if ($user->lock_code_enabled) {
-                if (!$request->filled('lock_code')) {
-                    return $this->errorHandler(403, 'Lock code required', [
-                        'lock_code_enabled' => true]);
-                }
-                if ($user->lock_code !== $request->lock_code) {
-                    return $this->errorHandler(403, 'Invalid lock code', [
-                        'lock_code_enabled' => true
-                    ]);
-                }
+
+            // Allow only parents
+            if (!$user->hasRole('parent')) {
+                return $this->errorHandler(403, 'Access restricted to parent accounts only');
             }
+
             $remember = $request->boolean('remember', false);
             Auth::login($user, $remember);
             $token = $user->createToken($user->email, ['remember_me' => $remember])->plainTextToken;
             $user['token'] = $token;
+
             return $this->successHandler(
                 new \App\Http\Resources\AuthResource($user),
                 200,
@@ -119,43 +58,53 @@ class AuthController extends Controller
 
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+    public function studentLogin(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'lock_code' => 'required|string',
+            ]);
+
+            // Find the user by lock_code
+            $user = User::where('lock_code_enabled', true)
+                ->where('lock_code', $request->lock_code)
+                ->first();
+
+            if (!$user) {
+                return $this->errorHandler(403, 'Invalid or unauthorized lock code.');
+            }
+
+            // Log in the user
+            Auth::login($user);
+            $token = $user->createToken('lock_code_login')->plainTextToken;
+            $user['token'] = $token;
+
+            return $this->successHandler(
+                new \App\Http\Resources\AuthResource($user),
+                200,
+                'Login with lock code successful'
+            );
+        } catch (ValidationException $e) {
+            return $this->errorHandler(422, collect($e->errors())->first()[0]);
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function logout(Request $request)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        try {
+            $user = Auth::user();
+            if ($user) {
+                $user->tokens()->delete();
+                Auth::logout();
+                return $this->successHandler(null, 200, 'Logout Successful');
+            }
+            return $this->errorHandler(401, 'Unauthorized');
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+        }
     }
 }

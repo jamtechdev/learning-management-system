@@ -17,7 +17,7 @@ class AuthResource extends JsonResource
             ? asset('storage/' . $avatarPath)
             : asset('images/logo/default-avatar.png'); // fallback to default image in public/images
 
-        return [
+        $data = [
             'first_name' => $this?->first_name,
             'last_name' => $this?->last_name,
             'email' => $this?->email,
@@ -25,7 +25,13 @@ class AuthResource extends JsonResource
             'phone' => $this?->phone,
             'address' => $this?->address,
             'avatar' => $avatarUrl,
-            'token' => $this->token
+            'token' => $this->token,
         ];
+
+        if ($this->role === 'child') {
+            $data['parent'] = $this->parent ?? null;
+        }
+
+        return $data;
     }
 }
