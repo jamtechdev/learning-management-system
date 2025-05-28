@@ -71,37 +71,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 6. Question Tags
-        Schema::create('question_tags', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->enum('tag_type', ['subject', 'level', 'term', 'topic', 'type']);
-            $table->string('value');
-            $table->timestamps();
-        });
 
-        // 7. Question Difficulties
-        Schema::create('question_difficulties', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->enum('difficulty', ['easy', 'medium', 'hard']);
-            $table->timestamps();
-        });
-
-        // 8. Pivot table for question <-> tag (many-to-many tagging system)
-        Schema::create('question_question_tag', function (Blueprint $table) {
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->foreignId('question_tag_id')->constrained('question_tags')->onDelete('cascade');
-            $table->primary(['question_id', 'question_tag_id']);
-        });
     }
 
     public function down(): void
     {
         // Drop the pivot table first to avoid foreign key errors
-        Schema::dropIfExists('question_question_tag');
-        Schema::dropIfExists('question_difficulties');
-        Schema::dropIfExists('question_tags');
         Schema::dropIfExists('question_group_items');
         Schema::dropIfExists('question_groups');
         Schema::dropIfExists('question_answers');

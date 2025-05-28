@@ -18,8 +18,8 @@
             <li>
                 <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
-                   📊
-                    <span >Dashboard</span>
+                    📊
+                    <span>Dashboard</span>
                 </x-nav-link>
             </li>
 
@@ -40,41 +40,37 @@
                 </button>
 
                 <!-- Submenu -->
-                <div id="submenu-questions" x-show="open" x-collapse
-                    class="mt-3 space-y-1 " style="display: none;">
+                <div id="submenu-questions" x-show="open" x-collapse class="mt-3 space-y-1 " style="display: none;">
                     <ul>
                         <li class="mb-[5px]">
                             <x-nav-link :href="route('admin.levels.index')" :active="request()->routeIs('admin.levels.*')"
                                 class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="flex-shrink-0 w-5 h-5 " fill="none"
+                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
-                                <span >Levels</span>
+                                <span>Levels</span>
                             </x-nav-link>
                         </li>
                         <li class="mb-[5px]">
                             <x-nav-link :href="route('admin.subjects.index')" :active="request()->routeIs('admin.subjects.*')"
                                 class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="flex-shrink-0 w-5 h-5 " fill="none"
+                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
                                 </svg>
-                                <span >Subjects</span>
+                                <span>Subjects</span>
                             </x-nav-link>
                         </li>
                         <li class="mb-[5px]">
                             <x-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')"
                                 class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="flex-shrink-0 w-5 h-5 " fill="none"
+                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                                 </svg>
-                                <span >Questions</span>
+                                <span>Questions</span>
                             </x-nav-link>
                         </li>
                     </ul>
@@ -85,8 +81,17 @@
             <li>
                 <x-nav-link href="{{ route('admin.parents.index') }}" :active="request()->routeIs('admin.parents.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
-                  👪
-                    <span >Add Parents </span>
+                    👪
+                    <span>Add Parents </span>
+                </x-nav-link>
+            </li>
+
+            <!-- Question Bank -->
+            <li>
+                <x-nav-link href="{{ route('admin.assignments.index') }}" :active="request()->routeIs('admin.assignments.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    🗂️
+                    <span>Question Assignments</span>
                 </x-nav-link>
             </li>
 
