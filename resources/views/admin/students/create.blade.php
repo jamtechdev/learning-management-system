@@ -81,15 +81,19 @@
                             <select name="student_level" id="student_level"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('student_level') ? 'border-red-500' : '' }}">
                                 <option value="">Select level</option>
+                                @if (isset($levels[old('student_type')]))
+                                    @foreach ($levels[old('student_type')] as $level)
+                                        <option value="{{ $level['id'] }}"
+                                            {{ old('student_level') == $level['id'] ? 'selected' : '' }}>
+                                            {{ $level['name'] }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                             @error('student_level')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-
-
-
-
                         <!-- Avatar Upload -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Avatar (optional)</label>
