@@ -84,8 +84,8 @@
                             <select name="student_level" id="student_level"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('student_level') ? 'border-red-500' : '' }}">
                                 <option value="">Select level</option>
-                                @if (isset($levels[$student->student_type]))
-                                    @foreach ($levels[$student->student_type] as $level)
+                                @if (isset($levels[old('student_type', $student->student_type)]))
+                                    @foreach ($levels[old('student_type', $student->student_type)] as $level)
                                         <option value="{{ $level['id'] }}"
                                             {{ old('student_level', $student->student_level) == $level['id'] ? 'selected' : '' }}>
                                             {{ $level['name'] }}
