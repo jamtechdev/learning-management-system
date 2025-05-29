@@ -4,7 +4,8 @@
             <!-- Logo (optional) -->
             <div class="flex justify-center">
 
-                <x-application-logo class="w-16 h-16 text-indigo-600" />
+                <img src="{{ asset('/images/logo/logo-1.png') }}" alt=""
+                    class="w-auto h-10 text-indigo-600 dark:text-indigo-400">
             </div>
 
             <!-- Heading -->
