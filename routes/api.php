@@ -17,10 +17,10 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
 
         Route::prefix('questions')->group(function () {
-            Route::get('levels', [\App\Http\Controllers\API\QuestionController::class, 'getAllLevels']);
-            Route::get('subjects', [\App\Http\Controllers\API\QuestionController::class, 'getAllSubjects']);
-            Route::post('getTypeBasedQuestions', [\App\Http\Controllers\API\QuestionController::class, 'getTypeBasedQuestions']);
-            Route::get('all', [\App\Http\Controllers\API\QuestionController::class, 'getAllQuestions']);
+            Route::get('levels', [QuestionController::class, 'getAllLevels']);
+            Route::get('subjects', [QuestionController::class, 'getAllSubjects']);
+            Route::post('getTypeBasedQuestions', [QuestionController::class, 'getTypeBasedQuestions']);
+            Route::get('all', [QuestionController::class, 'getAllQuestions']);
         });
 
 

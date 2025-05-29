@@ -30,7 +30,8 @@ class User extends Authenticatable
         'parent_id',
         'lock_code',
         'lock_code_enabled',
-        'student_type'
+        'student_type',
+        'student_level',
     ];
 
     /**

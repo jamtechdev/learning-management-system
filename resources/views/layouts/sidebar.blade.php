@@ -79,7 +79,7 @@
 
             <!-- Add Parents -->
             <li>
-                <x-nav-link href="{{ route('admin.parents.index') }}" :active="request()->routeIs('admin.parents.*')"
+                <x-nav-link href="{{ route('admin.parents.index') }}" :active="request()->routeIs('admin.parents.*') || request()->routeIs('admin.student.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     👪
                     <span>Add Parents </span>

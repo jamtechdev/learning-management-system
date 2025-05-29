@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\QuestionLevel;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -23,14 +24,16 @@ class StudentController extends Controller
     public function studentsByParent(User $parent)
     {
         $students = User::role('child')->where('parent_id', $parent->id)->get();
-
         return view('admin.students.index', compact('students', 'parent'));
     }
 
     public function create(Request $request, $id)
     {
         $parent = User::find($id);
-        return view('admin.students.create', compact('parent'));
+        $levels = QuestionLevel::select('id', 'name', 'education_type')
+            ->get()
+            ->groupBy('education_type');
+        return view('admin.students.create', compact('parent', 'levels'));
     }
 
 
@@ -39,28 +42,30 @@ class StudentController extends Controller
 
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|string|min:6|confirmed',
-            'phone'      => 'nullable|string|max:20',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:20',
             'student_type' => 'required|in:primary,secondary',
-            'parent_id'  => 'nullable|exists:users,id',
-            'lock_code'  => 'nullable|digits:6',
+            'student_level' => 'required|exists:question_levels,id',
+            'parent_id' => 'nullable|exists:users,id',
+            'lock_code' => 'nullable|digits:6',
             'lock_code_enabled' => 'nullable|string',
-            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
             $data = [
                 'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'phone'      => $request->phone,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
                 'student_type' => $request->student_type,
-                'parent_id'  => $request->parent_id,
-                'lock_code'  => $request->lock_code ?: null,
+                'parent_id' => $request->parent_id,
+                'lock_code' => $request->lock_code ?: null,
                 'lock_code_enabled' => $request->lock_code_enabled === 'on' ? true : false,
-                'password'   => Hash::make($request->password),
+                'password' => Hash::make($request->password),
+                'student_level' => $request->student_level
             ];
 
             if ($request->hasFile('avatar')) {
@@ -85,41 +90,40 @@ class StudentController extends Controller
     public function edit(User $student)
     {
         $parent = $student->parent;
+        $levels = QuestionLevel::select('id', 'name', 'education_type')
+            ->get()
+            ->groupBy('education_type');
 
-        return view('admin.students.edit', compact('student', 'parent'));
+        return view('admin.students.edit', compact('student', 'parent', 'levels'));
     }
 
     public function update(Request $request, User $student)
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email,' . $student->id,
-            'phone'      => 'nullable|string|max:20',
+            'last_name' => 'required|string|max:255',
+            'email' => "required|email|unique:users,email,{$student->id}",
+            'phone' => 'nullable|string|max:20',
             'lock_code_enabled' => 'nullable|string',
-            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'password'   => 'nullable|string|min:6|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'password' => 'nullable|string|min:6|confirmed',
+            'lock_code' => 'nullable|digits:6',
+            'parent_id' => 'nullable|exists:users,id',
+            'student_level' => 'required|exists:question_levels,id',
+            'student_type' => 'required|in:primary,secondary',
         ]);
 
         try {
             $student->first_name = $request->first_name;
-            $student->last_name  = $request->last_name;
-            $student->email      = $request->email;
-            $student->phone      = $request->phone;
+            $student->last_name = $request->last_name;
+            $student->email = $request->email;
+            $student->phone = $request->phone;
+            $student->student_type = $request->student_type;
+            $student->student_level = $request->student_level;
 
-            $lockCodeEnabled = $request->has('lock_code_enabled');
 
-            if ($lockCodeEnabled && !$student->lock_code_enabled) {
-                // Only generate new 6-digit code if enabling lock code from disabled state
-                $student->lock_code = random_int(100000, 999999);
-            }
-
-            // If disabling lock code, you may want to clear the lock_code (optional)
-            if (!$lockCodeEnabled) {
-                $student->lock_code = null;
-            }
-
-            $student->lock_code_enabled = $lockCodeEnabled;
+            $student->lock_code_enabled = $request->lock_code_enabled === 'on' ? true : false;
+            $student->lock_code = $student->lock_code_enabled ? $request->lock_code ?: null : null;
 
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -133,11 +137,11 @@ class StudentController extends Controller
             $student->save();
 
             if ($student->parent_id) {
-                return redirect()->route('admin.parents.students', $student->parent_id)
+                return redirect()->route('admin.student.index', $student->parent_id)
                     ->with('success', 'Student updated successfully!');
             }
 
-            return redirect()->route('admin.student.index', $student->parent_id)
+            return redirect()->route('admin.student.index', $request->parent_id)
                 ->with('success', 'Student updated successfully!');
         } catch (\Exception $e) {
             return back()->withInput()
