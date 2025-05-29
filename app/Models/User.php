@@ -71,4 +71,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'parent_id');
     }
+    public function level()
+    {
+        return $this->belongsTo(QuestionLevel::class, 'student_level');
+    }
 }

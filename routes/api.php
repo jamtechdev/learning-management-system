@@ -22,9 +22,5 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('getTypeBasedQuestions', [QuestionController::class, 'getTypeBasedQuestions']);
             Route::get('all', [QuestionController::class, 'getAllQuestions']);
         });
-
-
-
-
     });
 });
