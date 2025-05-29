@@ -24,11 +24,7 @@ class QuestionController extends Controller
     {
         $educationType = $request->input('education_type');
         $query = \App\Models\QuestionLevel::query();
-        if ($educationType) {
-            $levels = $query->where('education_type', $educationType)->get();
-        } else {
-            $levels = $query->get();
-        }
+        $levels = $educationType ? $query->where('education_type', $educationType)->get() : $query->get();
 
         return $this->successHandler(LevelResource::collection($levels), 200, "Levels fetched successfully!");
     }
@@ -38,11 +34,7 @@ class QuestionController extends Controller
 
         $query = \App\Models\QuestionSubject::query();
 
-        if ($levelId) {
-            $subjects = $query->where('level_id', $levelId)->get();
-        } else {
-            $subjects = $query->get();
-        }
+        $subjects = $levelId ? $query->where('level_id', $levelId)->get() : $query->get();
 
         return $this->successHandler(SubjectResource::collection($subjects), 200, "Subjects fetched successfully!");
     }
