@@ -8,111 +8,147 @@
                         for {{ $parent->first_name }} {{ $parent->last_name }}
                     @endif
                 </h2>
-                @if ($errors->any())
-                    <div class="p-4 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
-                        <ul class="list-disc list-inside">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
                 <form action="{{ route('admin.student.store', $parent->id) }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
-
-                    {{-- Pass parent_id as hidden --}}
                     @if (isset($parent))
                         <input type="hidden" name="parent_id" value="{{ $parent->id }}">
                     @endif
-
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- First Name -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">First Name</label>
-                            <input type="text" name="first_name" required
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <input type="text" name="first_name" placeholder="John" value="{{ old('first_name') }}"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('first_name') ? 'border-red-500' : '' }}">
+                            @error('first_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Last Name -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Last Name</label>
-                            <input type="text" name="last_name" required
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <input type="text" name="last_name" placeholder="Doe" value="{{ old('last_name') }}"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('last_name') ? 'border-red-500' : '' }}">
+                            @error('last_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Email -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" required
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <input type="email" name="email" placeholder="student@example.com"
+                                value="{{ old('email') }}"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('email') ? 'border-red-500' : '' }}">
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Phone -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Phone</label>
-                            <input type="text" name="phone"
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <input type="text" name="phone" placeholder="+1 234 567 8900"
+                                value="{{ old('phone') }}"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('phone') ? 'border-red-500' : '' }}">
+                            @error('phone')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Student Type -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Student Type</label>
-                            <select name="student_type" required
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <select name="student_type"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('student_type') ? 'border-red-500' : '' }}"
+                                id="student_type">
                                 <option value="">Select type</option>
-                                <option value="primary" {{ old('student_type') == 'primary' ? 'selected' : '' }}>Primary
-                                </option>
+                                <option value="primary" {{ old('student_type') == 'primary' ? 'selected' : '' }}>
+                                    Primary</option>
                                 <option value="secondary" {{ old('student_type') == 'secondary' ? 'selected' : '' }}>
                                     Secondary</option>
                             </select>
+                            @error('student_type')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
+
+                        <!-- Student level -->
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700">Student Level</label>
+                            <select name="student_level" id="student_level"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('student_level') ? 'border-red-500' : '' }}">
+                                <option value="">Select level</option>
+                                @if (isset($levels[old('student_type')]))
+                                    @foreach ($levels[old('student_type')] as $level)
+                                        <option value="{{ $level['id'] }}"
+                                            {{ old('student_level') == $level['id'] ? 'selected' : '' }}>
+                                            {{ $level['name'] }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            @error('student_level')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                         <!-- Avatar Upload -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Avatar (optional)</label>
                             <input type="file" name="avatar" accept="image/*"
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('avatar') ? 'border-red-500' : '' }}">
+                            @error('avatar')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Password -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Password</label>
-                            <input type="password" name="password" required
-                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <input type="password" name="password" placeholder="••••••••"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('password') ? 'border-red-500' : '' }}">
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Confirm Password -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Confirm Password</label>
-                            <input type="password" name="password_confirmation" required
+                            <input type="password" name="password_confirmation" placeholder="••••••••"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
                         </div>
-
-
 
                         <!-- Lock Code -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Lock Code</label>
                             <input type="text" name="lock_code" id="lock-code-field" readonly
+                                value="{{ old('lock_code') }}"
                                 class="w-full px-4 py-2 bg-gray-100 border rounded-md shadow-sm focus:ring focus:ring-indigo-200">
-                        </div>
-
-                        <!-- Lock Code Toggle -->
-                        <div class="flex items-center mt-6">
                             <input type="checkbox" id="lock-code-toggle" name="lock_code_enabled"
                                 class="w-5 h-5 text-indigo-600 form-checkbox"
                                 {{ old('lock_code_enabled', $student->lock_code_enabled ?? false) ? 'checked' : '' }}>
                             <label for="lock-code-toggle" class="ml-2 text-sm text-gray-700">Generate Lock Code</label>
+                            @error('lock_code')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
-                    <!-- Submit -->
-                    <div class="mt-6">
+                    <!-- Button Container -->
+                    <div class="mt-6 flex justify-end space-x-2 items-end">
+                        <!-- Submit Button -->
                         <button type="submit"
-                            class="px-6 py-2 text-white add-btn focus:outline-none">
+                            class="px-6 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md focus:outline-none">
                             Save Student
                         </button>
+                        <!-- Back Button -->
+                        <a href="{{ route('admin.student.index', $parent->id) }}"
+                            class="px-6 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md shadow-md focus:outline-none">
+                            Back
+                        </a>
                     </div>
                 </form>
             </div>
@@ -123,7 +159,6 @@
         <script>
             const checkbox = document.getElementById('lock-code-toggle');
             const lockField = document.getElementById('lock-code-field');
-
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
                     const code = Math.floor(100000 + Math.random() * 900000); // Generate 6-digit code
@@ -131,6 +166,18 @@
                 } else {
                     lockField.value = '';
                 }
+            });
+            const levels = @json($levels);
+            document.getElementById('student_type').addEventListener('change', function() {
+                const selectedType = this.value;
+                const studentLevelSelect = document.getElementById('student_level');
+                studentLevelSelect.innerHTML = '<option value="">Select level</option>';
+                levels[selectedType]?.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level.id;
+                    option.textContent = level.name;
+                    studentLevelSelect.appendChild(option);
+                });
             });
         </script>
     @endpush
