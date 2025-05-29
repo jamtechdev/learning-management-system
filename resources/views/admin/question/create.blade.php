@@ -1,8 +1,7 @@
 <x-app-layout>
     <div class="max-w-full p-10 mx-auto bg-white border border-gray-200 shadow-[0_8px_30px_rgba(55,55, 55, / 10%)] rounded-3xl"
         x-data="questionForm()" x-cloak style="font-family: 'Inter', sans-serif;">
-        <h1
-            class="mb-10 text-3xl font-bold text-left text-black-500 drop-shadow-[0_8px_30px_rgba(55,55, 55, / 10%]">
+        <h1 class="mb-10 text-3xl font-bold text-left text-black-500 drop-shadow-[0_8px_30px_rgba(55,55, 55, / 10%]">
             Create New Question
         </h1>
         <!-- Progress Bar -->
@@ -38,13 +37,14 @@
                         <button
                             class="px-6 py-3 text-lg font-medium transition duration-300 transform shadow-md w-44 rounded-xl hover:scale-105 hover:bg-blue-50 hover:shadow-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300"
                             :class="selectedLevel === level.name ?
-                                 'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
+                                'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
                                 'bg-blue-50 text-gray-700 border border-gray-200'"
                             @click="selectLevel(level.name)" x-text="level.name">
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 1">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 1">
                     ← Back
                 </button>
             </div>
@@ -65,7 +65,8 @@
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 2">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 2">
                     ← Back
                 </button>
             </div>
@@ -80,13 +81,14 @@
                         <button
                             class="px-5 py-3 text-lg font-medium capitalize transition duration-300 transform shadow-md w-44 rounded-xl hover:scale-105 hover:bg-blue-50 hover:shadow-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-50"
                             :class="questionType === type ?
-                               'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
+                                'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
                                 'bg-blue-50 text-gray-700 border border-gray-200'"
                             @click="selectQuestionType(type)" x-text="type.replace('_', ' ')">
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 3">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 3">
                     ← Back
                 </button>
             </div>
@@ -147,13 +149,30 @@
 
                             <p class="mb-3 text-lg font-semibold text-blue-700">Blank <span
                                     x-text="blank.blank_number"></span> Options:</p>
-
-                            <template x-for="(option, optIndex) in blank.options" :key="optIndex">
+                            <button type="button" class="mb-4 text-sm font-bold text-blue-600 hover:text-blue-800"
+                                @click="addBlankOption(index)">
+                                + Add Option
+                            </button>
+                            {{-- <template x-for="(option, optIndex) in blank.options" :key="optIndex">
                                 <input type="text"
                                     class="w-full p-3 mb-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
                                     :name="'question_data[blanks][' + index + '][options][' + optIndex + ']'"
                                     x-model="blank.options[optIndex]" required />
+                            </template> --}}
+                            <template x-for="(option, optIndex) in blank.options" :key="optIndex">
+                                <div class="relative mb-3">
+                                    <input type="text"
+                                        class="w-full p-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                        :name="'question_data[blanks][' + index + '][options][' + optIndex + ']'"
+                                        x-model="blank.options[optIndex]" required />
+
+                                    <button type="button"
+                                        class="absolute text-red-500 transform -translate-y-1/2 top-1/2 right-3 hover:text-red-700"
+                                        @click="removeBlankOption(index, optIndex)"
+                                        x-show="blank.options.length > 1">✕</button>
+                                </div>
                             </template>
+
 
                             <label class="block mt-4 mb-2 text-lg font-semibold text-blue-700">Correct Answer:</label>
                             <select
@@ -398,6 +417,8 @@
                     opt.is_correct = (i === index);
                 });
             },
+
+
             addBlank() {
                 const textarea = this.$refs.questionContent;
                 if (!textarea) return;
@@ -443,6 +464,20 @@
                     }
                 });
             },
+
+
+            addBlankOption(blankIndex) {
+                this.blanks[blankIndex].options.push('');
+            },
+
+            removeBlankOption(blankIndex, optionIndex) {
+                if (this.blanks[blankIndex].options.length > 1) {
+                    this.blanks[blankIndex].options.splice(optionIndex, 1);
+                }
+            },
+
+
+
 
             linkingOptions: [],
 
