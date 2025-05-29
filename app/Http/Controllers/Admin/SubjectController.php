@@ -82,4 +82,17 @@ class SubjectController extends Controller
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
     }
+    /**
+     * Remove the specified subject from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy($id)
+    {
+        $subject = QuestionSubject::findOrFail($id);
+        $subject->delete();
+
+        return redirect()->route('admin.subjects.index')->with('success', 'Subject deleted successfully.');
+    }
 }
