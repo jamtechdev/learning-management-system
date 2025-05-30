@@ -21,17 +21,15 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->enum('education_type', ['primary', 'secondary']);
-            $table->text('content');
+            $table->longText('content');
             $table->enum('type', [
                 'mcq',
                 'fill_blank',
                 'spelling',
-                'rearrange',
+                'rearranging',
                 'linking',
                 'true_false',
                 'image_mcq',
-                'math',
-                'grouped',
                 'comprehension'
             ]);
             $table->text('explanation')->nullable();

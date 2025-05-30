@@ -210,7 +210,6 @@
             </template>
 
             {{-- Linking --}}
-
             <template x-if="questionType === 'linking'">
                 <div class="space-y-4">
                     <x-input-label value="Matching Pairs" class="mb-4 text-lg font-semibold text-blue-700" />
@@ -303,6 +302,137 @@
                 </div>
             </template>
 
+            <!-- Rearranging question template -->
+            <template x-if="questionType === 'rearranging'">
+                <div class="space-y-4">
+                    <label class="block text-lg font-semibold text-blue-700">
+                        Question Instruction
+                    </label>
+                    <input type="text" name="question_data[question_text]" x-model="questionContent"
+                        class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                        placeholder="e.g., Rearrange to form a sentence." required>
+
+                    <label class="block mt-4 text-lg font-semibold text-blue-700">
+                        Correct Word/Phrase Order
+                    </label>
+
+                    <!-- Dynamic input fields for correct answer order -->
+                    <template x-for="(item, index) in rearrangingItems" :key="index">
+                        <div class="relative mb-3">
+                            <input type="text" :name="'question_data[rearranging][answer][' + index + ']'"
+                                x-model="rearrangingItems[index]"
+                                class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                                placeholder="Word or phrase" required>
+                            <button type="button"
+                                class="absolute text-red-500 -translate-y-1/2 right-3 top-1/2 hover:text-red-700"
+                                @click="removeRearrangingItem(index)" x-show="rearrangingItems.length > 1"
+                                aria-label="Remove item">
+                                ✕
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Add item button -->
+                    <button type="button" class="px-4 py-2 bg-blue-200 rounded-lg hover:bg-blue-300"
+                        @click="addRearrangingItem()">
+                        + Add Item
+                    </button>
+
+                    <!-- Preview correct answer (optional) -->
+                    <div class="mt-4">
+                        <label class="text-sm text-gray-600">Preview:</label>
+                        <div class="p-3 mt-1 bg-gray-100 rounded-lg">
+                            <span x-text="rearrangingItems.join(' ')"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            {{-- comprehension --}}
+
+            <template x-if="questionType === 'comprehension'">
+                <div>
+                    <template x-for="(cq, qIndex) in comprehensionQuestions" :key="qIndex">
+                        <div class="p-4 mb-6 border rounded-lg bg-gray-50">
+                            <label class="block text-lg font-semibold">Question <span
+                                    x-text="qIndex + 1"></span>:</label>
+                            <textarea x-ref="compTextarea" :name="'question_data[comprehension][' + qIndex + '][question_name]'"
+                                x-model="cq.question"
+                                class="w-full p-3 mb-4 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                placeholder="Enter question..."></textarea>
+
+
+                            <!-- Blanks Section -->
+                            <template x-for="(blank, bIndex) in cq.blanks" :key="bIndex">
+                                <div class="p-4 mb-4 border-2 border-blue-200 shadow-inner rounded-xl bg-blue-50">
+                                    <input type="hidden"
+                                        :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex +
+                                            '][blank_number]'"
+                                        :value="blank.blank_number" />
+
+                                    <p class="mb-2 font-semibold text-blue-700">Blank <span
+                                            x-text="blank.blank_number"></span> Options:</p>
+                                    <button type="button"
+                                        class="mb-2 text-sm font-bold text-blue-600 hover:text-blue-800"
+                                        @click="addComprehensionBlankOption(qIndex, bIndex)">
+                                        + Add Option
+                                    </button>
+
+                                    <template x-for="(opt, optIndex) in blank.options" :key="optIndex">
+                                        <div class="relative mb-2">
+                                            <input type="text"
+                                                class="w-full p-2 text-lg border rounded focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                                :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex +
+                                                    '][options][' + optIndex + ']'"
+                                                x-model="blank.options[optIndex]" required />
+
+                                            <button type="button"
+                                                class="absolute text-red-500 transform -translate-y-1/2 right-2 top-1/2 hover:text-red-700"
+                                                @click="removeComprehensionBlankOption(qIndex, bIndex, optIndex)"
+                                                x-show="blank.options.length > 1">✕</button>
+                                        </div>
+                                    </template>
+
+                                    <label class="block mt-3 mb-1 font-semibold text-blue-700">Correct Answer:</label>
+                                    <select
+                                        class="w-full p-2 text-lg border rounded focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                        :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex + '][answer]'"
+                                        x-model="blank.answer" required>
+                                        <option value="" disabled>Select correct answer</option>
+                                        <template x-for="opt in blank.options">
+                                            <option :value="opt" x-text="opt"></option>
+                                        </template>
+                                    </select>
+
+                                    <button type="button" class="mt-3 font-semibold text-red-600 hover:text-red-800"
+                                        @click="removeComprehensionBlank(qIndex, bIndex)">
+                                        Remove Blank
+                                    </button>
+                                </div>
+                            </template>
+
+                            <!-- Allow only one blank before showing add question -->
+                            <template x-if="cq.blanks.length === 0">
+                                <button type="button" @click="addComprehensionBlank(qIndex)"
+                                    class="px-4 py-2 font-semibold text-blue-800 bg-blue-200 rounded-xl hover:bg-blue-300">
+                                    + Add Blank
+                                </button>
+                            </template>
+
+                        </div>
+                    </template>
+
+                    <!-- Show "Add Question" button only if the last question has at least 1 blank -->
+                    <template
+                        x-if="comprehensionQuestions.length === 0 || comprehensionQuestions[comprehensionQuestions.length - 1].blanks.length > 0">
+                        <button type="button"
+                            class="px-4 py-2 font-semibold text-green-700 bg-green-200 rounded-xl hover:bg-green-300"
+                            @click="addComprehensionQuestion">
+                            + Add Question
+                        </button>
+                    </template>
+                </div>
+            </template>
             <div class="flex justify-between mt-12">
                 <button type="button" @click="step = 4"
                     class="px-8 py-3 text-lg font-semibold text-blue-600 transition border-2 border-blue-400 rounded-xl hover:bg-blue-100">
@@ -316,7 +446,25 @@
         </form>
     </div>
 </x-app-layout>
+
 <script>
+    function quillEditor() {
+        return {
+            quill: null,
+            questionContent: '',
+            init(el) {
+                this.quill = new Quill(el, {
+                    theme: 'snow',
+                    placeholder: 'Type your question...',
+                });
+
+                this.quill.on('text-change', () => {
+                    this.questionContent = this.quill.root.innerHTML;
+                });
+            }
+        };
+    }
+
     function questionForm() {
         return {
             step: 1,
@@ -328,7 +476,8 @@
             subjects: [],
             selectedSubject: null,
 
-            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking'],
+            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'],
+
             questionType: '',
             questionContent: '',
 
@@ -391,8 +540,10 @@
                     this.addLinkingOption(); // add default 2;
                 } else if (type === 'spelling') {
                     this.spellingAnswer = '';
-                } else if (type === 'math') {
-                    this.mathAnswer = '';
+                } else if (type === 'rearranging') {
+                    this.questionContent = '';
+                } else if (type === 'comprehension') {
+                    this.questionContent = '';
                 }
                 this.step = 5;
             },
@@ -476,9 +627,6 @@
                 }
             },
 
-
-
-
             linkingOptions: [],
 
             addLinkingOption() {
@@ -510,6 +658,111 @@
                 };
                 reader.readAsDataURL(file);
             },
+
+            // Rearranging
+            rearrangingItems: [''],
+
+            // Comprehension
+            comprehensionPassage: '',
+            comprehensionQuestions: [{
+                question: '',
+                blanks: [], // ✅ Add this line
+            }],
+
+
+
+            // Rearranging logic
+            addRearrangingItem() {
+                this.rearrangingItems.push('');
+            },
+            removeRearrangingItem(i) {
+                this.rearrangingItems.splice(i, 1);
+            },
+
+
+            addComprehensionQuestion() {
+                this.comprehensionQuestions.push({
+                    question: '',
+                    blanks: [],
+                });
+            },
+            addComprehensionBlank(qIndex) {
+                const comp = this.comprehensionQuestions[qIndex];
+
+                if (!comp || !Array.isArray(comp.blanks)) {
+                    console.warn('Invalid question or blanks missing at index:', qIndex);
+                    return;
+                }
+
+                const blankNumber = comp.blanks.length + 1;
+                const insertText = `${blankNumber}. _____`;
+
+                const textareaRef = this.$refs.compTextarea;
+                const ta = Array.isArray(textareaRef) ? textareaRef[qIndex] : textareaRef;
+
+                if (!ta) {
+                    console.warn('Textarea ref not found for index:', qIndex);
+                    return;
+                }
+
+                const start = ta.selectionStart;
+                const end = ta.selectionEnd;
+
+                comp.question =
+                    comp.question.substring(0, start) +
+                    insertText +
+                    comp.question.substring(end);
+
+                this.$nextTick(() => {
+                    ta.focus();
+                    ta.selectionStart = ta.selectionEnd = start + insertText.length;
+                });
+
+                comp.blanks.push({
+                    blank_number: blankNumber,
+                    options: ['', '', '', ''],
+                    answer: ''
+                });
+            },
+
+
+            removeComprehensionBlank(qIndex, bIndex) {
+                const comp = this.comprehensionQuestions[qIndex];
+                const removedBlank = comp.blanks[bIndex];
+
+                // Remove the placeholder text (e.g., "2. _____") from the question string
+                const placeholder = `${removedBlank.blank_number}. _____`;
+                comp.question = comp.question.replace(placeholder, '');
+
+                // Remove the blank from the array
+                comp.blanks.splice(bIndex, 1);
+
+                // Re-number remaining blanks
+                comp.blanks.forEach((b, i) => {
+                    const oldPlaceholder = `${b.blank_number}. _____`;
+                    const newPlaceholder = `${i + 1}. _____`;
+
+                    // Update question text if placeholder exists
+                    if (comp.question.includes(oldPlaceholder)) {
+                        comp.question = comp.question.replace(oldPlaceholder, newPlaceholder);
+                    }
+
+                    // Update blank number
+                    b.blank_number = i + 1;
+                });
+            },
+
+            addComprehensionBlankOption(qIndex, bIndex) {
+                this.comprehensionQuestions[qIndex].blanks[bIndex].options.push('');
+            },
+
+            removeComprehensionBlankOption(qIndex, bIndex, optIndex) {
+                const options = this.comprehensionQuestions[qIndex].blanks[bIndex].options;
+                if (options.length > 1) {
+                    options.splice(optIndex, 1);
+                }
+            },
+
             submitForm() {
                 // Optional: console.log to debug
                 console.log(JSON.stringify(this.blanks, null, 2));

@@ -14,7 +14,7 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        $questions = Question::with(['options', 'level', 'subject'])->paginate(5);
+        $questions = Question::with(['options', 'level', 'subject'])->paginate(10);
 
         return view('admin.question.index', compact('questions'));
     }
@@ -41,6 +41,7 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
+
         $data = $request->input('question_data');
 
         switch ($data['type']) {
@@ -58,6 +59,13 @@ class QuestionController extends Controller
 
             case 'linking':
                 $this->saveLinkingQuestion($data, $request);
+                break;
+
+            case 'rearranging':
+                $this->saveRearrangingQuestion($data);
+                break;
+            case 'comprehension':
+                $this->saveComprehensionQuestion($data);
                 break;
             default:
                 return response()->json(['error' => 'Invalid question type'], 400);
@@ -216,6 +224,82 @@ class QuestionController extends Controller
 
         return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
     }
+
+    private function saveRearrangingQuestion($data)
+    {
+        // Split question_text into words (preserve punctuation)
+        $questionText = $data['question_text'];
+        $orderedAnswer = preg_split('/\s+/', trim($questionText));
+
+        // Shuffle to create options
+        $shuffled = $orderedAnswer;
+        shuffle($shuffled);
+
+        // Convert to options format
+        $options = collect($shuffled)->map(fn($word) => [
+            'value' => $word,
+            'is_correct' => false,
+        ])->values()->toArray();
+
+        // Prepare full metadata
+        $transformed = [
+            'type' => 'rearrange',
+            'content' => $data['content'] ?? '',
+            'options' => $options,
+            'answer' => [
+                'answer' => $orderedAnswer,
+                'format' => 'ordered'
+            ],
+        ];
+        // dd($data);
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
+        $question->save();
+
+        return redirect()->route('admin.questions.index')->with('success', 'Rearranging question saved successfully!');
+    }
+
+    // Save Linking Question
+        private function saveComprehensionQuestion($data)
+        {
+
+
+            $question = new Question();
+            $question->type = $data['type'];
+            $question->education_type = $data['education_type'];
+            $question->level_id = $data['level_id'];
+            $question->subject_id = $data['subject_id'];
+            $question->content = $data['content'];
+            $question->explanation = $data['explanation'] ?? null;
+            $question->metadata = $data;
+            $question->save();
+
+            return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Update existing question
