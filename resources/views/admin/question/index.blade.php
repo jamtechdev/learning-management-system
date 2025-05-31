@@ -59,7 +59,7 @@
                                     </td>
                                     <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
                                         <div class="overflow-y-auto max-h-48">
-                                            {{ $question->content }}
+                                             {!! $question->content !!}
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">

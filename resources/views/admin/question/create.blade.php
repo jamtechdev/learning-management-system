@@ -106,12 +106,21 @@
             <input type="hidden" name="question_data[type]" :value="questionType">
 
             <!-- Question Content -->
-            <div>
+            {{-- <div>
                 <label class="block mb-3 text-lg font-semibold text-blue-700">Question Content</label>
                 <textarea x-model="questionContent" name="question_data[content]" rows="4"
                     class="w-full p-4 border-2 border-blue-300 shadow-sm rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
                     x-ref="questionContent" required></textarea>
+            </div> --}}
+            <div>
+                <div x-ref="questionContentEditor"
+                    class="border-2 border-blue-300 shadow-sm quill-editor focus:ring-4 focus:ring-blue-200"
+                    style="min-height: 150px;">
+                </div>
+                <!-- Moved input outside the Quill container -->
+                <input type="hidden" name="question_data[content]" :value="questionContent" x-model="questionContent">
             </div>
+
 
             <!-- Type Specific Sections -->
             <template x-if="questionType === 'mcq'">
@@ -433,6 +442,13 @@
                     </template>
                 </div>
             </template>
+
+            {{-- Grouped --}}
+            <template x-if="questionType === 'grouped'">
+
+            </template>
+
+
             <div class="flex justify-between mt-12">
                 <button type="button" @click="step = 4"
                     class="px-8 py-3 text-lg font-semibold text-blue-600 transition border-2 border-blue-400 rounded-xl hover:bg-blue-100">
@@ -448,25 +464,38 @@
 </x-app-layout>
 
 <script>
-    function quillEditor() {
+    function questionForm() {
         return {
+
+            // Existing properties
             quill: null,
             questionContent: '',
-            init(el) {
-                this.quill = new Quill(el, {
+
+            //...
+
+            init() {
+                const editor = this.$refs.questionContentEditor;
+                this.quill = new Quill(editor, {
                     theme: 'snow',
                     placeholder: 'Type your question...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{
+                                'list': 'ordered'
+                            }, {
+                                'list': 'bullet'
+                            }],
+                            ['clean']
+                        ]
+                    }
                 });
 
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
                 });
-            }
-        };
-    }
+            },
 
-    function questionForm() {
-        return {
             step: 1,
             selectedLevel: '',
             educationType: '',
@@ -475,11 +504,8 @@
             levels: [],
             subjects: [],
             selectedSubject: null,
-
             questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'],
-
             questionType: '',
-            questionContent: '',
 
             blanks: [],
 
@@ -570,51 +596,110 @@
             },
 
 
-            addBlank() {
-                const textarea = this.$refs.questionContent;
-                if (!textarea) return;
+            // addBlank() {
+            //     const textarea = this.$refs.questionContent;
+            //     if (!textarea) return;
 
+            //     const blankNumber = this.blanks.length + 1;
+            //     const insertText = `${blankNumber}. _____`;
+
+            //     const start = textarea.selectionStart;
+            //     const end = textarea.selectionEnd;
+
+            //     this.questionContent =
+            //         this.questionContent.substring(0, start) +
+            //         insertText +
+            //         this.questionContent.substring(end);
+
+            //     this.$nextTick(() => {
+            //         textarea.focus();
+            //         textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
+            //     });
+
+            //     this.blanks.push({
+            //         blank_number: blankNumber,
+            //         options: ['', '', '', ''],
+            //         answer: ''
+            //     });
+            // },
+
+            // removeBlank(index) {
+            //     const removed = this.blanks[index];
+            //     const regex = new RegExp(`\\b${removed.blank_number}\\. _____\\b`);
+            //     this.questionContent = this.questionContent.replace(regex, '').replace(/\s+/, ' ');
+
+            //     this.blanks.splice(index, 1);
+
+            //     // Re-number blanks and update passage
+            //     this.blanks.forEach((b, i) => {
+            //         const oldNumber = b.blank_number;
+            //         const newNumber = i + 1;
+            //         if (oldNumber !== newNumber) {
+            //             const re = new RegExp(`\\b${oldNumber}\\. _____\\b`);
+            //             this.questionContent = this.questionContent.replace(re, `${newNumber}. _____`);
+            //             b.blank_number = newNumber;
+            //         }
+            //     });
+            // },
+
+            addBlank() {
                 const blankNumber = this.blanks.length + 1;
                 const insertText = `${blankNumber}. _____`;
 
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-
-                this.questionContent =
-                    this.questionContent.substring(0, start) +
-                    insertText +
-                    this.questionContent.substring(end);
-
-                this.$nextTick(() => {
-                    textarea.focus();
-                    textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
-                });
+                const range = this.quill.getSelection(true);
+                if (range) {
+                    this.quill.insertText(range.index, insertText, 'user');
+                    this.quill.setSelection(range.index + insertText.length, 0);
+                }
 
                 this.blanks.push({
                     blank_number: blankNumber,
                     options: ['', '', '', ''],
                     answer: ''
                 });
+
+                this.questionContent = this.quill.root.innerHTML;
             },
 
             removeBlank(index) {
                 const removed = this.blanks[index];
-                const regex = new RegExp(`\\b${removed.blank_number}\\. _____\\b`);
-                this.questionContent = this.questionContent.replace(regex, '').replace(/\s+/, ' ');
+                const placeholder = `${removed.blank_number}. _____`;
+
+                const content = this.quill.getText();
+                const indexToRemove = content.indexOf(placeholder);
+
+                if (indexToRemove !== -1) {
+                    this.quill.deleteText(indexToRemove, placeholder.length, 'user');
+                }
 
                 this.blanks.splice(index, 1);
 
-                // Re-number blanks and update passage
+                // Re-number blanks and update content
                 this.blanks.forEach((b, i) => {
                     const oldNumber = b.blank_number;
                     const newNumber = i + 1;
                     if (oldNumber !== newNumber) {
-                        const re = new RegExp(`\\b${oldNumber}\\. _____\\b`);
-                        this.questionContent = this.questionContent.replace(re, `${newNumber}. _____`);
+                        const oldText = `${oldNumber}. _____`;
+                        const newText = `${newNumber}. _____`;
+
+                        const delta = this.quill.getContents();
+                        const ops = delta.ops.map(op => {
+                            if (typeof op.insert === 'string') {
+                                op.insert = op.insert.replace(oldText, newText);
+                            }
+                            return op;
+                        });
+                        this.quill.setContents({
+                            ops
+                        });
                         b.blank_number = newNumber;
                     }
                 });
+
+                this.questionContent = this.quill.root.innerHTML;
             },
+
+
 
 
             addBlankOption(blankIndex) {

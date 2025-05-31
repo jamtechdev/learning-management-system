@@ -25,11 +25,10 @@ return new class extends Migration
             $table->enum('type', [
                 'mcq',
                 'fill_blank',
-                'spelling',
                 'rearranging',
                 'linking',
                 'true_false',
-                'image_mcq',
+                'grouped',
                 'comprehension'
             ]);
             $table->text('explanation')->nullable();
