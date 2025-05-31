@@ -319,7 +319,7 @@
                     <label class="block text-lg font-semibold text-blue-700">
                         Question Instruction
                     </label>
-                    <input type="text" name="question_data[question_text]" x-model="questionContent"
+                    <input type="text" name="question_data[question_text]"
                         class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
                         placeholder="e.g., Rearrange to form a sentence." required>
 
