@@ -43,7 +43,7 @@ class SubjectController extends Controller
                 'max:100',
                 Rule::unique('question_subjects', 'name')
                     ->where(function ($query) use ($request, $inputName) {
-                        return $query->where('education_type', $request->education_type)
+                        return $query->where(['education_type'=> $request->education_type,'level_id'=>$request->level_id])
                             ->whereRaw('LOWER(name) = ?', [$inputName]);
                     }),
             ],
