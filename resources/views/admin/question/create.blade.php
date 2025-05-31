@@ -143,7 +143,9 @@
                     </template>
                     <button type="button"
                         class="px-5 py-2 font-semibold text-blue-800 transition bg-blue-200 rounded-xl hover:bg-blue-300"
-                        @click="addOption" x-show="options.length < 6">+ Add Option</button>
+                        @click="addOption">+ Add Option</button>
+
+                        {{-- x-show="options.length < 6" --}}
                 </div>
             </template>
 
@@ -575,12 +577,12 @@
             },
 
             addOption() {
-                if (this.options.length < 10) {
+                // if (this.options.length < 10) {
                     this.options.push({
                         value: '',
                         is_correct: false
                     });
-                }
+                // }
             },
 
             removeOption(index) {
