@@ -575,7 +575,7 @@
             },
 
             addOption() {
-                if (this.options.length < 4) {
+                if (this.options.length < 10) {
                     this.options.push({
                         value: '',
                         is_correct: false
