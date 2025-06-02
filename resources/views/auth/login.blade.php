@@ -4,7 +4,8 @@
             <!-- Logo (optional) -->
             <div class="flex justify-center">
 
-                <x-application-logo class="w-16 h-16 text-indigo-600" />
+                <img src="{{ asset('/images/logo/logo-1.png') }}" alt=""
+                    class="w-auto h-10 text-indigo-600 dark:text-indigo-400">
             </div>
 
             <!-- Heading -->
@@ -31,8 +32,8 @@
                 <!-- Password -->
                 <div>
                     <x-input-label for="password" :value="__('Password')" />
-                    <x-text-input id="password" type="password" name="password" required
-                        class="block w-full mt-1" placeholder="Enter your password" />
+                    <x-text-input id="password" type="password" name="password" required class="block w-full mt-1"
+                        placeholder="Enter your password" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 
@@ -60,10 +61,10 @@
             </form>
 
             <!-- Register CTA -->
-            <div class="text-sm text-center text-gray-600">
+            {{-- <div class="text-sm text-center text-gray-600">
                 Don't have an account?
                 <a href="{{ route('register') }}" class="text-indigo-600 hover:underline">Sign up</a>
-            </div>
+            </div> --}}
         </div>
     </div>
 </x-guest-layout>

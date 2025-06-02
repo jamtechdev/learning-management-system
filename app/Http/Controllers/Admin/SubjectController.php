@@ -43,7 +43,7 @@ class SubjectController extends Controller
                 'max:100',
                 Rule::unique('question_subjects', 'name')
                     ->where(function ($query) use ($request, $inputName) {
-                        return $query->where('education_type', $request->education_type)
+                        return $query->where(['education_type'=> $request->education_type,'level_id'=>$request->level_id])
                             ->whereRaw('LOWER(name) = ?', [$inputName]);
                     }),
             ],
@@ -81,5 +81,18 @@ class SubjectController extends Controller
         $subject->update($request->all());
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
+    }
+    /**
+     * Remove the specified subject from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy($id)
+    {
+        $subject = QuestionSubject::findOrFail($id);
+        $subject->delete();
+
+        return redirect()->route('admin.subjects.index')->with('success', 'Subject deleted successfully.');
     }
 }

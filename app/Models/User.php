@@ -30,7 +30,8 @@ class User extends Authenticatable
         'parent_id',
         'lock_code',
         'lock_code_enabled',
-        'student_type'
+        'student_type',
+        'student_level',
     ];
 
     /**
@@ -69,5 +70,9 @@ class User extends Authenticatable
     public function children()
     {
         return $this->hasMany(User::class, 'parent_id');
+    }
+    public function level()
+    {
+        return $this->belongsTo(QuestionLevel::class, 'student_level');
     }
 }

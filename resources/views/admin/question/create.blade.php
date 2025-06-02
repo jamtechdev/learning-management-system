@@ -1,8 +1,7 @@
 <x-app-layout>
     <div class="max-w-full p-10 mx-auto bg-white border border-gray-200 shadow-[0_8px_30px_rgba(55,55, 55, / 10%)] rounded-3xl"
         x-data="questionForm()" x-cloak style="font-family: 'Inter', sans-serif;">
-        <h1
-            class="mb-10 text-3xl font-bold text-left text-black-500 drop-shadow-[0_8px_30px_rgba(55,55, 55, / 10%]">
+        <h1 class="mb-10 text-3xl font-bold text-left text-black-500 drop-shadow-[0_8px_30px_rgba(55,55, 55, / 10%]">
             Create New Question
         </h1>
         <!-- Progress Bar -->
@@ -38,13 +37,14 @@
                         <button
                             class="px-6 py-3 text-lg font-medium transition duration-300 transform shadow-md w-44 rounded-xl hover:scale-105 hover:bg-blue-50 hover:shadow-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300"
                             :class="selectedLevel === level.name ?
-                                 'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
+                                'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
                                 'bg-blue-50 text-gray-700 border border-gray-200'"
                             @click="selectLevel(level.name)" x-text="level.name">
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 1">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 1">
                     ← Back
                 </button>
             </div>
@@ -65,7 +65,8 @@
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 2">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 2">
                     ← Back
                 </button>
             </div>
@@ -80,13 +81,14 @@
                         <button
                             class="px-5 py-3 text-lg font-medium capitalize transition duration-300 transform shadow-md w-44 rounded-xl hover:scale-105 hover:bg-blue-50 hover:shadow-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-50"
                             :class="questionType === type ?
-                               'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
+                                'bg-gray-200 text-gray-400 border-1 border-gray-200 shadow-gray-500' :
                                 'bg-blue-50 text-gray-700 border border-gray-200'"
                             @click="selectQuestionType(type)" x-text="type.replace('_', ' ')">
                         </button>
                     </template>
                 </div>
-                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white" @click="step = 3">
+                <button type="button" class="p-3 mt-8 text-white bg-blue-600 rounded-md hover:text-white"
+                    @click="step = 3">
                     ← Back
                 </button>
             </div>
@@ -104,12 +106,21 @@
             <input type="hidden" name="question_data[type]" :value="questionType">
 
             <!-- Question Content -->
-            <div>
+            {{-- <div>
                 <label class="block mb-3 text-lg font-semibold text-blue-700">Question Content</label>
                 <textarea x-model="questionContent" name="question_data[content]" rows="4"
                     class="w-full p-4 border-2 border-blue-300 shadow-sm rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
                     x-ref="questionContent" required></textarea>
+            </div> --}}
+            <div>
+                <div x-ref="questionContentEditor"
+                    class="border-2 border-blue-300 shadow-sm quill-editor focus:ring-4 focus:ring-blue-200"
+                    style="min-height: 150px;">
+                </div>
+                <!-- Moved input outside the Quill container -->
+                <input type="hidden" name="question_data[content]" :value="questionContent" x-model="questionContent">
             </div>
+
 
             <!-- Type Specific Sections -->
             <template x-if="questionType === 'mcq'">
@@ -132,7 +143,9 @@
                     </template>
                     <button type="button"
                         class="px-5 py-2 font-semibold text-blue-800 transition bg-blue-200 rounded-xl hover:bg-blue-300"
-                        @click="addOption" x-show="options.length < 6">+ Add Option</button>
+                        @click="addOption">+ Add Option</button>
+
+                        {{-- x-show="options.length < 6" --}}
                 </div>
             </template>
 
@@ -147,13 +160,30 @@
 
                             <p class="mb-3 text-lg font-semibold text-blue-700">Blank <span
                                     x-text="blank.blank_number"></span> Options:</p>
-
-                            <template x-for="(option, optIndex) in blank.options" :key="optIndex">
+                            <button type="button" class="mb-4 text-sm font-bold text-blue-600 hover:text-blue-800"
+                                @click="addBlankOption(index)">
+                                + Add Option
+                            </button>
+                            {{-- <template x-for="(option, optIndex) in blank.options" :key="optIndex">
                                 <input type="text"
                                     class="w-full p-3 mb-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
                                     :name="'question_data[blanks][' + index + '][options][' + optIndex + ']'"
                                     x-model="blank.options[optIndex]" required />
+                            </template> --}}
+                            <template x-for="(option, optIndex) in blank.options" :key="optIndex">
+                                <div class="relative mb-3">
+                                    <input type="text"
+                                        class="w-full p-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                        :name="'question_data[blanks][' + index + '][options][' + optIndex + ']'"
+                                        x-model="blank.options[optIndex]" required />
+
+                                    <button type="button"
+                                        class="absolute text-red-500 transform -translate-y-1/2 top-1/2 right-3 hover:text-red-700"
+                                        @click="removeBlankOption(index, optIndex)"
+                                        x-show="blank.options.length > 1">✕</button>
+                                </div>
                             </template>
+
 
                             <label class="block mt-4 mb-2 text-lg font-semibold text-blue-700">Correct Answer:</label>
                             <select
@@ -191,7 +221,6 @@
             </template>
 
             {{-- Linking --}}
-
             <template x-if="questionType === 'linking'">
                 <div class="space-y-4">
                     <x-input-label value="Matching Pairs" class="mb-4 text-lg font-semibold text-blue-700" />
@@ -284,6 +313,144 @@
                 </div>
             </template>
 
+            <!-- Rearranging question template -->
+            <template x-if="questionType === 'rearranging'">
+                <div class="space-y-4">
+                    <label class="block text-lg font-semibold text-blue-700">
+                        Question Instruction
+                    </label>
+                    <input type="text" name="question_data[question_text]"
+                        class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                        placeholder="e.g., Rearrange to form a sentence." required>
+
+                    <label class="block mt-4 text-lg font-semibold text-blue-700">
+                        Correct Word/Phrase Order
+                    </label>
+
+                    <!-- Dynamic input fields for correct answer order -->
+                    <template x-for="(item, index) in rearrangingItems" :key="index">
+                        <div class="relative mb-3">
+                            <input type="text" :name="'question_data[rearranging][answer][' + index + ']'"
+                                x-model="rearrangingItems[index]"
+                                class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                                placeholder="Word or phrase" required>
+                            <button type="button"
+                                class="absolute text-red-500 -translate-y-1/2 right-3 top-1/2 hover:text-red-700"
+                                @click="removeRearrangingItem(index)" x-show="rearrangingItems.length > 1"
+                                aria-label="Remove item">
+                                ✕
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Add item button -->
+                    <button type="button" class="px-4 py-2 bg-blue-200 rounded-lg hover:bg-blue-300"
+                        @click="addRearrangingItem()">
+                        + Add Item
+                    </button>
+
+                    <!-- Preview correct answer (optional) -->
+                    <div class="mt-4">
+                        <label class="text-sm text-gray-600">Preview:</label>
+                        <div class="p-3 mt-1 bg-gray-100 rounded-lg">
+                            <span x-text="rearrangingItems.join(' ')"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            {{-- comprehension --}}
+
+            <template x-if="questionType === 'comprehension'">
+                <div>
+                    <template x-for="(cq, qIndex) in comprehensionQuestions" :key="qIndex">
+                        <div class="p-4 mb-6 border rounded-lg bg-gray-50">
+                            <label class="block text-lg font-semibold">Question <span
+                                    x-text="qIndex + 1"></span>:</label>
+                            <textarea x-ref="compTextarea" :name="'question_data[comprehension][' + qIndex + '][question_name]'"
+                                x-model="cq.question"
+                                class="w-full p-3 mb-4 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                placeholder="Enter question..."></textarea>
+
+
+                            <!-- Blanks Section -->
+                            <template x-for="(blank, bIndex) in cq.blanks" :key="bIndex">
+                                <div class="p-4 mb-4 border-2 border-blue-200 shadow-inner rounded-xl bg-blue-50">
+                                    <input type="hidden"
+                                        :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex +
+                                            '][blank_number]'"
+                                        :value="blank.blank_number" />
+
+                                    <p class="mb-2 font-semibold text-blue-700">Blank <span
+                                            x-text="blank.blank_number"></span> Options:</p>
+                                    <button type="button"
+                                        class="mb-2 text-sm font-bold text-blue-600 hover:text-blue-800"
+                                        @click="addComprehensionBlankOption(qIndex, bIndex)">
+                                        + Add Option
+                                    </button>
+
+                                    <template x-for="(opt, optIndex) in blank.options" :key="optIndex">
+                                        <div class="relative mb-2">
+                                            <input type="text"
+                                                class="w-full p-2 text-lg border rounded focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                                :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex +
+                                                    '][options][' + optIndex + ']'"
+                                                x-model="blank.options[optIndex]" required />
+
+                                            <button type="button"
+                                                class="absolute text-red-500 transform -translate-y-1/2 right-2 top-1/2 hover:text-red-700"
+                                                @click="removeComprehensionBlankOption(qIndex, bIndex, optIndex)"
+                                                x-show="blank.options.length > 1">✕</button>
+                                        </div>
+                                    </template>
+
+                                    <label class="block mt-3 mb-1 font-semibold text-blue-700">Correct Answer:</label>
+                                    <select
+                                        class="w-full p-2 text-lg border rounded focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                        :name="'question_data[comprehension][' + qIndex + '][blanks][' + bIndex + '][answer]'"
+                                        x-model="blank.answer" required>
+                                        <option value="" disabled>Select correct answer</option>
+                                        <template x-for="opt in blank.options">
+                                            <option :value="opt" x-text="opt"></option>
+                                        </template>
+                                    </select>
+
+                                    <button type="button" class="mt-3 font-semibold text-red-600 hover:text-red-800"
+                                        @click="removeComprehensionBlank(qIndex, bIndex)">
+                                        Remove Blank
+                                    </button>
+                                </div>
+                            </template>
+
+                            <!-- Allow only one blank before showing add question -->
+                            <template x-if="cq.blanks.length === 0">
+                                <button type="button" @click="addComprehensionBlank(qIndex)"
+                                    class="px-4 py-2 font-semibold text-blue-800 bg-blue-200 rounded-xl hover:bg-blue-300">
+                                    + Add Blank
+                                </button>
+                            </template>
+
+                        </div>
+                    </template>
+
+                    <!-- Show "Add Question" button only if the last question has at least 1 blank -->
+                    <template
+                        x-if="comprehensionQuestions.length === 0 || comprehensionQuestions[comprehensionQuestions.length - 1].blanks.length > 0">
+                        <button type="button"
+                            class="px-4 py-2 font-semibold text-green-700 bg-green-200 rounded-xl hover:bg-green-300"
+                            @click="addComprehensionQuestion">
+                            + Add Question
+                        </button>
+                    </template>
+                </div>
+            </template>
+
+            {{-- Grouped --}}
+            <template x-if="questionType === 'grouped'">
+
+            </template>
+
+
             <div class="flex justify-between mt-12">
                 <button type="button" @click="step = 4"
                     class="px-8 py-3 text-lg font-semibold text-blue-600 transition border-2 border-blue-400 rounded-xl hover:bg-blue-100">
@@ -297,9 +464,40 @@
         </form>
     </div>
 </x-app-layout>
+
 <script>
     function questionForm() {
         return {
+
+            // Existing properties
+            quill: null,
+            questionContent: '',
+
+            //...
+
+            init() {
+                const editor = this.$refs.questionContentEditor;
+                this.quill = new Quill(editor, {
+                    theme: 'snow',
+                    placeholder: 'Type your question...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{
+                                'list': 'ordered'
+                            }, {
+                                'list': 'bullet'
+                            }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                this.quill.on('text-change', () => {
+                    this.questionContent = this.quill.root.innerHTML;
+                });
+            },
+
             step: 1,
             selectedLevel: '',
             educationType: '',
@@ -308,10 +506,8 @@
             levels: [],
             subjects: [],
             selectedSubject: null,
-
-            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking'],
+            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'],
             questionType: '',
-            questionContent: '',
 
             blanks: [],
 
@@ -372,19 +568,21 @@
                     this.addLinkingOption(); // add default 2;
                 } else if (type === 'spelling') {
                     this.spellingAnswer = '';
-                } else if (type === 'math') {
-                    this.mathAnswer = '';
+                } else if (type === 'rearranging') {
+                    this.questionContent = '';
+                } else if (type === 'comprehension') {
+                    this.questionContent = '';
                 }
                 this.step = 5;
             },
 
             addOption() {
-                if (this.options.length < 4) {
+                // if (this.options.length < 10) {
                     this.options.push({
                         value: '',
                         is_correct: false
                     });
-                }
+                // }
             },
 
             removeOption(index) {
@@ -398,50 +596,122 @@
                     opt.is_correct = (i === index);
                 });
             },
-            addBlank() {
-                const textarea = this.$refs.questionContent;
-                if (!textarea) return;
 
+
+            // addBlank() {
+            //     const textarea = this.$refs.questionContent;
+            //     if (!textarea) return;
+
+            //     const blankNumber = this.blanks.length + 1;
+            //     const insertText = `${blankNumber}. _____`;
+
+            //     const start = textarea.selectionStart;
+            //     const end = textarea.selectionEnd;
+
+            //     this.questionContent =
+            //         this.questionContent.substring(0, start) +
+            //         insertText +
+            //         this.questionContent.substring(end);
+
+            //     this.$nextTick(() => {
+            //         textarea.focus();
+            //         textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
+            //     });
+
+            //     this.blanks.push({
+            //         blank_number: blankNumber,
+            //         options: ['', '', '', ''],
+            //         answer: ''
+            //     });
+            // },
+
+            // removeBlank(index) {
+            //     const removed = this.blanks[index];
+            //     const regex = new RegExp(`\\b${removed.blank_number}\\. _____\\b`);
+            //     this.questionContent = this.questionContent.replace(regex, '').replace(/\s+/, ' ');
+
+            //     this.blanks.splice(index, 1);
+
+            //     // Re-number blanks and update passage
+            //     this.blanks.forEach((b, i) => {
+            //         const oldNumber = b.blank_number;
+            //         const newNumber = i + 1;
+            //         if (oldNumber !== newNumber) {
+            //             const re = new RegExp(`\\b${oldNumber}\\. _____\\b`);
+            //             this.questionContent = this.questionContent.replace(re, `${newNumber}. _____`);
+            //             b.blank_number = newNumber;
+            //         }
+            //     });
+            // },
+
+            addBlank() {
                 const blankNumber = this.blanks.length + 1;
                 const insertText = `${blankNumber}. _____`;
 
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-
-                this.questionContent =
-                    this.questionContent.substring(0, start) +
-                    insertText +
-                    this.questionContent.substring(end);
-
-                this.$nextTick(() => {
-                    textarea.focus();
-                    textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
-                });
+                const range = this.quill.getSelection(true);
+                if (range) {
+                    this.quill.insertText(range.index, insertText, 'user');
+                    this.quill.setSelection(range.index + insertText.length, 0);
+                }
 
                 this.blanks.push({
                     blank_number: blankNumber,
                     options: ['', '', '', ''],
                     answer: ''
                 });
+
+                this.questionContent = this.quill.root.innerHTML;
             },
 
             removeBlank(index) {
                 const removed = this.blanks[index];
-                const regex = new RegExp(`\\b${removed.blank_number}\\. _____\\b`);
-                this.questionContent = this.questionContent.replace(regex, '').replace(/\s+/, ' ');
+                const placeholder = `${removed.blank_number}. _____`;
+
+                const content = this.quill.getText();
+                const indexToRemove = content.indexOf(placeholder);
+
+                if (indexToRemove !== -1) {
+                    this.quill.deleteText(indexToRemove, placeholder.length, 'user');
+                }
 
                 this.blanks.splice(index, 1);
 
-                // Re-number blanks and update passage
+                // Re-number blanks and update content
                 this.blanks.forEach((b, i) => {
                     const oldNumber = b.blank_number;
                     const newNumber = i + 1;
                     if (oldNumber !== newNumber) {
-                        const re = new RegExp(`\\b${oldNumber}\\. _____\\b`);
-                        this.questionContent = this.questionContent.replace(re, `${newNumber}. _____`);
+                        const oldText = `${oldNumber}. _____`;
+                        const newText = `${newNumber}. _____`;
+
+                        const delta = this.quill.getContents();
+                        const ops = delta.ops.map(op => {
+                            if (typeof op.insert === 'string') {
+                                op.insert = op.insert.replace(oldText, newText);
+                            }
+                            return op;
+                        });
+                        this.quill.setContents({
+                            ops
+                        });
                         b.blank_number = newNumber;
                     }
                 });
+
+                this.questionContent = this.quill.root.innerHTML;
+            },
+
+
+
+
+            addBlankOption(blankIndex) {
+                this.blanks[blankIndex].options.push('');
+            },
+
+            removeBlankOption(blankIndex, optionIndex) {
+                if (this.blanks[blankIndex].options.length > 1) {
+                    this.blanks[blankIndex].options.splice(optionIndex, 1);
+                }
             },
 
             linkingOptions: [],
@@ -475,6 +745,111 @@
                 };
                 reader.readAsDataURL(file);
             },
+
+            // Rearranging
+            rearrangingItems: [''],
+
+            // Comprehension
+            comprehensionPassage: '',
+            comprehensionQuestions: [{
+                question: '',
+                blanks: [], // ✅ Add this line
+            }],
+
+
+
+            // Rearranging logic
+            addRearrangingItem() {
+                this.rearrangingItems.push('');
+            },
+            removeRearrangingItem(i) {
+                this.rearrangingItems.splice(i, 1);
+            },
+
+
+            addComprehensionQuestion() {
+                this.comprehensionQuestions.push({
+                    question: '',
+                    blanks: [],
+                });
+            },
+            addComprehensionBlank(qIndex) {
+                const comp = this.comprehensionQuestions[qIndex];
+
+                if (!comp || !Array.isArray(comp.blanks)) {
+                    console.warn('Invalid question or blanks missing at index:', qIndex);
+                    return;
+                }
+
+                const blankNumber = comp.blanks.length + 1;
+                const insertText = `${blankNumber}. _____`;
+
+                const textareaRef = this.$refs.compTextarea;
+                const ta = Array.isArray(textareaRef) ? textareaRef[qIndex] : textareaRef;
+
+                if (!ta) {
+                    console.warn('Textarea ref not found for index:', qIndex);
+                    return;
+                }
+
+                const start = ta.selectionStart;
+                const end = ta.selectionEnd;
+
+                comp.question =
+                    comp.question.substring(0, start) +
+                    insertText +
+                    comp.question.substring(end);
+
+                this.$nextTick(() => {
+                    ta.focus();
+                    ta.selectionStart = ta.selectionEnd = start + insertText.length;
+                });
+
+                comp.blanks.push({
+                    blank_number: blankNumber,
+                    options: ['', '', '', ''],
+                    answer: ''
+                });
+            },
+
+
+            removeComprehensionBlank(qIndex, bIndex) {
+                const comp = this.comprehensionQuestions[qIndex];
+                const removedBlank = comp.blanks[bIndex];
+
+                // Remove the placeholder text (e.g., "2. _____") from the question string
+                const placeholder = `${removedBlank.blank_number}. _____`;
+                comp.question = comp.question.replace(placeholder, '');
+
+                // Remove the blank from the array
+                comp.blanks.splice(bIndex, 1);
+
+                // Re-number remaining blanks
+                comp.blanks.forEach((b, i) => {
+                    const oldPlaceholder = `${b.blank_number}. _____`;
+                    const newPlaceholder = `${i + 1}. _____`;
+
+                    // Update question text if placeholder exists
+                    if (comp.question.includes(oldPlaceholder)) {
+                        comp.question = comp.question.replace(oldPlaceholder, newPlaceholder);
+                    }
+
+                    // Update blank number
+                    b.blank_number = i + 1;
+                });
+            },
+
+            addComprehensionBlankOption(qIndex, bIndex) {
+                this.comprehensionQuestions[qIndex].blanks[bIndex].options.push('');
+            },
+
+            removeComprehensionBlankOption(qIndex, bIndex, optIndex) {
+                const options = this.comprehensionQuestions[qIndex].blanks[bIndex].options;
+                if (options.length > 1) {
+                    options.splice(optIndex, 1);
+                }
+            },
+
             submitForm() {
                 // Optional: console.log to debug
                 console.log(JSON.stringify(this.blanks, null, 2));
