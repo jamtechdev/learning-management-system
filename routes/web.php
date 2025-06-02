@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AssignmentController;
+use App\Http\Controllers\Admin\AssignmentQuestionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\HomeController;
@@ -72,6 +73,22 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::prefix('assignments')->name('admin.assignments.')->group(function () {
         Route::get('/', [AssignmentController::class, 'index'])->name('index');
+        Route::get('/create', [AssignmentController::class, 'create'])->name('create');
+         Route::post('/index', [AssignmentController::class, 'store'])->name('store');
+         Route::get('/{id}/edit', [AssignmentController::class, 'edit'])->name('edit');
+         Route::post('/{id}/update', [AssignmentController::class, 'update'])->name('update');
+         Route::delete('/assignments/{id}/delete', [AssignmentController::class, 'delete'])->name('delete');
+
+         // Assessment Questions
+         
+          Route::get('/questions/{assessment_id}', [AssignmentQuestionController::class, 'index'])->name('question');
+          Route::get('/questions/create/{assessment_id}', [AssignmentQuestionController::class, 'create'])->name('questioncreate');
+          Route::post('/questions/store', [AssignmentQuestionController::class, 'store'])->name('questionstore');
+
+          Route::get('assignments/questions/{id}/edit', [AssignmentQuestionController::class, 'edit'])->name('questionedit');
+          Route::put('assignments/questions/{id}', [AssignmentQuestionController::class, 'update'])->name('questionupdate');
+
+          Route::delete('assignments/questions/{id}', [AssignmentQuestionController::class, 'destroy'])->name('questiondelete');
     });
 });
 

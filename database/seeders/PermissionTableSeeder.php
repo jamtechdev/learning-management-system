@@ -125,7 +125,7 @@ class PermissionTableSeeder extends Seeder
                 'avatar' => 'images/logo/default-avatar.png',
             ]
         );
-        $parent->assignRole($parentRole);   
+        $parent->assignRole($parentRole);
 
         $child = User::firstOrCreate(
             ['email' => 'child@gmail.com'],
