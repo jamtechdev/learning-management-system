@@ -9,7 +9,7 @@
                         class="text-3xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white md:text-left">
                         Manage All Question Assessments
                     </h2>
-                    <a href="{{ route('admin.levels.create') }}"
+                    <a href="{{ route('admin.assignments.create') }}"
                         class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white transition add-btn">
                         + Add Assessments
                     </a>
@@ -38,6 +38,13 @@
                                 <th
                                     class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                     Created At</th>
+
+                                     <th
+                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                    Actions</th>
+                                     <th
+                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                    Questions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -53,6 +60,30 @@
                                         {{ str_replace('_', ' ', $assessment->status) }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-900">
                                         {{ $assessment->created_at->format('d M Y') }}</td>
+
+                                    <td class="px-4 py-2 text-sm text-gray-900">
+                                        <a href="{{route('admin.assignments.edit', $assessment->id)}}"
+                                            class="inline-block px-3 py-1 mr-2 text-sm text-white-600 add-btn">
+                                            Edit
+                                        </a>
+                                         <form action="{{ route('admin.assignments.delete', $assessment->id) }}"
+                                            method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                onclick="return confirm('Are you sure you want to delete this assessment?')"
+                                                class="inline-block px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <a href="{{route('admin.assignments.question', $assessment->id)}}"
+                                            class="inline-block px-3 py-1 mr-2 text-sm text-white-600  bg-green-400">
+                                            Questions
+                                        </a>
+                                    </td>
+
                                 </tr>
                             @empty
                                 <tr>
