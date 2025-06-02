@@ -93,18 +93,22 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request)
-    {
-        try {
-            $user = Auth::user();
-            if ($user) {
-                $user->tokens()->delete();
-                Auth::logout();
-                return $this->successHandler(null, 200, 'Logout Successful');
-            }
-            return $this->errorHandler(401, 'Unauthorized');
-        } catch (\Exception $e) {
-            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+   public function logout(Request $request)
+{
+    try {
+        $user = $request->user(); // or Auth::user();
+
+        if ($user) {
+            // Delete current access token
+            $user->currentAccessToken()->delete();
+
+            return $this->successHandler(null, 200, 'Logout Successful');
         }
+
+        return $this->errorHandler(401, 'Unauthorized');
+    } catch (\Exception $e) {
+        return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
     }
+}
+
 }
