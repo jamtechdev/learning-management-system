@@ -20,6 +20,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('levels', [QuestionController::class, 'getAllLevels']);
             Route::get('subjects', [QuestionController::class, 'getAllSubjects']);
             Route::post('getTypeBasedQuestions', [QuestionController::class, 'getTypeBasedQuestions']);
+            Route::post('user-answer', [QuestionController::class, 'userAnswer']);
             Route::get('all', [QuestionController::class, 'getAllQuestions']);
         });
     });

@@ -7,6 +7,7 @@ use App\Http\Resources\LevelResource;
 use App\Http\Resources\QuestionCollection;
 use App\Http\Resources\SubjectResource;
 use App\Models\Question;
+use App\Models\UserAnswer;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
@@ -67,4 +68,34 @@ class QuestionController extends Controller
 
         return $this->successHandler(new QuestionCollection($questions), 200, "Filtered questions fetched successfully!");
     }
+
+
+    public function userAnswer(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'question_id' => 'required|integer|exists:questions,id',
+        'answer' => 'required|array',
+        'answer.options' => 'required|array|min:1',
+        'answer.options.*.value' => 'required|string',
+        'answer.answer' => 'required|array',
+        'answer.answer.answer' => 'required|string',
+        'answer.answer.format' => 'required|string|in:text,latex,image',
+    ]);
+
+    if ($validator->fails()) {
+            return $this->validationErrorHandler($validator->errors());
+        }
+
+    $userAnswer = UserAnswer::create([
+        'user_id' => auth()->id(),
+        'question_id' => $request->question_id,
+        'answer_data' => $request->answer,
+
+        'submitted_at' => now(),
+    ]);
+    return response()->json([
+        'message' => 'Answer saved successfully.',
+        'data' => $userAnswer,
+    ]);
+}
 }

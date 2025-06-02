@@ -37,177 +37,171 @@
                 </div>
 
                 <!-- Table -->
-                <div class="w-full overflow-x-scroll">
-                    <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gradient-to-r from-blue-600 to-blue-800">
-                            <tr>
-                                <th class="w-1/12 px-4 py-3 font-medium text-white">#</th>
-                                <th class="w-3/12 px-4 py-3 font-medium text-white">Question</th>
-                                <th class="w-1/12 px-4 py-3 font-medium text-white">Type</th>
-                                <th class="w-2/12 px-4 py-3 font-medium text-white">Level</th>
-                                <th class="w-2/12 px-4 py-3 font-medium text-white">Subject</th>
-                                <th class="w-3/12 px-4 py-3 font-medium text-white">Options</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
-                            @forelse ($questions as $index => $question)
-                                <tr x-show="tab === 'all' || tab === '{{ $question->type }}'">
-                                    <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
-                                        <div class="overflow-y-auto max-h-48">
-                                            {{ $index + 1 }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
-                                        <div class="overflow-y-auto max-h-48">
-                                             {!! $question->content !!}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
+                <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gradient-to-r from-blue-600 to-blue-800">
+                        <tr>
+                            <th class="px-4 py-3 font-medium text-white">#</th>
+                            <th class="px-4 py-3 font-medium text-white">Question</th>
+                            <th class="px-4 py-3 font-medium text-white">Type</th>
+                            <th class="px-4 py-3 font-medium text-white">Level</th>
+                            <th class="px-4 py-3 font-medium text-white">Subject</th>
+                            <th class="px-4 py-3 font-medium text-white">Options</th>
+                            <th class="px-4 py-3 font-medium text-white">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
+                        @forelse ($questions as $index => $question)
+                            <tr x-show="tab === 'all' || tab === '{{ $question->type }}'">
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    <div class="prose dark:prose-invert max-w-none">{!! $question->content !!}</div>
+                                </td>
+                                <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
+                                    <span class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">
                                         {{ str_replace('_', ' ', $question->type) }}
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
-                                        <div class="overflow-y-auto max-h-48">
-                                            {{ $question->level->name ?? '-' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
-                                        <div class="overflow-y-auto max-h-48">
-                                            {{ $question->subject->name ?? '-' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-gray-900 whitespace-normal dark:text-gray-100">
-                                        <div class="overflow-y-auto max-h-48">
-                                            <!-- MCQ -->
-                                            @if ($question->type === 'mcq')
-                                                <label class="block mb-2 font-semibold text-yellow-700">Options</label>
-                                                <ul class="list-disc list-inside h-[100px] overflow-y-scroll">
-                                                    @foreach ($question->options as $option)
-                                                        <li>
-                                                            {{ $option->value }}. {{ $option->text }}
-                                                            @if ($option->is_correct)
-                                                                <span
-                                                                    class="font-semibold text-green-500">(Correct)</span>
-                                                            @endif
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    {{ $question->level->name ?? '-' }}</td>
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    {{ $question->subject->name ?? '-' }}</td>
 
-                                            <!-- True/False -->
-                                            @elseif ($question->type === 'true_false')
-                                                @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
-                                                <label class="block mb-2 font-semibold text-yellow-700">True / False</label>
-                                                <ul class="list-disc list-inside h-[100px] overflow-y-scroll">
-                                                    <li
-                                                        class="{{ $correct === 'True' ? 'text-green-600 font-bold' : '' }}">
-                                                        True @if ($correct === 'True')
-                                                            (Correct)
-                                                        @endif
-                                                    </li>
-                                                    <li
-                                                        class="{{ $correct === 'False' ? 'text-green-600 font-bold' : '' }}">
-                                                        False @if ($correct === 'False')
-                                                            (Correct)
-                                                        @endif
-                                                    </li>
-                                                </ul>
-
-                                            <!-- Fill in the Blank -->
-                                            @elseif ($question->type === 'fill_blank')
-                                                <label class="block mb-2 font-semibold text-yellow-700">Fill in the Blanks</label>
-                                                @foreach ($question->metadata['blanks'] ?? [] as $blank)
-                                                    <div class="mb-2">
-                                                        <span class="text-sm font-medium">
-                                                            Blank {{ $blank['blank_number'] ?? 'N/A' }}:
-                                                        </span>
-                                                        <ul class="ml-4 list-disc list-inside h-[100px] overflow-y-scroll">
-                                                            @foreach ($blank['options'] as $option)
-                                                                <li>
-                                                                    {{ $option }}
-                                                                    @if ($option === $blank['answer'])
-                                                                        <span class="font-semibold text-green-600">(Correct)</span>
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    </div>
-                                                @endforeach
-
-                                            <!-- Linking -->
-                                            @elseif ($question->type === 'linking')
-                                                <label class="block mb-2 font-semibold text-yellow-700">Match the Following</label>
-                                                @if (!empty($question->metadata['answer']))
-                                                    <div class="space-y-4 h-[180px] overflow-y-scroll">
-                                                        @foreach ($question->metadata['answer'] as $pair)
-                                                            <div
-                                                                class="flex items-center justify-between p-3 bg-white border shadow rounded-xl">
-                                                                <div class="flex items-center w-5/12 space-x-3">
-                                                                    @if ($pair['left']['match_type'] === 'image' && $pair['left']['image_uri'])
-                                                                        <img src="{{ $pair['left']['image_uri'] }}"
-                                                                            class="object-cover border rounded-md w-14 h-14" />
-                                                                    @endif
-                                                                    @if (!empty($pair['left']['word']))
-                                                                        <span class="text-sm font-medium text-gray-800">{{ $pair['left']['word'] }}</span>
-                                                                    @endif
-                                                                </div>
-                                                                <div
-                                                                    class="hidden w-2/12 text-xl font-bold text-center text-yellow-600 sm:block">
-                                                                    →
-                                                                </div>
-                                                                <div
-                                                                    class="flex items-center justify-end w-5/12 space-x-3 sm:justify-start">
-                                                                    @if ($pair['right']['match_type'] === 'image' && $pair['right']['image_uri'])
-                                                                        <img src="{{ $pair['right']['image_uri'] }}"
-                                                                            class="object-cover border rounded-md w-14 h-14" />
-                                                                    @endif
-                                                                    @if (!empty($pair['right']['word']))
-                                                                        <span class="text-sm font-medium text-gray-800">{{ $pair['right']['word'] }}</span>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <p class="italic text-gray-400">No matching pairs available</p>
+                                <!-- Options -->
+                                <td class="max-w-md px-4 py-3 overflow-y-auto text-gray-900 dark:text-gray-100">
+                                    @if ($question->type === 'mcq')
+                                        <ul class="space-y-1">
+                                            @foreach ($question->options as $option)
+                                                <li class="flex items-start">
+                                                    <span class="font-semibold">{{ $option->value }}.</span>
+                                                    <span class="ml-1">{!! $option->text !!}</span>
+                                                    @if ($option->is_correct)
+                                                        <span
+                                                            class="ml-2 text-xs font-semibold text-green-600">(Correct)</span>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif ($question->type === 'true_false')
+                                        @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
+                                        <div class="flex flex-col space-y-1">
+                                            <span
+                                                class="{{ $correct === 'True' ? 'text-green-600 font-semibold' : '' }}">True
+                                                @if ($correct === 'True')
+                                                    (Correct)
                                                 @endif
-
-                                            <!-- Comprehension -->
-                                            @elseif ($question->type === 'comprehension')
-                                                <label class="block mb-2 font-semibold text-yellow-700">Comprehension Questions</label>
-                                                @foreach ($question->metadata['comprehension'] ?? [] as $comp)
-                                                    <div class="p-3 mb-4 border rounded bg-gray-50 dark:bg-gray-800">
-                                                        <p class="mb-2 font-medium text-gray-700 dark:text-gray-300">
-                                                            {{ $comp['question_name'] }}</p>
-                                                        @foreach ($comp['blanks'] ?? [] as $blank)
-                                                            <div class="mb-2">
-                                                                <span class="text-sm font-semibold">Blank {{ $blank['blank_number'] }} Options:</span>
-                                                                <ul class="ml-4 list-disc list-inside max-h-[100px] overflow-y-auto">
-                                                                    @foreach ($blank['options'] as $option)
-                                                                        <li>
-                                                                            {{ $option }}
-                                                                            @if ($option === $blank['answer'])
-                                                                                <span class="font-semibold text-green-600">(Correct)</span>
-                                                                            @endif
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endforeach
-                                            @endif
+                                            </span>
+                                            <span
+                                                class="{{ $correct === 'False' ? 'text-green-600 font-semibold' : '' }}">False
+                                                @if ($correct === 'False')
+                                                    (Correct)
+                                                @endif
+                                            </span>
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
-                                        No questions found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    @elseif ($question->type === 'fill_blank')
+                                        <div class="space-y-2">
+                                            @foreach ($question->metadata['blanks'] ?? [] as $blank)
+                                                <div>
+                                                    <span class="text-sm font-semibold">Blank
+                                                        {{ $blank['blank_number'] }}:</span>
+                                                    <ul class="pl-4 text-sm list-disc">
+                                                        @foreach ($blank['options'] as $option)
+                                                            <li>
+                                                                {{ $option }}
+                                                                @if ($option === $blank['answer'])
+                                                                    <span
+                                                                        class="font-semibold text-green-600">(Correct)</span>
+                                                                @endif
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($question->type === 'linking')
+                                        <div class="space-y-2">
+                                            @foreach ($question->metadata['answer'] ?? [] as $pair)
+                                                <div
+                                                    class="flex items-center justify-between p-2 space-x-2 border rounded">
+                                                    <div class="flex items-center space-x-2">
+                                                        @if ($pair['left']['match_type'] === 'image')
+                                                            <img src="{{ $pair['left']['image_uri'] }}"
+                                                                class="w-10 h-10 border rounded" />
+                                                        @else
+                                                            <span>{{ $pair['left']['word'] }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <span class="text-sm text-gray-500">→</span>
+                                                    <div class="flex items-center space-x-2">
+                                                        @if ($pair['right']['match_type'] === 'image')
+                                                            <img src="{{ $pair['right']['image_uri'] }}"
+                                                                class="w-10 h-10 border rounded" />
+                                                        @else
+                                                            <span>{{ $pair['right']['word'] }}</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif ($question->type === 'comprehension')
+                                        <div class="space-y-4">
+                                            @foreach ($question->metadata['comprehension'] ?? [] as $comp)
+                                                <div class="p-3 bg-gray-100 rounded shadow-sm dark:bg-gray-800">
+                                                    <div class="mb-2 font-semibold">{{ $comp['question_name'] }}</div>
+                                                    @foreach ($comp['blanks'] ?? [] as $blank)
+                                                        <div class="mb-2 text-sm">
+                                                            <div class="font-medium">Blank
+                                                                {{ $blank['blank_number'] }}:</div>
+                                                            <ul class="pl-4 list-disc">
+                                                                @foreach ($blank['options'] as $option)
+                                                                    <li>
+                                                                        {{ $option }}
+                                                                        @if ($option === $blank['answer'])
+                                                                            <span
+                                                                                class="font-semibold text-green-600">(Correct)</span>
+                                                                        @endif
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="italic text-gray-400">No options available</span>
+                                    @endif
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    <div class="flex space-x-2">
+                                        <a href="{{ route('admin.questions.edit', $question->id) }}"
+                                            class="inline-block px-2 py-1 text-xs text-blue-700 border border-blue-700 rounded hover:bg-blue-50 dark:hover:bg-blue-900">
+                                            Edit
+                                        </a>
+                                        <form action="{{ route('admin.questions.destroy', $question->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this question?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-block px-2 py-1 text-xs text-red-600 border border-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+                                    No questions found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
 
             </div>
         </div>
