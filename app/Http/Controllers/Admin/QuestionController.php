@@ -243,7 +243,7 @@ class QuestionController extends Controller
 
         // Prepare full metadata
         $transformed = [
-            'type' => 'rearrange',
+            'type' => 'rearranging',
             'content' => $data['content'] ?? '',
             'options' => $options,
             'answer' => [

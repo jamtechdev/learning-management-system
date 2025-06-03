@@ -167,7 +167,27 @@
                                                 </div>
                                             @endforeach
                                         </div>
+                                    @elseif ($question->type === 'rearranging')
+                                        <div>
+                                            <div class="mb-2 font-semibold">Available words:</div>
+                                            <ul class="flex flex-wrap gap-2">
+                                                @foreach ($question->metadata['options'] as $opt)
+                                                    <li
+                                                        class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
+                                                        {{ $opt['value'] }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+
+                                            <div class="mt-4 mb-1 font-semibold">Correct order:</div>
+                                            <ol class="list-decimal list-inside">
+                                                @foreach ($question->metadata['answer']['answer'] ?? [] as $word)
+                                                    <li>{{ $word }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
                                     @else
+                                        @dd($question->type)
                                         <span class="italic text-gray-400">No options available</span>
                                     @endif
                                 </td>
