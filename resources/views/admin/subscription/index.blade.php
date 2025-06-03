@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="py-8">
-        <div class="mx-auto max-w-full sm:px-6 lg:px-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="p-6 bg-white rounded-lg shadow">
                 <div class="flex flex-col mb-8 space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
                     <h1 class="text-3xl font-extrabold text-gray-900">
@@ -68,7 +68,7 @@
                                         </a>
 
                                         <a href="{{ route('admin.subscriptions.assignSubjects', $plan->id) }}"
-                                            class="inline-flex items-center px-3 py-1 text-sm text-white transition bg-green-600 rounded-md hover:bg-green-700">
+                                            class="inline-flex items-center px-3 py-1 text-sm text-white transition .add-btn">
                                             Assign Subjects
                                         </a>
 
