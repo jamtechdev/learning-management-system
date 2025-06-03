@@ -1,25 +1,32 @@
-.add-btn{
+.add-btn {
     background-image: linear-gradient(45deg, #2563eb, #1e40af);
     background-repeat: no-repeat;
     background-size: 100% 100%;
     color: white;
     border-radius: 6px;
 }
-table tr:nth-child(even){
+
+table tr:nth-child(even) {
     background-color: rgb(240, 249, 255);
 }
-table tr:nth-child(over){
+
+table tr:nth-child(over) {
     background-color: rgb(240, 249, 255);
 }
-table thead{
-     background-image: linear-gradient(45deg, #2563eb, #1e40af);
+
+table thead {
+    background-image: linear-gradient(45deg, #2563eb, #1e40af);
     background-repeat: no-repeat;
     background-size: 100% 100%;
     color: white;
 }
 
-table thead th{
+table thead th {
     color: white !important;
 }
 
 
+.ql-tooltip.ql-editing {
+    left: 5px !important;
+    top: 0 !important;
+}

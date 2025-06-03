@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <div class="max-w-full py-6 mx-auto sm:px-6 lg:px-8">
         <div class="p-6 bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
             <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Edit Parent</h2>
 

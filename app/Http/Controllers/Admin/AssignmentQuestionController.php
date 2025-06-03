@@ -8,7 +8,8 @@ use App\Models\Assessment;
 use Illuminate\Http\Request;
 
 use App\Models\Question;
-
+use App\Models\QuestionSubject;
+use App\Models\User;
 
 class AssignmentQuestionController extends Controller
 {
@@ -21,12 +22,23 @@ class AssignmentQuestionController extends Controller
 
     public function create($assessment_id)
     {
-        $questions = Question::all();
+        $students = User::role('child')->get();
+        $types = ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'];
         $assignment = Assessment::findOrFail($assessment_id);
-        $types = Question::select('type')->distinct()->pluck('type');
 
-        return view('admin.assignments.questioncreate', compact('questions', 'assignment', 'types'));
+        $subjects = QuestionSubject::all();
+        $questions = Question::all();
+
+        return view('admin.assignments.questioncreate', compact(
+            'students',
+            'types',
+            'assignment',
+            'subjects',
+            'questions'
+        ));
     }
+
+
 
 
 
@@ -42,6 +54,7 @@ class AssignmentQuestionController extends Controller
             AssessmentQuestion::create([
                 'assessment_id' => $request->assessment_id,
                 'question_id' => $questionId,
+                'user_id' => $request->student_id
             ]);
         }
 
@@ -50,13 +63,7 @@ class AssignmentQuestionController extends Controller
     }
 
 
-    public function destroy($id)
-    {
-        $questionAssignment = AssessmentQuestion::find($id);
-        $questionAssignment->delete();
 
-        return redirect()->back()->with('success', 'Assessment question deleted successfully.');
-    }
 
     public function edit($assessment_id)
     {
@@ -65,7 +72,7 @@ class AssignmentQuestionController extends Controller
         $questions = Question::all();
         $assignedQuestions = AssessmentQuestion::where('assessment_id', $assessment_id)->get();
         $assignedQuestionIds = $assignedQuestions->pluck('question_id')->toArray();
-        return view('admin.assignments.questionedit', compact('assignment', 'questions', 'assignedQuestionIds','assessmentQuestion'));
+        return view('admin.assignments.questionedit', compact('assignment', 'questions', 'assignedQuestionIds', 'assessmentQuestion'));
     }
 
 
@@ -104,5 +111,12 @@ class AssignmentQuestionController extends Controller
 
         return redirect()->route('admin.assignments.question', ['assessment_id' => $assessment_id])
             ->with('success', 'Assessment questions updated successfully.');
+    }
+    public function destroy($id)
+    {
+        $questionAssignment = AssessmentQuestion::find($id);
+        $questionAssignment->delete();
+
+        return redirect()->back()->with('success', 'Assessment question deleted successfully.');
     }
 }

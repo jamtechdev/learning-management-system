@@ -14,7 +14,8 @@ class AssessmentQuestion extends Model
         'question_id',
         'score',
         'student_answer',
-        'evaluated_feedback'
+        'evaluated_feedback',
+        'user_id'
     ];
 
     public function assessment()
