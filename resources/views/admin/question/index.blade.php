@@ -222,7 +222,9 @@
                     </tbody>
                 </table>
 
-
+                <div class="mt-6">
+                    {{ $levels->links('pagination::tailwind') }}
+                </div>
             </div>
         </div>
     </div>
