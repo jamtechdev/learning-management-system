@@ -47,7 +47,7 @@ class QuestionController extends Controller
             'education_type' => 'required|string|in:primary,secondary,senior', // adjust these values to match your data
             'level_id' => 'required|integer|exists:question_levels,id',
             'subject_id' => 'required|integer|exists:question_subjects,id',
-            'type' => 'required|string|in:mcq,fill_blank,true_false,linking', // customize per your question types
+            'type' => 'required|string|in:' . implode(',', ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension']), // customize per your question types
         ]);
 
         if ($validator->fails()) {
