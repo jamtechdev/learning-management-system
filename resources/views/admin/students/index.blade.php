@@ -11,11 +11,16 @@
                             Manage All Students
                         @endisset
                     </h2>
-
-                    <a href="{{ route('admin.student.create', $parent->id) }}"
-                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white add-btn">
-                        + Add Student
-                    </a>
+                    <div>
+                        <a href="{{ route('admin.parents.index') }}"
+                            class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white add-btn">
+                            Back
+                        </a>
+                        <a href="{{ route('admin.student.create', $parent->id) }}"
+                            class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white add-btn">
+                            + Add Student
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Table -->

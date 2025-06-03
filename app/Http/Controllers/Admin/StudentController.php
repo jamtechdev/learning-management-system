@@ -17,7 +17,7 @@ class StudentController extends Controller
     public function index($id)
     {
         $parent = User::role('parent')->where('id', $id)->first();
-        $students = User::role('child')->with('parent')->paginate(10);
+        $students = User::role('child')->with('parent')->where('parent_id', $id)->paginate(10);
         return view('admin.students.index', compact('students', 'parent'));
     }
 
