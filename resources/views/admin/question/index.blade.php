@@ -223,7 +223,7 @@
                 </table>
 
                 <div class="mt-6">
-                    {{ $levels->links('pagination::tailwind') }}
+                    {{ $questions->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>
