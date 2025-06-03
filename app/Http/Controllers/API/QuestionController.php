@@ -71,31 +71,30 @@ class QuestionController extends Controller
 
 
     public function userAnswer(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'question_id' => 'required|integer|exists:questions,id',
-        'answer' => 'required|array',
-        'answer.options' => 'required|array|min:1',
-        'answer.options.*.value' => 'required|string',
-        'answer.answer' => 'required|array',
-        'answer.answer.answer' => 'required|string',
-        'answer.answer.format' => 'required|string|in:text,latex,image',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'question_id' => 'required|integer|exists:questions,id',
+            'answer' => 'required|array',
+            // 'answer.options' => 'required|array|min:1',
+            // 'answer.options.*.value' => 'required|string',
+            // 'answer.answer' => 'required|array',
+            // 'answer.answer.answer' => 'required|string',
+            // 'answer.answer.format' => 'required|string|in:text,latex,image',
+        ]);
 
-    if ($validator->fails()) {
+        if ($validator->fails()) {
             return $this->validationErrorHandler($validator->errors());
         }
 
-    $userAnswer = UserAnswer::create([
-        'user_id' => auth()->id(),
-        'question_id' => $request->question_id,
-        'answer_data' => $request->answer,
-
-        'submitted_at' => now(),
-    ]);
-    return response()->json([
-        'message' => 'Answer saved successfully.',
-        'data' => $userAnswer,
-    ]);
-}
+        $userAnswer = UserAnswer::create([
+            'user_id' => auth()->id(),
+            'question_id' => $request->question_id,
+            'answer_data' => $request->answer,
+            'submitted_at' => now(),
+        ]);
+        return response()->json([
+            'message' => 'Answer saved successfully.',
+            'data' => $userAnswer,
+        ]);
+    }
 }
