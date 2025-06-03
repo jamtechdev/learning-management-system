@@ -24,4 +24,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('all', [QuestionController::class, 'getAllQuestions']);
         });
     });
+    Route::middleware(['auth:sanctum', 'role:parent'])
+        ->prefix('parent')
+        ->group(function () {
+            Route::apiResource('student', \App\Http\Controllers\API\StudentController::class);
+            Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
+        });
 });

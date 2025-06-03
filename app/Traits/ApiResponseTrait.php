@@ -21,7 +21,7 @@ trait ApiResponseTrait
             'version' => 'v1',
             'code' => $code,
             'message' => $message,
-            'data' => $data ?? (object)[], // Ensures "data" is always present, even if null
+            'data' => $data ?? (object) [], // Ensures "data" is always present, even if null
         ];
 
         return response()->json($error, $code);
@@ -81,7 +81,7 @@ trait ApiResponseTrait
      *
      * @return JsonResponse
      */
-    public function serverErrorHandler(\Exception $e, bool $isStripe = false): JsonResponse
+    public function serverErrorHandler(Exception|\Throwable $e, bool $isStripe = false): JsonResponse
     {
 
         $error = [
