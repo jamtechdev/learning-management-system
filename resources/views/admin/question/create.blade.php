@@ -541,7 +541,7 @@
             levels: [],
             subjects: [],
             selectedSubject: null,
-            questionTypes: ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'],
+            questionTypes: @json(\App\Enum\QuestionTypes::TYPES),
             questionType: '',
 
             blanks: [],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enum\QuestionTypes;
 use App\Http\Controllers\Controller;
 use App\Models\AssessmentQuestion;
 use App\Models\Assessment;
@@ -23,7 +24,7 @@ class AssignmentQuestionController extends Controller
     public function create($assessment_id)
     {
         $students = User::role('child')->get();
-        $types = ['mcq', 'fill_blank', 'true_false', 'linking', 'rearranging', 'comprehension'];
+        $types = QuestionTypes::TYPES;
         $assignment = Assessment::findOrFail($assessment_id);
 
         $subjects = QuestionSubject::all();
