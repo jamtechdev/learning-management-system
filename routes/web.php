@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ParentController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\SubscriptionController;
+use App\Models\Subscription;
 
 // Redirect root to login
 Route::get('/', fn() => redirect('login'));
@@ -74,21 +76,37 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::prefix('assignments')->name('admin.assignments.')->group(function () {
         Route::get('/', [AssignmentController::class, 'index'])->name('index');
         Route::get('/create', [AssignmentController::class, 'create'])->name('create');
-         Route::post('/index', [AssignmentController::class, 'store'])->name('store');
-         Route::get('/{id}/edit', [AssignmentController::class, 'edit'])->name('edit');
-         Route::post('/{id}/update', [AssignmentController::class, 'update'])->name('update');
-         Route::delete('/assignments/{id}/delete', [AssignmentController::class, 'delete'])->name('delete');
+        Route::post('/index', [AssignmentController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AssignmentController::class, 'edit'])->name('edit');
+        Route::post('/{id}/update', [AssignmentController::class, 'update'])->name('update');
+        Route::delete('/assignments/{id}/delete', [AssignmentController::class, 'delete'])->name('delete');
 
-         // Assessment Questions
-         
-          Route::get('/questions/{assessment_id}', [AssignmentQuestionController::class, 'index'])->name('question');
-          Route::get('/questions/create/{assessment_id}', [AssignmentQuestionController::class, 'create'])->name('questioncreate');
-          Route::post('/questions/store', [AssignmentQuestionController::class, 'store'])->name('questionstore');
+        // Assessment Questions
 
-          Route::get('assignments/questions/{id}/edit', [AssignmentQuestionController::class, 'edit'])->name('questionedit');
-          Route::put('assignments/questions/{id}', [AssignmentQuestionController::class, 'update'])->name('questionupdate');
+        Route::get('/questions/{assessment_id}', [AssignmentQuestionController::class, 'index'])->name('question');
+        Route::get('/questions/create/{assessment_id}', [AssignmentQuestionController::class, 'create'])->name('questioncreate');
+        Route::post('/questions/store', [AssignmentQuestionController::class, 'store'])->name('questionstore');
 
-          Route::delete('assignments/questions/{id}', [AssignmentQuestionController::class, 'destroy'])->name('questiondelete');
+        Route::get('assignments/questions/{id}/edit', [AssignmentQuestionController::class, 'edit'])->name('questionedit');
+        Route::put('assignments/questions/{id}', [AssignmentQuestionController::class, 'update'])->name('questionupdate');
+
+        Route::delete('assignments/questions/{id}', [AssignmentQuestionController::class, 'destroy'])->name('questiondelete');
+    });
+
+
+
+    Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
+
+        Route::get('/plans', [SubscriptionController::class, 'plans'])->name('index');
+        Route::get('/plans/create', [SubscriptionController::class, 'create'])->name('create');
+        Route::post('/plans', [SubscriptionController::class, 'store'])->name('store');
+        Route::get('/plans/{plan}/edit', [SubscriptionController::class, 'edit'])->name('edit');
+        Route::put('/plans/{plan}', [SubscriptionController::class, 'update'])->name('update');
+        Route::delete('/plans/{plan}', [SubscriptionController::class, 'destroy'])->name('destroy');
+
+        // Assign Subjects routes
+        Route::get('/plans/{plan}/assign-subjects', [SubscriptionController::class, 'showAssignSubjectsForm'])->name('assignSubjects');
+        Route::post('/plans/{plan}/assign-subjects', [SubscriptionController::class, 'assignSubjects'])->name('assignSubjects.store');
     });
 });
 

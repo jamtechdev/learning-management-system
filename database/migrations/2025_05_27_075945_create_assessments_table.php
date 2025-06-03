@@ -13,19 +13,21 @@ return new class extends Migration
     {
         Schema::create('assessments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->boolean('is_weekly')->default(false);
+            $table->foreignId('student_id')->constrained('users')->onDelete('cascade'); // assuming students are users
+            $table->foreignId('question_subject_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['not_started', 'in_progress', 'completed'])->default('not_started');
+            $table->date('assigned_date');
+            $table->integer('score')->nullable();
             $table->timestamps();
         });
+
         Schema::create('assessment_questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('assessment_id')->constrained()->onDelete('cascade');
             $table->foreignId('question_id')->constrained()->onDelete('cascade');
-            $table->integer('score')->nullable(); // Mark for that question
+            $table->enum('status', ['not_started', 'answered'])->default('not_started');
             $table->text('student_answer')->nullable();
-            $table->text('evaluated_feedback')->nullable(); // AI feedback
+            $table->integer('score')->nullable();
             $table->timestamps();
         });
     }

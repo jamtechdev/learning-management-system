@@ -85,15 +85,22 @@
                     <span>Add Parents </span>
                 </x-nav-link>
             </li>
+            <li>
+                <x-nav-link href="{{ route('admin.subscriptions.index') }}" :active="request()->routeIs('admin.subscriptions.*') || request()->routeIs('admin.subscriptionplan.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    👪
+                    <span>Subscription Plans </span>
+                </x-nav-link>
+            </li>
 
             <!-- Question Bank -->
-            <li>
+            {{-- <li>
                 <x-nav-link href="{{ route('admin.assignments.index') }}" :active="request()->routeIs('admin.assignments.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     🗂️
                     <span>Question Assignments</span>
                 </x-nav-link>
-            </li>
+            </li> --}}
 
         </ul>
     </nav>

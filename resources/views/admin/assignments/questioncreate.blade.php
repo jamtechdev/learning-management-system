@@ -1,93 +1,119 @@
 <x-app-layout>
-    <div class="py-6">
-        <div class="mx-auto max-w-8xl sm:px-6 lg:px-8">
-            <div class="p-6 bg-white shadow-xl sm:rounded-lg" x-data="questionSelector()">
-                <h2 class="mb-6 text-2xl font-bold text-gray-800">
-                    Add New Assessment Questions
-                </h2>
+    <div class="max-w-4xl px-4 py-10 mx-auto" x-data="questionAssign()">
+        <h2 class="mb-8 text-3xl font-bold text-gray-800">📘 Assign Questions to Assessment</h2>
 
-                <form action="{{ route('admin.assignments.questionstore') }}" method="POST" @submit="prepareSubmit">
-                    @csrf
+        <div class="p-8 space-y-10 bg-white rounded-lg shadow-lg">
+            {{-- Step Form --}}
+            <form method="POST" action="{{ route('admin.assignments.questionstore') }}" class="space-y-8">
+                @csrf
 
-                    @if (isset($user))
-                        <input type="hidden" name="user_id" value="{{ $user->id }}">
-                    @endif
-                    <input type="hidden" name="assessment_id" value="{{ $assignment->id }}">
+                {{-- Hidden Fields --}}
+                <input type="hidden" name="assessment_id" value="{{ $assignment->id }}">
+                <input type="hidden" name="student_id" :value="studentId">
+                {{-- <input type="hidden" name="subject_id" :value="subjectId"> --}}
+                {{-- <input type="hidden" name="type" :value="type"> --}}
 
-                    <!-- Question Type Selector -->
-                    <div class="mb-4">
-                        <label for="type" class="block mb-1 font-medium text-gray-700">Select Question Type</label>
-                        <select id="type" x-model="selectedType" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-indigo-200">
-                            <option value="">-- Select Type --</option>
-                            <template x-for="type in types" :key="type">
-                                <option :value="type" x-text="type"></option>
+                {{-- Step 1: Select Student --}}
+                <div>
+                    <label class="block mb-2 text-lg font-semibold text-gray-700">👤 Select Student</label>
+                    <select x-model="studentId" @change="onStudentChange()"
+                        class="w-full px-4 py-3 border rounded-lg shadow-sm">
+                        <option value="">-- Choose Student --</option>
+                        <template x-for="s in students" :key="s.id">
+                            <option :value="s.id" x-text="s.name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                {{-- Step 2: Select Subject --}}
+                <template x-if="filteredSubjects.length > 0">
+                    <div>
+                        <label class="block mb-2 text-lg font-semibold text-gray-700">📚 Select Subject</label>
+                        <select x-model="subjectId" @change="filterQuestions()"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm">
+                            <option value="">-- Choose Subject --</option>
+                            <template x-for="sub in filteredSubjects" :key="sub.id">
+                                <option :value="sub.id" x-text="sub.name"></option>
                             </template>
                         </select>
                     </div>
+                </template>
 
-                    <!-- Questions List -->
-                    <div class="p-4 overflow-y-auto border rounded-md max-h-96">
-                        <template x-if="filteredQuestions.length === 0">
-                            <p class="italic text-gray-500">No questions available for this type.</p>
-                        </template>
-                        <template x-for="question in filteredQuestions" :key="question.id">
-                            <label class="flex items-start p-2 space-x-3 rounded cursor-pointer hover:bg-indigo-50">
-                                <input
-                                    type="checkbox"
-                                    :value="question.id"
-                                    x-model="selectedQuestions"
-                                    class="w-5 h-5 mt-1 text-indigo-600 form-checkbox"
-                                >
-                                <div class="text-gray-800" x-html="question.content"></div>
-                            </label>
-                        </template>
+                {{-- Step 3: Select Type --}}
+                <template x-if="subjectId">
+                    <div>
+                        <label class="block mb-2 text-lg font-semibold text-gray-700">🧩 Select Question Type</label>
+                        <select x-model="type" @change="filterQuestions()"
+                            class="w-full px-4 py-3 border rounded-lg shadow-sm">
+                            <option value="">-- Choose Type --</option>
+                            <template x-for="t in types" :key="t">
+                                <option :value="t" x-text="t.replace('_', ' ').toUpperCase()"></option>
+                            </template>
+                        </select>
                     </div>
+                </template>
 
-                    <!-- Hidden inputs for selected questions -->
-                    <template x-for="id in selectedQuestions" :key="id">
-                        <input type="hidden" name="question_ids[]" :value="id" />
-                    </template>
-
-                    <!-- Submit -->
-                    <div class="mt-6">
-                        <button type="submit"
-                                class="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-300">
-                            Add Selected Questions
-                        </button>
+                {{-- Step 4: Questions --}}
+                <template x-if="filteredQuestions.length > 0">
+                    <div>
+                        <h3 class="mb-3 text-lg font-semibold text-gray-800">✅ Select Questions</h3>
+                        <div
+                            class="p-4 space-y-2 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 max-h-96">
+                            <template x-for="q in filteredQuestions" :key="q.id">
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" :value="q.id" name="question_ids[]"
+                                        class="mt-1 text-indigo-600 border-gray-300 rounded">
+                                    <span class="text-gray-700" x-html="q.content"></span>
+                                </label>
+                            </template>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </template>
+
+                {{-- Submit --}}
+                <div x-show="filteredQuestions.length > 0">
+                    <button type="submit"
+                        class="px-6 py-3 font-semibold text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700">
+                        🚀 Assign Selected Questions
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function questionSelector() {
+        function questionAssign() {
             return {
-                selectedType: '',
-                selectedQuestions: [],
-                questions: @json($questions),
-                get types() {
-                    // extract unique types from questions
-                    return [...new Set(this.questions.map(q => q.type))];
+                studentId: '',
+                subjectId: '',
+                type: '',
+                students: @json($students->map(fn($s) => ['id' => $s->id, 'name' => $s->first_name . ' ' . $s->last_name, 'level_id' => $s->student_level])),
+                allSubjects: @json($subjects),
+                allQuestions: @json($questions),
+                types: @json($types),
+
+                filteredSubjects: [],
+                filteredQuestions: [],
+
+                onStudentChange() {
+                    const level = this.students.find(s => s.id == this.studentId)?.level_id;
+                    this.filteredSubjects = this.allSubjects.filter(sub => sub.level_id == level);
+                    this.subjectId = '';
+                    this.type = '';
+                    this.filteredQuestions = [];
                 },
-                get filteredQuestions() {
-                    if (!this.selectedType) return [];
-                    return this.questions.filter(q => q.type === this.selectedType);
-                },
-                prepareSubmit(event) {
-                    if (!this.selectedType) {
-                        alert('Please select a question type.');
-                        event.preventDefault();
-                        return;
-                    }
-                    if (this.selectedQuestions.length === 0) {
-                        alert('Please select at least one question.');
-                        event.preventDefault();
-                        return;
-                    }
-                    // Form submits normally with question_ids[] hidden inputs
+
+                filterQuestions() {
+                    const student = this.students.find(s => s.id == this.studentId);
+                    if (!student) return;
+
+                    this.filteredQuestions = this.allQuestions.filter(q =>
+                        q.level_id == student.level_id &&
+                        q.subject_id == this.subjectId &&
+                        q.type == this.type
+                    );
                 }
-            }
+            };
         }
     </script>
 </x-app-layout>

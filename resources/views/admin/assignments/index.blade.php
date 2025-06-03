@@ -26,15 +26,7 @@
                                 <th
                                     class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                     Title</th>
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    User</th>
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Weekly?</th>
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Status</th>
+
                                 <th
                                     class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                     Created At</th>
@@ -44,7 +36,7 @@
                                     Actions</th>
                                      <th
                                     class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Questions</th>
+                                    Add Questions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -52,12 +44,6 @@
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-gray-900">{{ $assessment->id }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-900">{{ $assessment->title }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-900">
-                                        {{ $assessment->user->first_name ?? 'N/A' }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-900">
-                                        {{ $assessment->is_weekly ? 'Yes' : 'No' }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-900 capitalize">
-                                        {{ str_replace('_', ' ', $assessment->status) }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-900">
                                         {{ $assessment->created_at->format('d M Y') }}</td>
 
@@ -79,7 +65,7 @@
                                     </td>
                                     <td>
                                         <a href="{{route('admin.assignments.question', $assessment->id)}}"
-                                            class="inline-block px-3 py-1 mr-2 text-sm text-white-600  bg-green-400">
+                                            class="inline-block px-3 py-1 mr-2 text-sm bg-green-400 text-white-600">
                                             Questions
                                         </a>
                                     </td>

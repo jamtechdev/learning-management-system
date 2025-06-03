@@ -145,7 +145,7 @@
                         class="px-5 py-2 font-semibold text-blue-800 transition bg-blue-200 rounded-xl hover:bg-blue-300"
                         @click="addOption">+ Add Option</button>
 
-                        {{-- x-show="options.length < 6" --}}
+                    {{-- x-show="options.length < 6" --}}
                 </div>
             </template>
 
@@ -477,19 +477,54 @@
 
             init() {
                 const editor = this.$refs.questionContentEditor;
+
+                const toolbarOptions = [
+                    [{
+                        header: [1, 2, 3, false]
+                    }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{
+                        'script': 'sub'
+                    }, {
+                        'script': 'super'
+                    }],
+                    [{
+                        'list': 'ordered'
+                    }, {
+                        'list': 'bullet'
+                    }],
+                    [{
+                        'indent': '-1'
+                    }, {
+                        'indent': '+1'
+                    }],
+                    [{
+                        'direction': 'rtl'
+                    }],
+                    [{
+                        'size': ['small', false, 'large', 'huge']
+                    }],
+                    [{
+                        'color': []
+                    }, {
+                        'background': []
+                    }],
+                    [{
+                        'font': []
+                    }],
+                    [{
+                        'align': []
+                    }],
+                    ['link', 'image', 'video', 'formula'],
+                    ['clean']
+                ];
+
+
                 this.quill = new Quill(editor, {
                     theme: 'snow',
                     placeholder: 'Type your question...',
                     modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            [{
-                                'list': 'ordered'
-                            }, {
-                                'list': 'bullet'
-                            }],
-                            ['clean']
-                        ]
+                        toolbar: toolbarOptions,
                     }
                 });
 
@@ -578,10 +613,10 @@
 
             addOption() {
                 // if (this.options.length < 10) {
-                    this.options.push({
-                        value: '',
-                        is_correct: false
-                    });
+                this.options.push({
+                    value: '',
+                    is_correct: false
+                });
                 // }
             },
 
