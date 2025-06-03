@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Enum\QuestionTypes;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LevelResource;
 use App\Http\Resources\QuestionCollection;
@@ -47,7 +48,7 @@ class QuestionController extends Controller
             'education_type' => 'required|string|in:primary,secondary,senior', // adjust these values to match your data
             'level_id' => 'required|integer|exists:question_levels,id',
             'subject_id' => 'required|integer|exists:question_subjects,id',
-            'type' => 'required|string|in:mcq,fill_blank,true_false,linking', // customize per your question types
+            'type' => 'required|string|in:' . implode(',', QuestionTypes::TYPES), // customize per your question types
         ]);
 
         if ($validator->fails()) {
