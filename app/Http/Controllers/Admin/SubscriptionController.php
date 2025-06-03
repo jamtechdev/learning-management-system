@@ -33,15 +33,11 @@ class SubscriptionController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'description' => 'nullable|string',
-            'subjects' => 'array',
-            'subjects.*' => 'exists:question_subjects,id',
+
         ]);
 
         $plan = SubscriptionPlan::create($validated);
 
-        if (isset($validated['subjects'])) {
-            $plan->subjects()->sync($validated['subjects']);
-        }
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan created successfully.');
     }
@@ -59,17 +55,10 @@ class SubscriptionController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'description' => 'nullable|string',
-            'subjects' => 'array',
-            'subjects.*' => 'exists:question_subjects,id',
+
         ]);
 
         $plan->update($validated);
-
-        if (isset($validated['subjects'])) {
-            $plan->subjects()->sync($validated['subjects']);
-        } else {
-            $plan->subjects()->detach();
-        }
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan updated successfully.');
     }
