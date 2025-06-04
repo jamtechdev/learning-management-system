@@ -10,12 +10,12 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/register', [\App\Http\Controllers\API\AuthController::class, 'register']);
         Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
         Route::post('/student-login', [\App\Http\Controllers\API\AuthController::class, 'studentLogin']);
+        Route::post('/forgot-password', [\App\Http\Controllers\API\AuthController::class, 'forgotPassword']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-
+        Route::post('/password-reset', [\App\Http\Controllers\API\AuthController::class, 'resetPassword']);
         Route::post('/logout', [\App\Http\Controllers\API\AuthController::class, 'logout']);
-
         Route::prefix('questions')->group(function () {
             Route::get('levels', [QuestionController::class, 'getAllLevels']);
             Route::get('subjects', [QuestionController::class, 'getAllSubjects']);
@@ -29,5 +29,6 @@ Route::group(['prefix' => 'v1'], function () {
         ->group(function () {
             Route::apiResource('student', \App\Http\Controllers\API\StudentController::class);
             Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
+            Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
         });
 });
