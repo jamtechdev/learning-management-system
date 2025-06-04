@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentCollection;
 use App\Http\Resources\StudentResource;
+use App\Models\QuestionLevel;
 use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -183,6 +184,18 @@ class StudentController extends Controller
             return $this->validationErrorHandler($th->validator->errors());
         } catch (ModelNotFoundException $e) {
             return $this->errorHandler(404, "Student not found!");
+        } catch (\Throwable $th) {
+            return $this->serverErrorHandler($th);
+        }
+    }
+
+    public function getStudentLevel(Request $request)
+    {
+        try {
+            $levels = QuestionLevel::select('id', 'name', 'education_type')
+                ->get()
+                ->groupBy('education_type');
+            return $this->successHandler($levels, 200, "Levels fetched successfully!");
         } catch (\Throwable $th) {
             return $this->serverErrorHandler($th);
         }

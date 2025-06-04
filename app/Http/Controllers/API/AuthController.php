@@ -8,6 +8,7 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -93,22 +94,73 @@ class AuthController extends Controller
     }
 
 
-   public function logout(Request $request)
-{
-    try {
-        $user = $request->user(); // or Auth::user();
-
-        if ($user) {
-            // Delete current access token
-            $user->currentAccessToken()->delete();
-
-            return $this->successHandler(null, 200, 'Logout Successful');
+    public function logout(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if ($user) {
+                $user->currentAccessToken()->delete();
+                return $this->successHandler(null, 200, 'Logout Successful');
+            }
+            return $this->errorHandler(401, 'Unauthorized');
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
         }
-
-        return $this->errorHandler(401, 'Unauthorized');
-    } catch (\Exception $e) {
-        return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
     }
-}
 
+    public function resetPassword(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $request->validate([
+                'current_password' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($user) {
+                        if (!Hash::check($value, $user->password)) {
+                            $fail('The provided password is incorrect.');
+                        }
+                    }
+                ],
+                'new_password' => [
+                    'required',
+                    'confirmed',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($value === $request->current_password) {
+                            $fail('The new password cannot be the same as the current password.');
+                        }
+                    }
+                ],
+            ]);
+            $user->update([
+                'password' => Hash::make($request->new_password),
+            ]);
+            return $this->successHandler(null, 200, 'Password reset successful');
+        } catch (ValidationException $e) {
+            return $this->validationErrorHandler($e->validator->errors());
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+        }
+    }
+
+
+    public function forgotPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => ['required', 'email'],
+            ]);
+            $status = Password::sendResetLink(
+                $request->only('email'),
+            );
+            return match ($status) {
+                Password::RESET_LINK_SENT => $this->successHandler(null, 200, 'Password reset link sent successfully'),
+                default => $this->errorHandler(500, 'Server Error', ['message' => $status]),
+            };
+        } catch (ValidationException $e) {
+            return $this->validationErrorHandler($e->validator->errors());
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+        }
+    }
 }
