@@ -27,7 +27,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::middleware(['auth:sanctum', 'role:parent'])
         ->prefix('parent')
         ->group(function () {
-            Route::apiResource('student', \App\Http\Controllers\API\StudentController::class);
+            Route::apiResource('student', \App\Http\Controllers\API\StudentController::class)->except('update');
+            Route::post('student/{student}', [\App\Http\Controllers\API\StudentController::class, 'update']);
             Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
             Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
         });
