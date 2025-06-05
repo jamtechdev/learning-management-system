@@ -15,23 +15,23 @@
                 <!-- Tabs -->
                 <div class="mb-4 space-x-2">
                     <button @click="tab = 'all'" :class="{ 'bg-blue-700 text-white': tab === 'all' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border rounded hover:bg-blue-100">
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         All
                     </button>
                     <button @click="tab = 'mcq'" :class="{ 'bg-blue-700 text-white': tab === 'mcq' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border rounded hover:bg-blue-100">
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         MCQ
                     </button>
                     <button @click="tab = 'fill_blank'" :class="{ 'bg-blue-700 text-white': tab === 'fill_blank' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border rounded hover:bg-blue-100">
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         Fill in the Blank
                     </button>
                     <button @click="tab = 'true_false'" :class="{ 'bg-blue-700 text-white': tab === 'true_false' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border rounded hover:bg-blue-100">
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white" >
                         True / False
                     </button>
                     <button @click="tab = 'linking'" :class="{ 'bg-blue-700 text-white': tab === 'linking' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border rounded hover:bg-blue-100">
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         Linking
                     </button>
                 </div>
