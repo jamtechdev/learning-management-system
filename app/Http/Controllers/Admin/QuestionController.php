@@ -14,7 +14,7 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        $questions = Question::with(['options', 'level', 'subject'])->paginate(10);
+        $questions = Question::with(['options', 'level', 'subject'])->get();
 
         return view('admin.question.index', compact('questions'));
     }
@@ -42,6 +42,7 @@ class QuestionController extends Controller
     public function store(Request $request)
     {
 
+
         $data = $request->input('question_data');
 
         switch ($data['type']) {
@@ -49,6 +50,9 @@ class QuestionController extends Controller
                 $this->saveMcqQuestion($data);
                 break;
 
+            case 'fill_blank':
+                $this->saveFillBlankQuestion($data);
+                break;
             case 'fill_blank':
                 $this->saveFillBlankQuestion($data);
                 break;
@@ -67,11 +71,46 @@ class QuestionController extends Controller
             case 'comprehension':
                 $this->saveComprehensionQuestion($data);
                 break;
+            case 'grammar_cloze_with_options':
+                $this->saveGrammarClozeWithOptions($data);
+                break;
+
             default:
                 return response()->json(['error' => 'Invalid question type'], 400);
         }
         return redirect()->route('admin.questions.index')->with('message', 'Question created successfully!');
     }
+
+
+
+
+    private function saveGrammarClozeWithOptions(array $data)
+    {
+        // Decode the JSON string if it's still in string format
+        $metadata = is_string($data['metadata']) ? json_decode($data['metadata'], true) : $data['metadata'];
+
+        // Extract content from metadata['paragraph'] for main content field
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->content = $metadata['paragraph'] ?? ''; // use paragraph as content
+        $question->education_type = $data['education_type'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
+        $question->explanation = $metadata['explanation'] ?? null;
+        $question->metadata = $metadata;
+        $question->save();
+
+        return redirect()->route('admin.questions.index')->with('success', 'Grammar Cloze With Options question saved successfully!');
+    }
+
+
+
+
+
+
+
+
+
 
     public function saveMcqQuestion(array $data)
     {
@@ -266,22 +305,22 @@ class QuestionController extends Controller
     }
 
     // Save Linking Question
-        private function saveComprehensionQuestion($data)
-        {
+    private function saveComprehensionQuestion($data)
+    {
 
 
-            $question = new Question();
-            $question->type = $data['type'];
-            $question->education_type = $data['education_type'];
-            $question->level_id = $data['level_id'];
-            $question->subject_id = $data['subject_id'];
-            $question->content = $data['content'];
-            $question->explanation = $data['explanation'] ?? null;
-            $question->metadata = $data;
-            $question->save();
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $data;
+        $question->save();
 
-            return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
-        }
+        return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
+    }
 
 
 

@@ -50,10 +50,11 @@
                     class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="" disabled>-- Choose Type --</option>
                     <template x-for="type in questionTypes" :key="type">
-                        <option :value="type" x-text="type.replace('_', ' ')"></option>
+                        <option :value="type" x-text="formatQuestionType(type)"></option>
                     </template>
                 </select>
             </div>
+
         </div>
 
         <!-- Step 2: Question Form -->
@@ -65,6 +66,8 @@
             <input type="hidden" name="question_data[level_id]" :value="selectedLevelId" />
             <input type="hidden" name="question_data[subject_id]" :value="selectedSubject?.id" />
             <input type="hidden" name="question_data[type]" :value="questionType" />
+            <input type="hidden" name="question_data[metadata]" id="metadataInput" x-model="formattedJson">
+
 
             <!-- Question Content -->
             <div class="p-6 bg-white border shadow rounded-xl">
@@ -267,74 +270,50 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'fill_blank'">
-                <div class="mb-6">
-                    <label for="fillBlankType" class="block mb-2 text-lg font-semibold text-blue-700">
-                        Fill in the Blank Type
-                    </label>
-                    <select id="fillBlankType" x-model="fillBlankType"
-                        class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="grammar_cloze">Grammar Cloze</option>
-                        <option value="grammar_cloze_with_options">Grammar Cloze with Options</option>
-                    </select>
+            <template x-if="questionType === 'grammar_cloze_with_options'">
+                <div class="p-6 bg-white border rounded shadow">
+                    <!-- Generate Button -->
+                    <div class="mb-6">
+                        <a href="javascript:void(0)" @click="parseGrammarCloze"
+                            class="px-4 py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                            Generate Grammar Cloze Questions
+                        </a>
+                    </div>
 
-                    <div class="mt-4">
+                    <!-- Shared Options Input -->
+                    <div class="mb-6">
+                        <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
+                        <input type="text" x-model="sharedOptionsRaw" @input="updateFormattedJson"
+                            class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
+                    </div>
 
-
-                        <button type="button" @click="generateQuestions()"
-                            class="px-4 py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700">
-                            Generate Questions
-                        </button>
-
-                        <template x-if="questions.length > 0">
-                            <div class="mt-6">
-                                <h3 class="mb-2 text-lg font-semibold">Generated Questions JSON Preview:</h3>
-                                <pre class="p-3 overflow-auto bg-gray-100 rounded" style="max-height: 300px; font-size: 0.9rem;">
-                            <code x-text="JSON.stringify(getQuestionPayload(), null, 2)"></code>
-                             </pre>
-                            </div>
-                        </template>
-
-                        <template x-if="fillBlankType === 'grammar_cloze' && questions.length > 0">
-                            <div class="mt-6">
-                                <h3 class="mb-2 text-lg font-semibold">Fill in the Blank Inputs</h3>
-                                <template x-for="(q, index) in questions" :key="index">
-                                    <div class="mb-3">
-                                        <label class="block mb-1 font-semibold text-blue-700">Blank Number: <span
-                                                x-text="q.blank_number"></span></label>
-                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded"
-                                            placeholder="User's answer" x-model="q.userAnswer" />
+                    <!-- Detected Blanks -->
+                    <template x-if="questions.length">
+                        <div class="mb-6">
+                            <h2 class="mb-4 text-xl font-bold">Detected Blanks</h2>
+                            <template x-for="(q, idx) in questions" :key="q.blank_number">
+                                <div
+                                    class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
+                                    <div><strong>Blank #</strong>: <span x-text="q.blank_number"></span></div>
+                                    <div>
+                                        <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
+                                            class="px-3 py-2 border rounded" @input="updateFormattedJson">
                                     </div>
-                                </template>
-                            </div>
-                        </template>
+                                    <button @click="removeQuestion(idx)"
+                                        class="text-red-600 hover:underline">Remove</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
 
-                        <template x-if="fillBlankType === 'grammar_cloze_with_options' && questions.length > 0">
-                            <div class="mt-6">
-                                <h3 class="mb-2 text-lg font-semibold">Fill in the Blank with Options</h3>
-                                <template x-for="(q, index) in questions" :key="index">
-                                    <div class="p-3 mb-4 border border-gray-300 rounded">
-                                        <label class="block mb-2 font-semibold text-blue-700">Blank Number: <span
-                                                x-text="q.blank_number"></span></label>
-                                        <template x-if="q.options && q.options.length > 0">
-                                            <template x-for="(opt, i) in q.options" :key="i">
-                                                <label class="inline-flex items-center mr-4">
-                                                    <input type="radio" :name="'blank_' + q.blank_number"
-                                                        :value="opt" x-model="q.userAnswer" />
-                                                    <span class="ml-2" x-text="opt"></span>
-                                                </label>
-                                            </template>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
+                    <!-- JSON Output -->
+                    <div
+                        class="p-4 overflow-x-auto font-mono text-sm text-white whitespace-pre-wrap bg-gray-800 rounded">
+                        <h3 class="mb-2 font-semibold">Generated JSON:</h3>
+                        <pre x-text="formattedJson"></pre>
                     </div>
                 </div>
-
-
             </template>
-
 
             <!-- Submit Buttons -->
             <div class="flex justify-between mt-10">
@@ -368,6 +347,15 @@
             subjects: [],
             options: [],
             hasInsertedBlank: false,
+
+
+            // ===================== Grammar Cloze =====================
+            // Grammar Cloze State
+            paragraph: '',
+            sharedOptionsRaw: '',
+            questions: [],
+            formattedJson: '',
+
 
             init() {
                 const editor = this.$refs.questionContentEditor;
@@ -424,7 +412,75 @@
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
                 });
+                if (this.questionType === 'fill_blank') {
+                    this.parseGrammarCloze(); // auto-parse grammar cloze from editor content
+                }
             },
+
+
+            parseGrammarCloze() {
+                if (!this.questionContent) return;
+
+                // Get raw text from Quill HTML content
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.questionContent;
+                const rawText = tempDiv.innerText.trim();
+
+                const blankRegex = /\((\d+)\)\s*_{4,}/g;
+                const matches = [];
+                let match;
+                while ((match = blankRegex.exec(rawText)) !== null) {
+                    const blankNumber = parseInt(match[1]);
+                    matches.push({
+                        id: matches.length + 1,
+                        blank_number: blankNumber,
+                        correct_answer: '',
+                        input_type: 'input'
+                    });
+                }
+
+                this.questions = matches;
+                this.updateFormattedJson();
+            },
+
+            updateFormattedJson() {
+                const sharedOptions = this.sharedOptionsRaw
+                    .split(',')
+                    .map(opt => opt.trim())
+                    .filter(opt => opt.length > 0);
+
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.questionContent;
+                const rawText = tempDiv.innerText.trim();
+
+                const output = {
+                    paragraph: rawText,
+                    question_type: 'grammar_cloze',
+                    question_group: {
+                        shared_options: sharedOptions
+                    },
+                    questions: this.questions.map(q => ({
+                        id: q.id,
+                        blank_number: q.blank_number,
+                        correct_answer: q.correct_answer,
+                        input_type: q.input_type
+                    }))
+                };
+
+                this.formattedJson = JSON.stringify(output, null, 2);
+                // 🔽 Also set it to the hidden input field
+                const hiddenInput = document.querySelector('#metadataInput');
+                if (hiddenInput) {
+                    hiddenInput.value = this.formattedJson;
+                }
+            },
+
+            removeQuestion(index) {
+                this.questions.splice(index, 1);
+                this.updateFormattedJson();
+            },
+
+            // ===================== Grammar Cloze =====================
 
             // Called when education type changes
             onEducationTypeChange() {
@@ -551,80 +607,26 @@
                 };
                 reader.readAsDataURL(file);
             },
-
+            // Other question type data
+            trueFalseAnswer: 'True',
+            linkingPairs: [{
+                label: '',
+                value: ''
+            }, {
+                label: '',
+                value: ''
+            }],
             rearrangingText: '',
             rearrangingItems: [],
             addRearrangingItem() {
                 this.rearrangingItems.push('');
             },
-
-            // Fill in the blank
-            fillBlankType: 'grammar_cloze',
-
-            fillBlankType: 'grammar_cloze',
-            paragraph: '',
-            questions: [],
-
-            generateQuestions() {
-                this.questions = [];
-                // Parse the paragraph for blanks:
-                // Pattern 1: (number) ______  --> grammar_cloze, input type
-                // Pattern 2: (number)[option1 / option2 / option3] --> grammar_cloze_with_options, radio
-
-                if (!this.paragraph.trim()) {
-                    alert('Please enter a paragraph with blanks.');
-                    return;
-                }
-
-                if (this.fillBlankType === 'grammar_cloze') {
-                    // Detect (number) ______
-                    const regex = /\((\d+)\)\s*_{2,}/g; // matches (15) ______ (2 or more underscores)
-                    let match;
-                    while ((match = regex.exec(this.paragraph)) !== null) {
-                        this.questions.push({
-                            blank_number: parseInt(match[1]),
-                            correct_answer: null,
-                            input_type: 'input',
-                            userAnswer: '',
-                        });
-                    }
-                } else if (this.fillBlankType === 'grammar_cloze_with_options') {
-                    // Detect (number)[option1 / option2 / option3]
-                    const regex = /\((\d+)\)\[([^\]]+)\]/g;
-                    let match;
-                    while ((match = regex.exec(this.paragraph)) !== null) {
-                        // Split options by slash and trim spaces
-                        let options = match[2].split('/').map(o => o.trim());
-                        this.questions.push({
-                            blank_number: parseInt(match[1]),
-                            correct_answer: null,
-                            input_type: 'radio',
-                            options: options,
-                            userAnswer: '',
-                        });
-                    }
-                }
+            formatQuestionType(type) {
+                return type
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
             },
-
-            getQuestionPayload() {
-                // Return JSON structure like your example
-                return {
-                    paragraph: this.paragraph,
-                    question_type: this.fillBlankType,
-                    questions: this.questions.map(q => {
-                        let base = {
-                            blank_number: q.blank_number,
-                            correct_answer: q.correct_answer,
-                            input_type: q.input_type,
-                        };
-                        if (q.input_type === 'radio') {
-                            base.options = q.options;
-                        }
-                        return base;
-                    }),
-                };
-            },
-
 
             // Submit question form
             submitForm() {

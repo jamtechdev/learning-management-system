@@ -27,7 +27,7 @@
                         Fill in the Blank
                     </button>
                     <button @click="tab = 'true_false'" :class="{ 'bg-blue-700 text-white': tab === 'true_false' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white" >
+                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         True / False
                     </button>
                     <button @click="tab = 'linking'" :class="{ 'bg-blue-700 text-white': tab === 'linking' }"
@@ -186,8 +186,33 @@
                                                 @endforeach
                                             </ol>
                                         </div>
+                                    @elseif ($question->type === 'grammar_cloze_with_options')
+                                        <div class="space-y-4">
+                                            @php
+                                                $sharedOptions =
+                                                    $question->metadata['question_group']['shared_options'] ?? [];
+                                                $questions = $question->metadata['questions'] ?? [];
+                                            @endphp
+
+                                            @foreach ($questions as $blank)
+                                                <div>
+                                                    <span class="font-semibold">Blank
+                                                        {{ $blank['blank_number'] }}:</span>
+                                                    <ul class="pl-4 list-disc">
+                                                        @foreach ($sharedOptions as $option)
+                                                            <li>
+                                                                {{ $option }}
+                                                                @if ($option === $blank['correct_answer'])
+                                                                    <span
+                                                                        class="font-semibold text-green-600">(Correct)</span>
+                                                                @endif
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     @else
-                                        @dd($question->type)
                                         <span class="italic text-gray-400">No options available</span>
                                     @endif
                                 </td>
@@ -222,9 +247,9 @@
                     </tbody>
                 </table>
 
-                <div class="mt-6">
+                {{-- <div class="mt-6">
                     {{ $questions->links('pagination::tailwind') }}
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
