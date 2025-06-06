@@ -29,7 +29,11 @@ return new class extends Migration
                 'linking',
                 'true_false',
                 'grouped',
-                'comprehension'
+                'comprehension',
+                'editing',
+                'underlinecorrect',
+                'grammar_cloze_with_options',
+
             ]);
             $table->text('explanation')->nullable();
             $table->json('metadata')->nullable();

@@ -14,7 +14,7 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        $questions = Question::with(['options', 'level', 'subject'])->get();
+        $questions = Question::with(['options', 'level', 'subject'])->paginate(10);
 
         return view('admin.question.index', compact('questions'));
     }
@@ -41,8 +41,7 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-
-
+        // dd($request->all());
         $data = $request->input('question_data');
 
         switch ($data['type']) {
@@ -50,9 +49,6 @@ class QuestionController extends Controller
                 $this->saveMcqQuestion($data);
                 break;
 
-            case 'fill_blank':
-                $this->saveFillBlankQuestion($data);
-                break;
             case 'fill_blank':
                 $this->saveFillBlankQuestion($data);
                 break;
@@ -68,53 +64,31 @@ class QuestionController extends Controller
             case 'rearranging':
                 $this->saveRearrangingQuestion($data);
                 break;
+
             case 'comprehension':
                 $this->saveComprehensionQuestion($data);
                 break;
+
             case 'grammar_cloze_with_options':
                 $this->saveGrammarClozeWithOptions($data);
+                break;
+            case 'editing':
+                $this->saveEditingQuestion($data);
+                break;
+            case 'underlinecorrect':
+                $this->saveUnderlineInpuQuestion($data);
                 break;
 
             default:
                 return response()->json(['error' => 'Invalid question type'], 400);
         }
+
         return redirect()->route('admin.questions.index')->with('message', 'Question created successfully!');
     }
 
-
-
-
-    private function saveGrammarClozeWithOptions(array $data)
-    {
-        // Decode the JSON string if it's still in string format
-        $metadata = is_string($data['metadata']) ? json_decode($data['metadata'], true) : $data['metadata'];
-
-        // Extract content from metadata['paragraph'] for main content field
-        $question = new Question();
-        $question->type = $data['type'];
-        $question->content = $metadata['paragraph'] ?? ''; // use paragraph as content
-        $question->education_type = $data['education_type'] ?? null;
-        $question->level_id = $data['level_id'] ?? null;
-        $question->subject_id = $data['subject_id'] ?? null;
-        $question->explanation = $metadata['explanation'] ?? null;
-        $question->metadata = $metadata;
-        $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'Grammar Cloze With Options question saved successfully!');
-    }
-
-
-
-
-
-
-
-
-
-
+    // 1. MCQ
     public function saveMcqQuestion(array $data)
     {
-
         $correctIndex = (int) $data['correct_option'];
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
@@ -122,17 +96,18 @@ class QuestionController extends Controller
                 'is_correct' => ($index === $correctIndex),
             ];
         }, $data['options'], array_keys($data['options']));
+
         $answer = [
             'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
             'format' => 'text',
         ];
+
         $payload = $data;
-
-
-
         $payload['options'] = $structuredOptions;
         $payload['answer'] = $answer;
+        $payload['instruction'] = $data['instruction'] ?? '';
         unset($payload['correct_option']);
+
         $question = new \App\Models\Question();
         $question->type = $data['type'];
         $question->content = $data['content'];
@@ -143,21 +118,22 @@ class QuestionController extends Controller
         $question->metadata = $payload;
         $question->save();
 
-        // Save each option
         foreach ($structuredOptions as $index => $option) {
             \App\Models\QuestionOption::create([
                 'question_id' => $question->id,
-                'label' => chr(65 + $index), // A, B, C...
+                'label' => chr(65 + $index),
                 'value' => $option['value'],
                 'is_correct' => $option['is_correct'],
             ]);
         }
 
-        return redirect()->route('admin.questions.index')->with('success', 'Fill in blanks type question created successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'MCQ question created successfully!');
     }
 
+    // 2. Fill in the Blank
     private function saveFillBlankQuestion($data)
     {
+        $data['instruction'] = $data['instruction'] ?? '';
 
         $question = new Question();
         $question->type = $data['type'];
@@ -169,15 +145,16 @@ class QuestionController extends Controller
         $question->metadata = $data;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Fill in the Blank type question created successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'Fill in the Blank question saved successfully!');
     }
 
-    // Save True/False Question
+    // 3. True/False
     private function saveTrueFalseQuestion($data)
     {
         $transformed = [
             'type' => 'true_false',
             'content' => $data['content'],
+            'instruction' => $data['instruction'] ?? '',
             'options' => [
                 ['value' => 'True'],
                 ['value' => 'False'],
@@ -199,11 +176,10 @@ class QuestionController extends Controller
         $question->metadata = $transformed;
         $question->save();
 
-        return redirect()->route('admin.questions.index')
-            ->with('success', 'True/False type question saved successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'True/False question saved successfully!');
     }
 
-    // Save Linking Question
+    // 4. Linking
     private function saveLinkingQuestion($data, $request)
     {
         $answer = [];
@@ -212,19 +188,13 @@ class QuestionController extends Controller
             $leftImageUri = null;
             $rightImageUri = null;
 
-            // Upload left image if label_type is 'image' and file is uploaded
-            if (($option['label_type'] ?? '') === 'image' &&
-                $request->hasFile("question_data.options.$index.label_image")
-            ) {
+            if (($option['label_type'] ?? '') === 'image' && $request->hasFile("question_data.options.$index.label_image")) {
                 $leftImage = $request->file("question_data.options.$index.label_image");
                 $storedPath = $leftImage->store('uploads/linking', 'public');
                 $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
             }
 
-            // Upload right image if value_type is 'image' and file is uploaded
-            if (($option['value_type'] ?? '') === 'image' &&
-                $request->hasFile("question_data.options.$index.value_image")
-            ) {
+            if (($option['value_type'] ?? '') === 'image' && $request->hasFile("question_data.options.$index.value_image")) {
                 $rightImage = $request->file("question_data.options.$index.value_image");
                 $storedPath = $rightImage->store('uploads/linking', 'public');
                 $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
@@ -248,9 +218,11 @@ class QuestionController extends Controller
             'type' => 'linking',
             'content' => $data['content'] ?? '',
             'explanation' => $data['explanation'] ?? '',
+            'instruction' => $data['instruction'] ?? '',
             'format' => 'mapping',
             'answer' => $answer,
         ];
+
         $question = new Question();
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
@@ -261,36 +233,33 @@ class QuestionController extends Controller
         $question->metadata = $transformed;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'Linking question saved successfully!');
     }
 
+    // 5. Rearranging
     private function saveRearrangingQuestion($data)
     {
-        // Split question_text into words (preserve punctuation)
         $questionText = $data['question_text'];
         $orderedAnswer = preg_split('/\s+/', trim($questionText));
-
-        // Shuffle to create options
         $shuffled = $orderedAnswer;
         shuffle($shuffled);
 
-        // Convert to options format
         $options = collect($shuffled)->map(fn($word) => [
             'value' => $word,
             'is_correct' => false,
         ])->values()->toArray();
 
-        // Prepare full metadata
         $transformed = [
             'type' => 'rearranging',
             'content' => $data['content'] ?? '',
+            'instruction' => $data['instruction'] ?? '',
             'options' => $options,
             'answer' => [
                 'answer' => $orderedAnswer,
                 'format' => 'ordered'
             ],
         ];
-        // dd($data);
+
         $question = new Question();
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
@@ -304,41 +273,106 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'Rearranging question saved successfully!');
     }
 
-    // Save Linking Question
-    private function saveComprehensionQuestion($data)
+    // 6. Grammar Cloze With Options
+    private function saveGrammarClozeWithOptions(array $data)
     {
+        $metadata = is_string($data['metadata']) ? json_decode($data['metadata'], true) : $data['metadata'];
+        $metadata['instruction'] = $data['instruction'] ?? '';
 
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->content = $metadata['paragraph'] ?? '';
+        $question->education_type = $data['education_type'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
+        $question->explanation = $metadata['explanation'] ?? null;
+        $question->metadata = $metadata;
+        $question->save();
+
+        return redirect()->route('admin.questions.index')->with('success', 'Grammar Cloze With Options question saved successfully!');
+    }
+
+    // 7. Comprehension
+    private function saveComprehensionQuestion(array $data)
+    {
+        $decodedMetadata = is_string($data['comprehension_metadata'])
+            ? json_decode($data['comprehension_metadata'], true)
+            : $data['comprehension_metadata'];
+
+        $fullMetadata = [
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'instruction' => $data['instruction'] ?? '',
+            'passage' => $decodedMetadata['passage'] ?? null,
+            'subquestions' => $decodedMetadata['subquestions'] ?? [],
+        ];
 
         $question = new Question();
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
         $question->subject_id = $data['subject_id'];
-        $question->content = $data['content'];
+        $question->content = $fullMetadata['passage'] ?? '';
         $question->explanation = $data['explanation'] ?? null;
-        $question->metadata = $data;
+        $question->metadata = $fullMetadata;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Linking type question saved successfully!');
+        return redirect()->route('admin.questions.index')->with('success', 'Comprehension question saved successfully!');
     }
 
+    protected function saveEditingQuestion($data)
+    {
+        // Parse the editing_metadata JSON
+        $decodedMetadata = json_decode($data['editing_metadata'], true);
+        $fullMetadata = [
+            'instruction' => $data['instruction'] ?? '',
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'paragraph' => $decodedMetadata['paragraph'] ?? null,
+            'questions' => $decodedMetadata['questions'] ?? [],
+        ];
+        // dd($fullMetadata);
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'] ?? '';
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $fullMetadata;
+        $question->save();
+        return redirect()->route('admin.questions.index')->with('success', 'Editing spelling  question saved successfully!');
+    }
 
+    protected function saveUnderlineInpuQuestion($data)
+    {
+        // Parse the editing_metadata JSON
+        $decodedMetadata = json_decode($data['underline_metadata'], true);
+        $fullMetadata = [
+            'instruction' => $data['instruction'] ?? '',
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'paragraph' => $data['content'] ?? null,
+            'questions' => $decodedMetadata['questions'] ?? [],
+        ];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        $question = new Question();
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'] ?? '';
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $fullMetadata;
+        $question->save();
+        return redirect()->route('admin.questions.index')->with('success', 'Underline correct  question saved successfully!');
+    }
 
 
     // Update existing question
