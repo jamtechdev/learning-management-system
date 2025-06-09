@@ -74,6 +74,7 @@
 
                                 <!-- Options -->
                                 <td class="max-w-md px-4 py-3 overflow-y-auto text-gray-900 dark:text-gray-100">
+
                                     @switch($question->type)
                                         @case('mcq')
                                             <ul class="space-y-1">
@@ -196,9 +197,11 @@
                                             </div>
                                         @break
 
-                                        @case('grammar_cloze')
+                                        @case('grammar_cloze_with_options')
+
                                             <div class="space-y-4">
                                                 @foreach ($question->metadata['questions'] ?? [] as $blank)
+
                                                     <div class="p-2 border rounded dark:border-gray-700">
                                                         <span class="font-semibold">Blank {{ $blank['blank_number'] }}:</span>
                                                         <span
