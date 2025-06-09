@@ -16,6 +16,7 @@ class EditingQuestionSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Creating editing questions...');
         $subjects = QuestionSubject::all();
 
         foreach ($subjects as $subject) {
@@ -63,5 +64,7 @@ class EditingQuestionSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->command->info('Editing questions created successfully.');
     }
 }

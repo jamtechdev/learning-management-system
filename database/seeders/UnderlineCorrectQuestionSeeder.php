@@ -16,6 +16,10 @@ class UnderlineCorrectQuestionSeeder extends Seeder
      */
     public function run(): void
     {
+
+
+        $this->command->info('Creating underline correct questions...');
+
         $subjects = QuestionSubject::all();
 
         foreach ($subjects as $subject) {
@@ -59,5 +63,7 @@ class UnderlineCorrectQuestionSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->command->info('Underline correct questions seeded successfully.');
     }
 }

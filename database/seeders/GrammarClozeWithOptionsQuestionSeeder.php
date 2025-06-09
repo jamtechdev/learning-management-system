@@ -16,6 +16,8 @@ class GrammarClozeWithOptionsQuestionSeeder extends Seeder
      */
     public function run(): void
     {
+
+        $this->command->info('Creating grammar cloze with options questions...');
         // Get all subjects
         $subjects = QuestionSubject::all();
 
@@ -59,5 +61,7 @@ class GrammarClozeWithOptionsQuestionSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->command->info('Grammar cloze with options questions created successfully.');
     }
 }

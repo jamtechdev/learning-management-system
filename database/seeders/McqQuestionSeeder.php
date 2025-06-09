@@ -14,6 +14,7 @@ class McqQuestionSeeder extends Seeder
      */
     public function run(): void
     {
+
         $questions = [];
         $this->command->info('Seeding MCQ questions...');
         $this->command->info('Generating MCQ questions...');

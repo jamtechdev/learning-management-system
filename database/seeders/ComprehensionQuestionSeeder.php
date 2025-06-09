@@ -17,7 +17,7 @@ class ComprehensionQuestionSeeder extends Seeder
     public function run(): void
     {
         $subjects = QuestionSubject::all();
-
+        $this->command->info('Creating comprehension questions...');
         foreach ($subjects as $subject) {
             for ($i = 1; $i <= 10; $i++) {
                 $level = $subject->level;
@@ -55,5 +55,7 @@ class ComprehensionQuestionSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->command->info('Comprehension questions created successfully.');
     }
 }
