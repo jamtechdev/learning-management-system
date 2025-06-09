@@ -1,12 +1,18 @@
 <?php
 
+use App\Enum\QuestionTypes;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-// Artisan::command('inspire', function () {
-//     $this->comment(Inspiring::quote());
-// })->purpose('Display an inspiring quote');
+Artisan::command('inspire', function () {
+    // $this->comment(Inspiring::quote());
+    foreach (QuestionTypes::names() as $key => $value) {
+        $value = str($value)->studly();
+        Artisan::call("make:seeder {$value}QuestionSeeder");
+    }
+
+})->purpose('Display an inspiring quote');
 
 
 Artisan::command('weekly:assign', function (string $user) {

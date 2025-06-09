@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->statefulApi();
+        // $middleware->statefulApi();
         $middleware->alias([
             'role' => CheckRole::class,
         ]);
@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Route not found or does not exist',
+                    'message' => 'Requested API not found, Please check your request',
                 ], 404);
             }
             return response()->view('errors.404', [], 404);
