@@ -495,7 +495,8 @@ class QuestionController extends Controller
             $leftImageUri = null;
             $rightImageUri = null;
 
-            if (($option['match_type'] ?? '') === 'image' &&
+            if (
+                ($option['match_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.label_image")
             ) {
                 $leftImage = $request->file("question_data.options.$index.label_image");
@@ -505,7 +506,8 @@ class QuestionController extends Controller
                 $leftImageUri = $option['existing_label_image_uri'];
             }
 
-            if (($option['value_type'] ?? '') === 'image' &&
+            if (
+                ($option['value_type'] ?? '') === 'image' &&
                 $request->hasFile("question_data.options.$index.value_image")
             ) {
                 $rightImage = $request->file("question_data.options.$index.value_image");
