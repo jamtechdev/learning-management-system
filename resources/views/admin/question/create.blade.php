@@ -65,19 +65,22 @@
             <input type="hidden" name="question_data[subject_id]" :value="selectedSubject?.id" />
             <input type="hidden" name="question_data[type]" :value="questionType" />
             <!-- Grammar Cloze Metadata (only when type is grammar_cloze_with_options) -->
+
             <template x-if="questionType === 'grammar_cloze_with_options'">
                 <input type="hidden" name="question_data[metadata]" id="metadataInput" x-model="formattedJson" />
             </template>
-            <template x-if="questionType === 'underlinecorrect'">
-                <input type="hidden" name="question_data[underline_metadata]" id="correctUnderlineInput" x-model="formattedJson" />
-            </template>
 
+            <template x-if="questionType === 'underlinecorrect'">
+                <input type="hidden" name="question_data[underline_metadata]" id="correctUnderlineInput"
+                    x-model="formattedJson" />
+            </template>
 
             <!-- Comprehension Metadata (only when type is comprehension) -->
             <template x-if="questionType === 'comprehension'">
                 <input type="hidden" id="comprehensionMetadataInput" name="question_data[comprehension_metadata]"
                     x-model="formattedJson" />
             </template>
+
             <template x-if="questionType === 'editing'">
                 <input type="hidden" id="editingMetadataInput" name="question_data[editing_metadata]"
                     x-model="formattedJson" />
@@ -131,8 +134,8 @@
                     <template x-for="(option, index) in options" :key="index">
                         <div class="flex items-center gap-3 mb-3">
                             <input type="radio" :name="'question_data[correct_option]'" :value="index"
-                                class="w-5 h-5 text-blue-600" @change="setCorrect(index)" :checked="option.is_correct"
-                                required />
+                                class="w-5 h-5 text-blue-600" @change="setCorrect(index)"
+                                :checked="option.is_correct" required />
                             <input type="text" :name="'question_data[options][' + index + ']'"
                                 x-model="option.value" class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                                 placeholder="Option text" required />
@@ -318,7 +321,7 @@
                     <!-- Shared Options Input -->
                     <div class="mb-6">
                         <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
-                        <input type="text" x-model="sharedOptionsRaw" @input="updateFormattedJson"
+                        <input type="text" x-model="sharedOptionsRaw" @input="updateGrammarClozeJson"
                             class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
                     </div>
 
@@ -332,7 +335,7 @@
                                     <div><strong>Blank #</strong>: <span x-text="q.blank_number"></span></div>
                                     <div>
                                         <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
-                                            class="px-3 py-2 border rounded" @input="updateFormattedJson">
+                                            class="px-3 py-2 border rounded" @input="updateGrammarClozeJson">
                                     </div>
                                     <button @click="removeQuestion(idx)"
                                         class="text-red-600 hover:underline">Remove</button>
@@ -617,7 +620,7 @@
 
                 const output = {
                     paragraph: rawText,
-                    question_type: 'grammar_cloze',
+                    question_type: 'grammar_cloze_with_options',
                     question_group: {
                         shared_options: sharedOptions
                     },

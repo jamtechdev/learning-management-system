@@ -1,13 +1,21 @@
 <x-app-layout>
-    <div class="py-6" x-data="{ tab: 'all' }">
+    <div class="py-6"
+         x-data="{
+            tab: 'all',
+            search: '',
+            filteredType(type, content) {
+                return (this.tab === 'all' || this.tab === type) &&
+                       content.toLowerCase().includes(this.search.toLowerCase());
+            }
+         }"
+    >
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="p-6 overflow-hidden bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
-
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Manage All Questions</h2>
                     <a href="{{ route('admin.questions.create') }}"
-                        class="inline-block px-4 py-2 text-sm font-medium text-white add-btn">
+                        class="inline-block px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
                         + Add Question
                     </a>
                 </div>
@@ -18,25 +26,23 @@
                         class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
                         All
                     </button>
-                    <button @click="tab = 'mcq'" :class="{ 'bg-blue-700 text-white': tab === 'mcq' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
-                        MCQ
-                    </button>
-                    <button @click="tab = 'fill_blank'" :class="{ 'bg-blue-700 text-white': tab === 'fill_blank' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
-                        Fill in the Blank
-                    </button>
-                    <button @click="tab = 'true_false'" :class="{ 'bg-blue-700 text-white': tab === 'true_false' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
-                        True / False
-                    </button>
-                    <button @click="tab = 'linking'" :class="{ 'bg-blue-700 text-white': tab === 'linking' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
-                        Linking
-                    </button>
+
+                    @foreach ($questionTypes as $type)
+                        <button @click="tab = '{{ $type }}'"
+                            :class="{ 'bg-blue-700 text-white': tab === '{{ $type }}' }"
+                            class="px-4 py-2 text-sm font-semibold text-gray-800 capitalize border rounded hover:bg-blue-700 hover:text-white">
+                            {{ str_replace('_', ' ', $type) }}
+                        </button>
+                    @endforeach
                 </div>
 
-                <!-- Table -->
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <input type="text" x-model="search" placeholder="Search by question or type..."
+                        class="w-full px-4 py-2 text-sm border rounded dark:bg-gray-800 dark:text-white" />
+                </div>
+
+                <!-- Questions Table -->
                 <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gradient-to-r from-blue-600 to-blue-800">
                         <tr>
@@ -51,8 +57,11 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
                         @forelse ($questions as $index => $question)
-                            <tr x-show="tab === 'all' || tab === '{{ $question->type }}'">
-                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $index + 1 }}</td>
+                            <tr
+                                x-show="filteredType('{{ $question->type }}', `{!! strip_tags($question->content) !!}`)"
+                                x-cloak
+                            >
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $questions->firstItem() + $index }}</td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                                     <div
                                         class="p-2 overflow-y-auto bg-white border border-gray-300 rounded max-h-40 dark:border-gray-700 dark:bg-gray-800">
@@ -61,20 +70,20 @@
                                         </div>
                                     </div>
                                 </td>
-
                                 <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
                                     <span class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">
                                         {{ str_replace('_', ' ', $question->type) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
-                                    {{ $question->level->name ?? '-' }}</td>
+                                    {{ $question->level->name ?? '-' }}
+                                </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
-                                    {{ $question->subject->name ?? '-' }}</td>
+                                    {{ $question->subject->name ?? '-' }}
+                                </td>
 
-                                <!-- Options -->
+                                <!-- Options column: render based on question type -->
                                 <td class="max-w-md px-4 py-3 overflow-y-auto text-gray-900 dark:text-gray-100">
-
                                     @switch($question->type)
                                         @case('mcq')
                                             <ul class="space-y-1">
@@ -83,8 +92,7 @@
                                                         <span class="font-semibold">{{ $option->value }}.</span>
                                                         <span class="ml-1">{!! $option->text !!}</span>
                                                         @if ($option->is_correct)
-                                                            <span
-                                                                class="ml-2 text-xs font-semibold text-green-600">(Correct)</span>
+                                                            <span class="ml-2 text-xs font-semibold text-green-600">(Correct)</span>
                                                         @endif
                                                     </li>
                                                 @endforeach
@@ -94,17 +102,11 @@
                                         @case('true_false')
                                             @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
                                             <div class="flex flex-col space-y-1">
-                                                <span
-                                                    class="{{ $correct === 'True' ? 'text-green-600 font-semibold' : '' }}">True
-                                                    @if ($correct === 'True')
-                                                        (Correct)
-                                                    @endif
+                                                <span class="{{ $correct === 'True' ? 'text-green-600 font-semibold' : '' }}">
+                                                    True @if ($correct === 'True')(Correct)@endif
                                                 </span>
-                                                <span
-                                                    class="{{ $correct === 'False' ? 'text-green-600 font-semibold' : '' }}">False
-                                                    @if ($correct === 'False')
-                                                        (Correct)
-                                                    @endif
+                                                <span class="{{ $correct === 'False' ? 'text-green-600 font-semibold' : '' }}">
+                                                    False @if ($correct === 'False')(Correct)@endif
                                                 </span>
                                             </div>
                                         @break
@@ -113,15 +115,13 @@
                                             <div class="space-y-2">
                                                 @foreach ($question->metadata['blanks'] ?? [] as $blank)
                                                     <div>
-                                                        <span class="text-sm font-semibold">Blank
-                                                            {{ $blank['blank_number'] }}:</span>
+                                                        <span class="text-sm font-semibold">Blank {{ $blank['blank_number'] }}:</span>
                                                         <ul class="pl-4 text-sm list-disc">
                                                             @foreach ($blank['options'] as $option)
                                                                 <li>
                                                                     {{ $option }}
                                                                     @if ($option === $blank['answer'])
-                                                                        <span
-                                                                            class="font-semibold text-green-600">(Correct)</span>
+                                                                        <span class="font-semibold text-green-600">(Correct)</span>
                                                                     @endif
                                                                 </li>
                                                             @endforeach
@@ -137,8 +137,7 @@
                                                     <div class="flex items-center justify-between p-2 space-x-2 border rounded">
                                                         <div class="flex items-center space-x-2">
                                                             @if ($pair['left']['match_type'] === 'image')
-                                                                <img src="{{ $pair['left']['image_uri'] }}"
-                                                                    class="w-10 h-10 border rounded" />
+                                                                <img src="{{ $pair['left']['image_uri'] }}" class="w-10 h-10 border rounded" />
                                                             @else
                                                                 <span>{{ $pair['left']['word'] }}</span>
                                                             @endif
@@ -146,8 +145,7 @@
                                                         <span class="text-sm text-gray-500">→</span>
                                                         <div class="flex items-center space-x-2">
                                                             @if ($pair['right']['match_type'] === 'image')
-                                                                <img src="{{ $pair['right']['image_uri'] }}"
-                                                                    class="w-10 h-10 border rounded" />
+                                                                <img src="{{ $pair['right']['image_uri'] }}" class="w-10 h-10 border rounded" />
                                                             @else
                                                                 <span>{{ $pair['right']['word'] }}</span>
                                                             @endif
@@ -181,8 +179,7 @@
                                                 <div class="mb-2 font-semibold">Available words:</div>
                                                 <ul class="flex flex-wrap gap-2">
                                                     @foreach ($question->metadata['options'] ?? [] as $opt)
-                                                        <li
-                                                            class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
+                                                        <li class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
                                                             {{ $opt['value'] }}
                                                         </li>
                                                     @endforeach
@@ -198,14 +195,11 @@
                                         @break
 
                                         @case('grammar_cloze_with_options')
-
                                             <div class="space-y-4">
                                                 @foreach ($question->metadata['questions'] ?? [] as $blank)
-
                                                     <div class="p-2 border rounded dark:border-gray-700">
                                                         <span class="font-semibold">Blank {{ $blank['blank_number'] }}:</span>
-                                                        <span
-                                                            class="font-medium text-green-600">{{ $blank['correct_answer'] }}</span>
+                                                        <span class="font-medium text-green-600">{{ $blank['correct_answer'] }}</span>
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -294,20 +288,21 @@
                                     </div>
                                 </td>
                             </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
-                                        No questions found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+                                    No questions found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
 
-                    <div class="mt-6">
-                        {{ $questions->links('pagination::tailwind') }}
-                    </div>
+                <!-- Pagination -->
+                <div class="mt-6">
+                    {{ $questions->links('pagination::tailwind') }}
                 </div>
             </div>
         </div>
-    </x-app-layout>
+    </div>
+</x-app-layout>

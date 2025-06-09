@@ -4,7 +4,6 @@
         <h1 class="mb-10 text-3xl font-bold text-center text-black drop-shadow-[0_8px_30px_rgba(55,55,55,0.1)]">
             Edit Question
         </h1>
-
         <form method="POST" x-data="questionForm()" action="{{ route('admin.questions.update', $question->id) }}"
             enctype="multipart/form-data" class="space-y-8">
             @csrf
@@ -68,7 +67,8 @@
                         Adding options in edit not supported
                     </button>
                 </div>
-            @elseif ($question->type === 'fill_blank')
+
+                @elseif ($question->type === 'fill_blank')
                 @php $blanks = old('question_data.blanks', $question->metadata['blanks'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Fill in the Blanks</label>
@@ -98,7 +98,8 @@
                     @endforeach
                     <small class="text-gray-500">To add or remove blanks/options, please recreate the question.</small>
                 </div>
-            @elseif ($question->type === 'true_false')
+
+                @elseif ($question->type === 'true_false')
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Answer</label>
                     <select name="question_data[true_false_answer]" required
@@ -111,7 +112,8 @@
                             False</option>
                     </select>
                 </div>
-            @elseif ($question->type === 'linking')
+
+                @elseif ($question->type === 'linking')
                 @php $pairs = old('question_data.options', $question->metadata['answer'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Linking Pairs</label>
@@ -178,6 +180,7 @@
                     <small class="text-gray-500">To add or remove pairs, please recreate the question.</small>
                 </div>
             @endif
+
             @if ($question->type === 'rearranging')
                 <div>
                     <div class="mb-2 font-semibold">Available words:</div>
@@ -200,61 +203,35 @@
 
             {{-- Comprehension Type --}}
             @if ($question->type === 'comprehension')
-                <div class="mb-6">
-                    <label class="block mb-2 font-semibold">Comprehension Passage</label>
-                    <textarea name="question_data[content]" rows="6" required
-                        class="w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-4 focus:ring-indigo-200">{{ old('question_data.content', $question->content) }}</textarea>
-                </div>
-
                 <div>
-                    <label class="block mb-4 font-semibold">Comprehension Questions</label>
-
+                    <label class="block mb-4 font-semibold">Passage Questions</label>
                     @php
-                        $comprehension = old('question_data.comprehension', $question->metadata['comprehension'] ?? []);
+                        $comprehension = old('question_data.comprehension', $question->metadata['subquestions'] ?? []);
                     @endphp
 
                     @foreach ($comprehension as $i => $comp)
                         <div class="p-5 mb-8 border border-gray-300 rounded-lg bg-gray-50">
                             <label class="block mb-2 font-semibold">Question #{{ $i + 1 }}</label>
-                            <input type="text"
-                                name="question_data[comprehension][{{ $i }}][question_name]" required
-                                value="{{ $comp['question_name'] ?? '' }}"
+                            <input type="text" name="question_data[comprehension][{{ $i }}][ques1]"
+                                required value="{{ $comp['ques1'] ?? '' }}"
                                 class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
 
-                            @foreach ($comp['blanks'] ?? [] as $bIndex => $blank)
-                                <div class="mb-6">
-                                    <label class="block mb-1 font-semibold">Blank #{{ $bIndex + 1 }} Correct
-                                        Answer</label>
-                                    <select
-                                        name="question_data[comprehension][{{ $i }}][blanks][{{ $bIndex }}][answer]"
-                                        required
-                                        class="w-full p-2 mb-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200">
-                                        <option value="" disabled
-                                            {{ empty($blank['answer']) ? 'selected' : '' }}>Select correct answer
-                                        </option>
-                                        @foreach ($blank['options'] ?? [] as $option)
-                                            <option value="{{ $option }}"
-                                                {{ ($blank['answer'] ?? '') === $option ? 'selected' : '' }}>
-                                                {{ $option }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <label class="block mb-1 font-semibold">Options for this blank</label>
-                                    @foreach ($blank['options'] ?? [] as $optIndex => $option)
-                                        <input type="text"
-                                            name="question_data[comprehension][{{ $i }}][blanks][{{ $bIndex }}][options][]"
-                                            value="{{ $option }}" required
-                                            class="w-full p-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
-                                    @endforeach
-                                </div>
-                            @endforeach
+                            <label class="block mb-2 font-semibold">Answer #{{ $i + 1 }}</label>
+                            <input type="text" name="question_data[comprehension][{{ $i }}][answer]"
+                                required value="{{ $comp['answer'] ?? '' }}"
+                                class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
                         </div>
                     @endforeach
-
-                    <p class="text-sm text-gray-500">To add or remove questions/blanks, please recreate the question.
-                    </p>
                 </div>
             @endif
+
+            @if ($question->type === 'underlinecorrect')
+
+
+
+
+            @endif
+
 
             <div class="flex justify-end mt-8">
                 <button type="submit" class="px-10 py-3 text-lg font-extrabold text-white transition add-btn">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enum\QuestionTypes;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\QuestionGroup;
@@ -12,11 +13,15 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-    public function index()
+     public function index()
     {
-        $questions = Question::with(['options', 'level', 'subject'])->paginate(10);
+        $questionTypes = QuestionTypes::TYPES;
 
-        return view('admin.question.index', compact('questions'));
+        $questions = Question::with(['options', 'level', 'subject'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15); // no paginate()
+
+        return view('admin.question.index', compact('questions', 'questionTypes'));
     }
 
 
@@ -276,9 +281,8 @@ class QuestionController extends Controller
     // 6. Grammar Cloze With Options
     private function saveGrammarClozeWithOptions(array $data)
     {
-        $metadata = is_string($data['metadata']) ? json_decode($data['metadata'], true) : $data['metadata'];
+        $metadata = json_decode($data['metadata'], true);
         $metadata['instruction'] = $data['instruction'] ?? '';
-
         $question = new Question();
         $question->type = $data['type'];
         $question->content = $metadata['paragraph'] ?? '';
@@ -335,6 +339,7 @@ class QuestionController extends Controller
             'paragraph' => $decodedMetadata['paragraph'] ?? null,
             'questions' => $decodedMetadata['questions'] ?? [],
         ];
+
         // dd($fullMetadata);
         $question = new Question();
         $question->type = $data['type'];
