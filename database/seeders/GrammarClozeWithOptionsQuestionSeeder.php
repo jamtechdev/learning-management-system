@@ -22,8 +22,9 @@ class GrammarClozeWithOptionsQuestionSeeder extends Seeder
         $subjects = QuestionSubject::all();
 
         foreach ($subjects as $subject) {
-            for ($i = 1; $i <= 10; $i++) {
-                $paragraph = "The quick brown fox ($i) ____ over the lazy dog. It ($i+1) ____ a sunny day.";
+            for ($i = 1; $i <= 5; $i++) {
+                $j = $i + 1;
+                $paragraph = "The quick brown fox ($i) ____ over the lazy dog. It ($j) ____ a sunny day.";
                 $sharedOptions = ['jumps', 'jumped', 'was', 'is'];
 
                 $metadata = [
@@ -43,7 +44,7 @@ class GrammarClozeWithOptionsQuestionSeeder extends Seeder
                         ],
                         [
                             'id' => 2,
-                            'blank_number' => $i + 1,
+                            'blank_number' => $j,
                             'correct_answer' => 'was',
                             'input_type' => 'input'
                         ]

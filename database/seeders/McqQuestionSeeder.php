@@ -22,7 +22,7 @@ class McqQuestionSeeder extends Seeder
             if ($level->subjects->count() <= 0) {
                 continue;
             }
-            foreach (range(1, 10) as $i) {
+            foreach (range(1, 2) as $i) {
                 $options = collect(range(1, 4))->map(fn($num) => fake()->word())->toArray();
                 $questions[] = [
                     'type' => 'mcq',

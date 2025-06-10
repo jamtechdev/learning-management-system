@@ -18,7 +18,7 @@ class TrueFalseQuestionSeeder extends Seeder
                 continue;
             }
 
-            foreach (range(1, 10) as $i) {
+            foreach (range(1, 5) as $i) {
                 $answer = fake()->boolean() ? 'True' : 'False';
                 $questionText = fake()->sentence();
 

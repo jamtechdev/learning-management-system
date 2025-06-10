@@ -19,7 +19,7 @@ class ComprehensionQuestionSeeder extends Seeder
         $subjects = QuestionSubject::all();
         $this->command->info('Creating comprehension questions...');
         foreach ($subjects as $subject) {
-            for ($i = 1; $i <= 10; $i++) {
+            for ($i = 1; $i <= 5; $i++) {
                 $level = $subject->level;
                 $educationType = 'primary'; // or assign based on level/subject
 

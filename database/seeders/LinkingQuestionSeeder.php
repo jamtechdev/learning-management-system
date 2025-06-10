@@ -20,7 +20,7 @@ class LinkingQuestionSeeder extends Seeder
                 continue;
             }
 
-            foreach (range(1, 10) as $i) {
+            foreach (range(1, 5) as $i) {
                 // Generate 4 pairs of matching options
                 $pairs = [];
                 for ($j = 0; $j < 4; $j++) {
