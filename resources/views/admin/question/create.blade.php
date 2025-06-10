@@ -42,8 +42,20 @@
                 </select>
             </div>
 
-            <!-- Question Type -->
+            <!-- Topic -->
             <div x-show="selectedSubject" x-transition>
+                <label class="block mb-2 text-sm font-medium text-blue-700">📘 Topic</label>
+                <select x-model="selectedTopicId" @change="onTopicChange"
+                    class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="" disabled>-- Choose Topic --</option>
+                    <template x-for="topic in topics" :key="topic.id">
+                        <option :value="topic.id" x-text="topic.name"></option>
+                    </template>
+                </select>
+            </div>
+
+            <!-- Question Type -->
+            <div x-show="selectedTopic" x-transition>
                 <label class="block mb-2 text-sm font-medium text-blue-700">❓ Question Type</label>
                 <select x-model="questionType"
                     class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -63,6 +75,7 @@
             <input type="hidden" name="question_data[education_type]" :value="educationType" />
             <input type="hidden" name="question_data[level_id]" :value="selectedLevelId" />
             <input type="hidden" name="question_data[subject_id]" :value="selectedSubject?.id" />
+            <input type="hidden" name="question_data[topic_id]" :value="selectedTopic?.id" />
             <input type="hidden" name="question_data[type]" :value="questionType" />
             <!-- Grammar Cloze Metadata (only when type is grammar_cloze_with_options) -->
 
@@ -469,12 +482,15 @@
             selectedLevel: '',
             selectedLevelId: '',
             selectedSubjectId: '',
+            selectedTopicId: '',
             selectedSubject: null,
+            selectedTopic: null,
             questionType: '',
             questionTypes: @json(\App\Enum\QuestionTypes::TYPES),
             levelsByType: @json($levels),
             levels: [],
             subjects: [],
+            topics: [],
             options: [],
             hasInsertedBlank: false,
             // ===================== Grammar Cloze =====================
@@ -488,6 +504,8 @@
             comprehensionJson: '',
             questionInstruction: "",
             init() {
+
+                console.log(this.levelsByType);
 
                 const editor = this.$refs.questionContentEditor;
 
@@ -707,6 +725,14 @@
             },
             onSubjectChange() {
                 this.selectedSubject = this.subjects.find(s => s.id == this.selectedSubjectId);
+                this.topics = this.selectedSubject.topics || [];
+                this.selectedTopic = '';
+                this.selectedTopicId = '';
+                this.questionType = '';
+            },
+
+            onTopicChange() {
+                this.selectedTopic = this.topics.find(t => t.id == this.selectedTopicId);
                 this.questionType = '';
             },
 

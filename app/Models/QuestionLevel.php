@@ -19,4 +19,10 @@ class QuestionLevel extends Model
     {
         return $this->hasMany(Question::class, 'level_id');
     }
+
+    public function topics()
+    {
+        return $this->hasMany(QuestionTopic::class, 'level_id');
+    }
+
 }

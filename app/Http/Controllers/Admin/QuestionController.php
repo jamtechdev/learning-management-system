@@ -20,7 +20,7 @@ class QuestionController extends Controller
         $tab = $request->query('tab', 'all');
         $search = $request->query('search');
 
-        $questions = Question::with(['options', 'level', 'subject'])
+        $questions = Question::with(['options', 'level', 'subject', 'topic'])
             ->when($tab !== 'all', function ($query) use ($tab) {
                 $query->where('type', $tab);
             })
@@ -41,11 +41,13 @@ class QuestionController extends Controller
     public function create()
     {
         // Load levels with subjects eager loaded
-        $levels = \App\Models\QuestionLevel::with('subjects')->get()->groupBy('education_type');
+        $levels = \App\Models\QuestionLevel::with('subjects', 'subjects.topics')->get()->groupBy('education_type');
         if ($levels->isEmpty()) {
             Session::flash('error', 'No levels found. Please create a level first.');
             return redirect()->route('admin.levels.create');
         }
+
+        // dd($levels);
         return view('admin.question.create', compact('levels'));
     }
 
@@ -129,7 +131,8 @@ class QuestionController extends Controller
         $payload['instruction'] = $data['instruction'] ?? '';
         unset($payload['correct_option']);
 
-        $question = new \App\Models\Question();
+        $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->education_type = $data['education_type'];
@@ -157,6 +160,7 @@ class QuestionController extends Controller
         $data['instruction'] = $data['instruction'] ?? '';
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
@@ -188,6 +192,7 @@ class QuestionController extends Controller
         ];
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
         $question->subject_id = $data['subject_id'];
@@ -245,6 +250,7 @@ class QuestionController extends Controller
         ];
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
@@ -282,6 +288,7 @@ class QuestionController extends Controller
         ];
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
@@ -300,6 +307,7 @@ class QuestionController extends Controller
         $metadata = json_decode($data['metadata'], true);
         $metadata['instruction'] = $data['instruction'] ?? '';
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $metadata['paragraph'] ?? '';
         $question->education_type = $data['education_type'] ?? null;
@@ -330,6 +338,7 @@ class QuestionController extends Controller
         ];
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
@@ -358,6 +367,7 @@ class QuestionController extends Controller
 
         // dd($fullMetadata);
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
@@ -384,6 +394,7 @@ class QuestionController extends Controller
         ];
 
         $question = new Question();
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LevelResource;
 use App\Http\Resources\QuestionCollection;
 use App\Http\Resources\SubjectResource;
+use App\Http\Resources\TopicResource;
 use App\Models\Question;
 use App\Models\UserAnswer;
 use Illuminate\Support\Facades\Validator;
@@ -41,6 +42,17 @@ class QuestionController extends Controller
         return $this->successHandler(SubjectResource::collection($subjects), 200, "Subjects fetched successfully!");
     }
 
+    public function getAllTopics(Request $request)
+    {
+        $subjectId = $request->input('subject_id');
+
+        $query = \App\Models\QuestionTopic::query();
+
+        $topics = $subjectId ? $query->where('subject_id', $subjectId)->get() : $query->get();
+
+        return $this->successHandler(TopicResource::collection($topics), 200, "Topics fetched successfully!");
+    }
+
 
     public function getTypeBasedQuestions(Request $request)
     {
@@ -48,6 +60,7 @@ class QuestionController extends Controller
             'education_type' => 'required|string|in:primary,secondary,senior', // adjust these values to match your data
             'level_id' => 'required|integer|exists:question_levels,id',
             'subject_id' => 'required|integer|exists:question_subjects,id',
+            'topic_id' => 'required|integer|exists:question_topics,id',
             'type' => 'required|string|in:' . implode(',', QuestionTypes::TYPES), // customize per your question types
         ]);
 
@@ -61,6 +74,7 @@ class QuestionController extends Controller
             ->where('type', $validated['type'])
             ->where('subject_id', $validated['subject_id'])
             ->where('level_id', $validated['level_id'])
+            ->where('topic_id', $validated['topic_id'])
             ->whereHas('level', function ($q) use ($validated) {
                 $q->where('education_type', $validated['education_type']);
             });

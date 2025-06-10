@@ -11,7 +11,8 @@ use App\Http\Controllers\Admin\{
     SubjectController,
     ParentController,
     StudentController,
-    SubscriptionController
+    SubscriptionController,
+    TopicController
 };
 use App\Models\Subscription;
 
@@ -59,6 +60,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::put('/{id}', [SubjectController::class, 'update'])->name('update');
         Route::delete('/{id}', [SubjectController::class, 'destroy'])->name('destroy');
     });
+
+    Route::resource('topics', TopicController::class)->names('admin.topics');
+
 
     Route::resource('parents', ParentController::class)->names('admin.parents');
 
