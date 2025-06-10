@@ -17,6 +17,7 @@ class Question extends Model
         'group_id',
         'level_id',
         'subject_id',
+        'topic_id',
     ];
 
     public function level()
@@ -34,12 +35,12 @@ class Question extends Model
 
     public function options()
     {
-        return $this->hasMany(QuestionOption::class,'question_id','id');
+        return $this->hasMany(QuestionOption::class, 'question_id', 'id');
     }
 
     public function answers()
     {
-        return $this->hasMany(QuestionAnswer::class,'question_id','id');
+        return $this->hasMany(QuestionAnswer::class, 'question_id', 'id');
     }
 
     public function parent()
@@ -50,5 +51,10 @@ class Question extends Model
     public function children()
     {
         return $this->hasMany(Question::class, 'parent_question_id');
+    }
+
+    public function topic()
+    {
+        return $this->belongsTo(QuestionTopic::class, 'topic_id');
     }
 }

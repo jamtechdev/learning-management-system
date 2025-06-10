@@ -19,6 +19,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::prefix('questions')->group(function () {
             Route::get('levels', [QuestionController::class, 'getAllLevels']);
             Route::get('subjects', [QuestionController::class, 'getAllSubjects']);
+            Route::get('topics', [QuestionController::class, 'getAllTopics']);
             Route::post('getTypeBasedQuestions', [QuestionController::class, 'getTypeBasedQuestions']);
             Route::post('user-answer', [QuestionController::class, 'userAnswer']);
             Route::get('all', [QuestionController::class, 'getAllQuestions']);

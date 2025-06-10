@@ -10,7 +10,7 @@
 
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-6 overflow-y-auto" x-data="{
-        open: {{ request()->routeIs('admin.levels.*') || request()->routeIs('admin.subjects.*') || request()->routeIs('admin.questions.*') ? 'true' : 'false' }}
+        open: {{ request()->routeIs('admin.topics.*') || request()->routeIs('admin.levels.*') || request()->routeIs('admin.subjects.*') || request()->routeIs('admin.questions.*') ? 'true' : 'false' }}
     }" aria-label="Main menu">
         <ul class="space-y-3 text-sm font-medium text-white dark:text-white">
 
@@ -63,6 +63,13 @@
                             </x-nav-link>
                         </li>
                         <li class="mb-[5px]">
+                            <x-nav-link :href="route('admin.topics.index')" :active="request()->routeIs('admin.topics.*')"
+                                class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
+                                🗂️
+                                <span>Topics</span>
+                            </x-nav-link>
+                        </li>
+                        <li class="mb-[5px]">
                             <x-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')"
                                 class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
@@ -86,7 +93,8 @@
                 </x-nav-link>
             </li>
             <li>
-                <x-nav-link href="{{ route('admin.subscriptions.index') }}" :active="request()->routeIs('admin.subscriptions.*') || request()->routeIs('admin.subscriptionplan.*')"
+                <x-nav-link href="{{ route('admin.subscriptions.index') }}" :active="request()->routeIs('admin.subscriptions.*') ||
+                    request()->routeIs('admin.subscriptionplan.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     👪
                     <span>Subscription Plans </span>

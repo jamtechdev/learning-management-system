@@ -43,6 +43,7 @@
                             <th class="px-4 py-3 font-medium text-white">Type</th>
                             <th class="px-4 py-3 font-medium text-white">Level</th>
                             <th class="px-4 py-3 font-medium text-white">Subject</th>
+                            <th class="px-4 py-3 font-medium text-white">Topic</th>
                             <th class="px-4 py-3 font-medium text-white">Options</th>
                             <th class="px-4 py-3 font-medium text-white">Actions</th>
                         </tr>
@@ -70,6 +71,10 @@
                                 </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                                     {{ $question->subject->name ?? '-' }}
+                                </td>
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100"
+                                    title="{{ $question->topic->name ?? '-' }}">
+                                    {{ str($question->topic->name)->limit(20) ?? '-' }}
                                 </td>
 
                                 <!-- Options column: render based on question type -->

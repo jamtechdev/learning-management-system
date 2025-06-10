@@ -1,11 +1,11 @@
 <?php
 
+use App\Enum\QuestionTypes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // 1. Question Groups (Comprehension Passages) – created first
@@ -22,19 +22,7 @@ return new class extends Migration
             $table->id();
             $table->enum('education_type', ['primary', 'secondary']);
             $table->longText('content');
-            $table->enum('type', [
-                'mcq',
-                'fill_blank',
-                'rearranging',
-                'linking',
-                'true_false',
-                'grouped',
-                'comprehension',
-                'editing',
-                'underlinecorrect',
-                'grammar_cloze_with_options',
-
-            ]);
+            $table->enum('type', QuestionTypes::TYPES);
             $table->text('explanation')->nullable();
             $table->json('metadata')->nullable();
             $table->foreignId('parent_question_id')->nullable()->constrained('questions')->onDelete('cascade');
