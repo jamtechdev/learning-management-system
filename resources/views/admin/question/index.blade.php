@@ -73,8 +73,8 @@
                                     {{ $question->subject->name ?? '-' }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100"
-                                    title="{{ $question->topic->name ?? '-' }}">
-                                    {{ str($question->topic->name)->limit(20) ?? '-' }}
+                                    title="{{ $question?->topic?->name ?? '-' }}">
+                                    {{ str($question?->topic?->name ?? '-')->limit(20) ?? '-' }}
                                 </td>
 
                                 <!-- Options column: render based on question type -->
