@@ -42,7 +42,10 @@ class QuestionController extends Controller
     {
         // Load levels with subjects eager loaded
         $levels = \App\Models\QuestionLevel::with('subjects')->get()->groupBy('education_type');
-
+        if ($levels->isEmpty()) {
+            Session::flash('error', 'No levels found. Please create a level first.');
+            return redirect()->route('admin.levels.create');
+        }
         return view('admin.question.create', compact('levels'));
     }
 
