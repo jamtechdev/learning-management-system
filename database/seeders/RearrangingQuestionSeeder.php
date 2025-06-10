@@ -20,7 +20,7 @@ class RearrangingQuestionSeeder extends Seeder
                 continue;
             }
 
-            foreach (range(1, 10) as $i) {
+            foreach (range(1, 5) as $i) {
                 $sentence = fake()->sentence(6); // fixed-length sentence
                 $orderedAnswer = preg_split('/\s+/', trim($sentence));
                 $shuffled = $orderedAnswer;

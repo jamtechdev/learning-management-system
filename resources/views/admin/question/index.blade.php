@@ -29,7 +29,8 @@
                 <!-- Search Bar -->
                 <form method="GET" action="{{ route('admin.questions.index') }}" class="mb-4">
                     <input type="hidden" name="tab" value="{{ request('tab', 'all') }}">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by question or type..."
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search by question or type..."
                         class="w-full px-4 py-2 text-sm border rounded dark:bg-gray-800 dark:text-white" />
                 </form>
 
@@ -49,7 +50,8 @@
                     <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
                         @forelse ($questions as $index => $question)
                             <tr>
-                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $questions->firstItem() + $index }}</td>
+                                <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    {{ $questions->firstItem() + $index }}</td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                                     <div
                                         class="p-2 overflow-y-auto bg-white border border-gray-300 rounded max-h-40 dark:border-gray-700 dark:bg-gray-800">
@@ -80,7 +82,8 @@
                                                         <span class="font-semibold">{{ $option->value }}.</span>
                                                         <span class="ml-1">{!! $option->text !!}</span>
                                                         @if ($option->is_correct)
-                                                            <span class="ml-2 text-xs font-semibold text-green-600">(Correct)</span>
+                                                            <span
+                                                                class="ml-2 text-xs font-semibold text-green-600">(Correct)</span>
                                                         @endif
                                                     </li>
                                                 @endforeach
@@ -91,10 +94,14 @@
                                             @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
                                             <div class="flex flex-col space-y-1">
                                                 <span class="{{ $correct === 'True' ? 'text-green-600 font-semibold' : '' }}">
-                                                    True @if ($correct === 'True')(Correct)@endif
+                                                    True @if ($correct === 'True')
+                                                        (Correct)
+                                                    @endif
                                                 </span>
                                                 <span class="{{ $correct === 'False' ? 'text-green-600 font-semibold' : '' }}">
-                                                    False @if ($correct === 'False')(Correct)@endif
+                                                    False @if ($correct === 'False')
+                                                        (Correct)
+                                                    @endif
                                                 </span>
                                             </div>
                                         @break
@@ -103,13 +110,15 @@
                                             <div class="space-y-2">
                                                 @foreach ($question->metadata['blanks'] ?? [] as $blank)
                                                     <div>
-                                                        <span class="text-sm font-semibold">Blank {{ $blank['blank_number'] }}:</span>
+                                                        <span class="text-sm font-semibold">Blank
+                                                            {{ $blank['blank_number'] }}:</span>
                                                         <ul class="pl-4 text-sm list-disc">
                                                             @foreach ($blank['options'] as $option)
                                                                 <li>
                                                                     {{ $option }}
                                                                     @if ($option === $blank['answer'])
-                                                                        <span class="font-semibold text-green-600">(Correct)</span>
+                                                                        <span
+                                                                            class="font-semibold text-green-600">(Correct)</span>
                                                                     @endif
                                                                 </li>
                                                             @endforeach
@@ -125,7 +134,8 @@
                                                     <div class="flex items-center justify-between p-2 space-x-2 border rounded">
                                                         <div class="flex items-center space-x-2">
                                                             @if ($pair['left']['match_type'] === 'image')
-                                                                <img src="{{ $pair['left']['image_uri'] }}" class="w-10 h-10 border rounded" />
+                                                                <img src="{{ $pair['left']['image_uri'] }}"
+                                                                    class="w-10 h-10 border rounded" />
                                                             @else
                                                                 <span>{{ $pair['left']['word'] }}</span>
                                                             @endif
@@ -133,7 +143,8 @@
                                                         <span class="text-sm text-gray-500">→</span>
                                                         <div class="flex items-center space-x-2">
                                                             @if ($pair['right']['match_type'] === 'image')
-                                                                <img src="{{ $pair['right']['image_uri'] }}" class="w-10 h-10 border rounded" />
+                                                                <img src="{{ $pair['right']['image_uri'] }}"
+                                                                    class="w-10 h-10 border rounded" />
                                                             @else
                                                                 <span>{{ $pair['right']['word'] }}</span>
                                                             @endif
@@ -167,7 +178,8 @@
                                                 <div class="mb-2 font-semibold">Available words:</div>
                                                 <ul class="flex flex-wrap gap-2">
                                                     @foreach ($question->metadata['options'] ?? [] as $opt)
-                                                        <li class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
+                                                        <li
+                                                            class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
                                                             {{ $opt['value'] }}
                                                         </li>
                                                     @endforeach
@@ -187,7 +199,8 @@
                                                 @foreach ($question->metadata['questions'] ?? [] as $blank)
                                                     <div class="p-2 border rounded dark:border-gray-700">
                                                         <span class="font-semibold">Blank {{ $blank['blank_number'] }}:</span>
-                                                        <span class="font-medium text-green-600">{{ $blank['correct_answer'] }}</span>
+                                                        <span
+                                                            class="font-medium text-green-600">{{ $blank['correct_answer'] }}</span>
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -276,21 +289,21 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
-                                    No questions found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+                                        No questions found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
 
-                <!-- Pagination -->
-                <div class="mt-6">
-                    {{ $questions->links('pagination::tailwind') }}
+                    <!-- Pagination -->
+                    <div class="mt-6">
+                        {{ $questions->links('pagination::tailwind') }}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</x-app-layout>
+    </x-app-layout>

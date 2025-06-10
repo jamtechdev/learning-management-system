@@ -23,7 +23,7 @@ class UnderlineCorrectQuestionSeeder extends Seeder
         $subjects = QuestionSubject::all();
 
         foreach ($subjects as $subject) {
-            for ($i = 1; $i <= 10; $i++) {
+            for ($i = 1; $i <= 5; $i++) {
                 $level = $subject->level;
                 $educationType = $subject->education_type;
                 $paragraph = "Select the correct option in each blank. This is a sample paragraph for question $i in subject '{$subject->name}'.";
