@@ -13,13 +13,26 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-     public function index()
+    public function index(Request $request)
     {
         $questionTypes = QuestionTypes::TYPES;
 
+        $tab = $request->query('tab', 'all');
+        $search = $request->query('search');
+
         $questions = Question::with(['options', 'level', 'subject'])
+            ->when($tab !== 'all', function ($query) use ($tab) {
+                $query->where('type', $tab);
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('content', 'ILIKE', "%$search%")
+                        ->orWhere('type', 'ILIKE', "%$search%");
+                });
+            })
             ->orderBy('created_at', 'desc')
-            ->paginate(15); // no paginate()
+            ->paginate(15)
+            ->withQueryString(); // Preserve tab/search in pagination links
 
         return view('admin.question.index', compact('questions', 'questionTypes'));
     }

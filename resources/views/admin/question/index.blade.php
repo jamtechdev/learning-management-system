@@ -1,14 +1,5 @@
 <x-app-layout>
-    <div class="py-6"
-         x-data="{
-            tab: 'all',
-            search: '',
-            filteredType(type, content) {
-                return (this.tab === 'all' || this.tab === type) &&
-                       content.toLowerCase().includes(this.search.toLowerCase());
-            }
-         }"
-    >
+    <div class="py-6">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="p-6 overflow-hidden bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
                 <!-- Header -->
@@ -22,25 +13,25 @@
 
                 <!-- Tabs -->
                 <div class="mb-4 space-x-2">
-                    <button @click="tab = 'all'" :class="{ 'bg-blue-700 text-white': tab === 'all' }"
-                        class="px-4 py-2 text-sm font-semibold text-gray-800 border rounded hover:bg-blue-700 hover:text-white">
+                    <a href="{{ route('admin.questions.index', ['tab' => 'all', 'search' => request('search')]) }}"
+                        class="px-4 py-2 text-sm font-semibold border rounded {{ request('tab', 'all') === 'all' ? 'bg-blue-700 text-white' : 'text-gray-800 hover:bg-blue-700 hover:text-white' }}">
                         All
-                    </button>
+                    </a>
 
                     @foreach ($questionTypes as $type)
-                        <button @click="tab = '{{ $type }}'"
-                            :class="{ 'bg-blue-700 text-white': tab === '{{ $type }}' }"
-                            class="px-4 py-2 text-sm font-semibold text-gray-800 capitalize border rounded hover:bg-blue-700 hover:text-white">
+                        <a href="{{ route('admin.questions.index', ['tab' => $type, 'search' => request('search')]) }}"
+                            class="px-4 py-2 text-sm font-semibold border rounded capitalize {{ request('tab') === $type ? 'bg-blue-700 text-white' : 'text-gray-800 hover:bg-blue-700 hover:text-white' }}">
                             {{ str_replace('_', ' ', $type) }}
-                        </button>
+                        </a>
                     @endforeach
                 </div>
 
                 <!-- Search Bar -->
-                <div class="mb-4">
-                    <input type="text" x-model="search" placeholder="Search by question or type..."
+                <form method="GET" action="{{ route('admin.questions.index') }}" class="mb-4">
+                    <input type="hidden" name="tab" value="{{ request('tab', 'all') }}">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by question or type..."
                         class="w-full px-4 py-2 text-sm border rounded dark:bg-gray-800 dark:text-white" />
-                </div>
+                </form>
 
                 <!-- Questions Table -->
                 <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-gray-700">
@@ -57,10 +48,7 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
                         @forelse ($questions as $index => $question)
-                            <tr
-                                x-show="filteredType('{{ $question->type }}', `{!! strip_tags($question->content) !!}`)"
-                                x-cloak
-                            >
+                            <tr>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $questions->firstItem() + $index }}</td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                                     <div

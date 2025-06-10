@@ -67,8 +67,7 @@
                         Adding options in edit not supported
                     </button>
                 </div>
-
-                @elseif ($question->type === 'fill_blank')
+            @elseif ($question->type === 'fill_blank')
                 @php $blanks = old('question_data.blanks', $question->metadata['blanks'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Fill in the Blanks</label>
@@ -98,8 +97,7 @@
                     @endforeach
                     <small class="text-gray-500">To add or remove blanks/options, please recreate the question.</small>
                 </div>
-
-                @elseif ($question->type === 'true_false')
+            @elseif ($question->type === 'true_false')
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Answer</label>
                     <select name="question_data[true_false_answer]" required
@@ -112,8 +110,7 @@
                             False</option>
                     </select>
                 </div>
-
-                @elseif ($question->type === 'linking')
+            @elseif ($question->type === 'linking')
                 @php $pairs = old('question_data.options', $question->metadata['answer'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Linking Pairs</label>
@@ -180,28 +177,49 @@
                     <small class="text-gray-500">To add or remove pairs, please recreate the question.</small>
                 </div>
             @endif
-
             @if ($question->type === 'rearranging')
-                <div>
-                    <div class="mb-2 font-semibold">Available words:</div>
-                    <ul class="flex flex-wrap gap-2">
-                        @foreach ($question->metadata['options'] as $opt)
-                            <li class="px-2 py-1 text-sm bg-gray-100 border rounded dark:bg-gray-800">
-                                {{ $opt['value'] }}
-                            </li>
-                        @endforeach
-                    </ul>
+                <div class="p-4 space-y-4 border rounded bg-gray-50">
 
-                    <div class="mt-4 mb-1 font-semibold">Correct order:</div>
-                    <ol class="list-decimal list-inside">
-                        @foreach ($question->metadata['answer']['answer'] ?? [] as $word)
-                            <li>{{ $word }}</li>
-                        @endforeach
-                    </ol>
+                    <!-- Instruction -->
+                    <div>
+                        <label class="font-semibold">Instruction:</label>
+                        <input type="text" name="instruction"
+                            value="{{ $question->metadata['instruction'] ?? '' }}"
+                            class="w-full p-2 mt-1 border rounded" placeholder="Enter instruction">
+                    </div>
+
+                    <!-- Options to Rearrange -->
+                    <div>
+                        <label class="font-semibold">Words (Options):</label>
+                        <div class="space-y-2">
+                            @foreach ($question->metadata['options'] ?? [] as $index => $opt)
+                                <div class="flex items-center gap-2">
+                                    <input type="text" name="options[{{ $index }}][value]"
+                                        value="{{ $opt['value'] }}" class="w-full p-2 border rounded"
+                                        placeholder="Word">
+                                    <input type="hidden" name="options[{{ $index }}][is_correct]"
+                                        value="false">
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Correct Answer Order -->
+                    <div>
+                        <label class="font-semibold">Correct Answer Order:</label>
+                        <div class="space-y-2">
+                            @foreach ($question->metadata['answer']['answer'] ?? [] as $index => $word)
+                                <input type="text" name="answer[answer][{{ $index }}]"
+                                    value="{{ $word }}" class="w-full p-2 border rounded"
+                                    placeholder="Correct Word in Order">
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="answer[format]"
+                            value="{{ $question->metadata['answer']['format'] ?? 'ordered' }}">
+                    </div>
+
                 </div>
             @endif
-
-            {{-- Comprehension Type --}}
             @if ($question->type === 'comprehension')
                 <div>
                     <label class="block mb-4 font-semibold">Passage Questions</label>
@@ -224,13 +242,77 @@
                     @endforeach
                 </div>
             @endif
-
             @if ($question->type === 'underlinecorrect')
+                @php
+                    $items = $question->metadata['questions'] ?? [];
+                @endphp
 
+                <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
+                    <div class="p-4 mt-4 border rounded bg-gray-50">
+                        <h2 class="mb-3 font-semibold text-gray-700">Select Correct Answers</h2>
 
-
-
+                        @foreach ($items as $item)
+                            <div class="flex items-center mb-3 space-x-4">
+                                <div class="flex-1">
+                                    <label class="text-sm font-medium text-gray-600">
+                                        Question No:{{ $item['blank_number'] }}
+                                    </label>
+                                    <select name="questions[{{ $loop->index }}][correct_answer]"
+                                        class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">-- Select --</option>
+                                        @foreach ($item['options'] as $option)
+                                            <option value="{{ $option }}"
+                                                {{ $option === $item['correct_answer'] ? 'selected' : '' }}>
+                                                {{ $option }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             @endif
+            @if ($question->type === 'editing')
+                @php
+                    $items = $question->metadata['questions'] ?? [];
+                @endphp
+
+                <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
+
+
+                    <div class="p-4 mt-4 border rounded bg-gray-50">
+                        <h2 class="mb-3 font-semibold text-gray-700">Editing Questions:</h2>
+
+                        @foreach ($items as $index => $item)
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Box No:</label>
+                                    <input type="number" name="questions[{{ $index }}][box]"
+                                        value="{{ $item['box'] }}"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Wrong Word:</label>
+                                    <input type="text" name="questions[{{ $index }}][wrong]"
+                                        value="{{ $item['wrong'] }}"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Correct Word:</label>
+                                    <input type="text" name="questions[{{ $index }}][correct]"
+                                        value="{{ $item['correct'] }}"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+
 
 
             <div class="flex justify-end mt-8">
