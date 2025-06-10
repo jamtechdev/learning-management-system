@@ -4,13 +4,15 @@ use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentQuestionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\HomeController;
-use App\Http\Controllers\Admin\QuestionController;
-use App\Http\Controllers\Admin\LevelController;
-use App\Http\Controllers\Admin\SubjectController;
-use App\Http\Controllers\Admin\ParentController;
-use App\Http\Controllers\Admin\StudentController;
-use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\{
+    HomeController,
+    QuestionController,
+    LevelController,
+    SubjectController,
+    ParentController,
+    StudentController,
+    SubscriptionController
+};
 use App\Models\Subscription;
 
 // Redirect root to login
@@ -23,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/users', [ProfileController::class, 'index'])->name('users.index');
 });
-
+require __DIR__ . '/auth.php';
 // Admin routes
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
@@ -110,4 +112,4 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     });
 });
 
-require __DIR__ . '/auth.php';
+
