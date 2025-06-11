@@ -54,7 +54,7 @@ class QuestionController extends Controller
 
     public function edit($id)
     {
-        $question = Question::with(['options', 'level', 'subject'])->findOrFail($id);
+        $question = Question::with(['options', 'level', 'subject', 'topic'])->findOrFail($id);
         $levels = \App\Models\QuestionLevel::with('subjects')->get()->groupBy('education_type');
 
         return view('admin.question.edit', compact('question', 'levels'));
@@ -463,6 +463,7 @@ class QuestionController extends Controller
         $question->content = $data['content'];
         $question->education_type = $data['education_type'];
         $question->subject_id = $data['subject_id'];
+        $question->topic_id = $data['topic_id'];
         $question->level_id = $data['level_id'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $payload;
@@ -512,6 +513,7 @@ class QuestionController extends Controller
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
         $question->subject_id = $data['subject_id'];
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
@@ -575,6 +577,8 @@ class QuestionController extends Controller
         $question->education_type = $data['education_type'];
         $question->level_id = $data['level_id'];
         $question->subject_id = $data['subject_id'];
+        $question->topic_id = $data['topic_id'];
+
         $question->content = $data['content'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
