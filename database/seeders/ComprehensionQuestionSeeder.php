@@ -29,7 +29,7 @@ class ComprehensionQuestionSeeder extends Seeder
                 $subquestions = [];
                 for ($j = 1; $j <= rand(2, 3); $j++) {
                     $subquestions[] = [
-                        "ques{$j}" => "What is the main idea in sentence $j?",
+                        "question" => "What is the main idea in sentence $j?",
                         "answer" => "Sample answer $j"
                     ];
                 }

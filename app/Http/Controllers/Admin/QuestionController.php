@@ -415,7 +415,7 @@ class QuestionController extends Controller
         $data = $request->input('question_data');
 
         switch ($data['type']) {
-            case 'mcq':
+            case QuestionTypes::MCQ:
                 $this->updateMcqQuestion($question, $data);
                 break;
 
@@ -423,20 +423,161 @@ class QuestionController extends Controller
                 $this->updateFillBlankQuestion($question, $data);
                 break;
 
-            case 'true_false':
+            case QuestionTypes::TRUE_FALSE:
                 $this->updateTrueFalseQuestion($question, $data);
                 break;
 
-            case 'linking':
+            case QuestionTypes::LINKING:
                 $this->updateLinkingQuestion($question, $data, $request);
                 break;
 
+            case QuestionTypes::REARRANGING:
+                $this->updateRearrangingQuestion($question, $data);
+                break;
+            case QuestionTypes::GRAMMAR_CLOZE_WITH_OPTIONS:
+                $this->updateGrammarClozeWithOptions($question, $data);
+                break;
+
+            case QuestionTypes::UNDERLINECORRECT:
+                $this->updateUnderlineInpuQuestion($question, $data);
+                break;
+
+            case QuestionTypes::COMPREHENSION:
+                $this->updateComprehensionQuestion($question, $data);
+                break;
+
+            case QuestionTypes::EDITING:
+                $this->updateEditingQuestion($question, $data);
+                break;
             default:
                 return redirect()->route('admin.questions.index')->with('message', 'Invalid question type!');
         }
 
         return redirect()->route('admin.questions.index')->with('message', 'Question updated successfully!');
     }
+
+
+
+    public function updateEditingQuestion($question, array $data)
+    {
+        $data['questions'] = json_decode($data['questions'], true);
+        $fullMetadata = [
+            'instruction' => $data['instruction'] ?? '',
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'paragraph' => $data['content'] ?? null,
+            'questions' => $data['questions'] ?? [],
+        ];
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'] ?? '';
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $fullMetadata;
+        $question->save();
+    }
+
+
+    public function updateComprehensionQuestion($question, array $data)
+    {
+        $fullMetadata = [
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'instruction' => $data['instruction'] ?? '',
+            'passage' => $data['content'] ?? null,
+            'subquestions' => $data['questions'] ? json_decode($data['questions'], true) : [],
+        ];
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $fullMetadata['passage'] ?? '';
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $fullMetadata;
+        $question->save();
+    }
+
+    private function updateUnderlineInpuQuestion($question, array $data)
+    {
+        $data['questions'] = json_decode($data['questions'], true);
+        $fullMetadata = [
+            'instruction' => $data['instruction'] ?? '',
+            'education_type' => $data['education_type'],
+            'level_id' => $data['level_id'],
+            'subject_id' => $data['subject_id'],
+            'type' => $data['type'],
+            'paragraph' => $data['content'] ?? null,
+            'questions' => $data['questions'] ?? [],
+        ];
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'] ?? '';
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $fullMetadata;
+        $question->save();
+    }
+
+
+    public function updateGrammarClozeWithOptions($question, array $data)
+    {
+        $metadata = json_decode($data['metadata'], true);
+        $metadata['instruction'] = $data['instruction'] ?? '';
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->content = $metadata['paragraph'] ?? '';
+        $question->education_type = $data['education_type'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
+        $question->explanation = $metadata['explanation'] ?? null;
+        $question->metadata = $metadata;
+        $question->save();
+    }
+
+
+    public function updateRearrangingQuestion($question, array $data)
+    {
+        $questionText = strip_tags($data['content']);
+        $orderedAnswer = preg_split('/\s+/', trim($questionText));
+        $shuffled = $orderedAnswer;
+        shuffle($shuffled);
+
+        $options = collect($shuffled)->map(fn($word) => [
+            'value' => $word,
+            'is_correct' => false,
+        ])->values()->toArray();
+
+        $transformed = [
+            'type' => 'rearranging',
+            'content' => $data['content'] ?? '',
+            'instruction' => $data['instruction'] ?? '',
+            'options' => $options,
+            'answer' => [
+                'answer' => $orderedAnswer,
+                'format' => 'ordered'
+            ],
+        ];
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->education_type = $data['education_type'];
+        $question->level_id = $data['level_id'];
+        $question->subject_id = $data['subject_id'];
+        $question->content = $data['content'] ?? $question?->content;
+        $question->explanation = $data['explanation'] ?? null;
+        $question->metadata = $transformed;
+        $question->save();
+
+    }
+
     public function updateMcqQuestion($question, array $data)
     {
         $correctIndex = (int) $data['correct_option']; // Cast to int

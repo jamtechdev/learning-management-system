@@ -694,7 +694,7 @@
                 this.comprehensionQuestions.forEach((q, index) => {
                     const i = index + 1;
                     output.subquestions.push({
-                        [`ques${i}`]: q.text.trim(),
+                        question: q.text.trim(),
                         answer: q.answer.trim()
                     });
                 });
