@@ -61,7 +61,7 @@
                     @foreach ($question->options as $index => $option)
                         <div class="flex items-center gap-4 p-3 mb-4 border-2 bg-gray-50 rounded-xl">
                             <input type="radio" name="question_data[correct_option]" value="{{ $index }}"
-                                {{ old('question_data.correct_option', $option->is_correct) == $index ? 'checked' : '' }}
+                                {{ old('question_data.correct_option', $option->is_correct) === 1 ? 'checked' : '' }}
                                 required class="w-6 h-6 accent-gray-500" />
                             <input type="text" name="question_data[options][]"
                                 value="{{ old('question_data.options.' . $index, $option->value) }}"
@@ -186,12 +186,13 @@
             @endif
             @if ($question->type === 'rearranging')
                 <div class="p-4 space-y-4 border rounded bg-gray-50">
+                    {{-- @dd($question->toArray()); --}}
 
                     <!-- Instruction -->
                     <div>
                         <label class="font-semibold">Instruction:</label>
                         <input type="text" name="instruction"
-                            value="{{ $question->metadata['instruction'] ?? '' }}"
+                            value="{{ $question->metadata['instruction'] ?? '' }}" name="question_data[instruction]"
                             class="w-full p-2 mt-1 border rounded" placeholder="Enter instruction">
                     </div>
 
@@ -201,7 +202,7 @@
                         <div class="space-y-2">
                             @foreach ($question->metadata['options'] ?? [] as $index => $opt)
                                 <div class="flex items-center gap-2">
-                                    <input type="text" name="options[{{ $index }}][value]"
+                                    <input type="text" name="question_data[options][{{ $index }}][value]"
                                         value="{{ $opt['value'] }}" class="w-full p-2 border rounded"
                                         placeholder="Word">
                                     <input type="hidden" name="options[{{ $index }}][is_correct]"
@@ -216,37 +217,39 @@
                         <label class="font-semibold">Correct Answer Order:</label>
                         <div class="space-y-2">
                             @foreach ($question->metadata['answer']['answer'] ?? [] as $index => $word)
-                                <input type="text" name="answer[answer][{{ $index }}]"
+                                <input type="text" name="question_data[answer][{{ $index }}]"
                                     value="{{ $word }}" class="w-full p-2 border rounded"
                                     placeholder="Correct Word in Order">
                             @endforeach
                         </div>
-                        <input type="hidden" name="answer[format]"
+                        <input type="hidden" name="question_data[answer][format]"
                             value="{{ $question->metadata['answer']['format'] ?? 'ordered' }}">
                     </div>
-
                 </div>
             @endif
             @if ($question->type === 'comprehension')
-                <div>
+                <div x-data="comprehension()" class="p-4 space-y-4 border rounded bg-gray-50">
                     <label class="block mb-4 font-semibold">Passage Questions</label>
-                    @php
-                        $comprehension = old('question_data.comprehension', $question->metadata['subquestions'] ?? []);
-                    @endphp
-
-                    @foreach ($comprehension as $i => $comp)
-                        <div class="p-5 mb-8 border border-gray-300 rounded-lg bg-gray-50">
-                            <label class="block mb-2 font-semibold">Question #{{ $i + 1 }}</label>
-                            <input type="text" name="question_data[comprehension][{{ $i }}][ques1]"
-                                required value="{{ $comp['ques1'] ?? '' }}"
+                    <template x-for="(question, index) in questions" :key="index">
+                        <div class="p-4 mb-6 border border-gray-300 rounded-lg bg-gray-50">
+                            <label class="block mb-2 font-semibold">Question # <span
+                                    x-text="index + 1"></span></label>
+                            <input type="text" required x-model="question.question"
+                                class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
+                            <label class="block mb-2 font-semibold">Answer # <span x-text="index + 1"></span></label>
+                            <input type="text" required x-model="question.answer"
                                 class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
 
-                            <label class="block mb-2 font-semibold">Answer #{{ $i + 1 }}</label>
-                            <input type="text" name="question_data[comprehension][{{ $i }}][answer]"
-                                required value="{{ $comp['answer'] ?? '' }}"
-                                class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
+                            <button type="button" @click="removeQuestion(index)"
+                                class="text-red-600 hover:underline">Remove</button>
                         </div>
-                    @endforeach
+
+                    </template>
+
+                    <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
+
+                    <button type="button" @click="addQuestion"
+                        class="px-5 py-2 font-semibold text-white bg-indigo-500 rounded-xl">+ Add Question</button>
                 </div>
             @endif
             @if ($question->type === 'underlinecorrect')
@@ -255,16 +258,36 @@
                 @endphp
 
                 <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
-                    <div class="p-4 mt-4 border rounded bg-gray-50">
+                    <div class="p-4 mt-4 border rounded bg-gray-50" x-data="underlinecorrect()">
                         <h2 class="mb-3 font-semibold text-gray-700">Select Correct Answers</h2>
+                        <template x-for="(item , index) in questions" x-key="index">
+                            <div class="flex items-center mb-3 space-x-4">
+                                <div class="flex-1">
+                                    <label class="text-sm font-medium text-gray-600">
+                                        Question No:<span x-text="item.blank_number"></span>
+                                    </label>
+                                    <select :name="`question_data[questions][${index}][correct_answer]`"
+                                        class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        x-model="item.correct_answer">
+                                        <option value="">-- Select --</option>
+                                        <template x-for="option in item.options" :key="option">
+                                            <option x-text="option" :value="option"
+                                                x-bind:selected="option == item.correct_answer"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </template>
+                        <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
 
-                        @foreach ($items as $item)
+
+                        {{-- @foreach ($items as $item)
                             <div class="flex items-center mb-3 space-x-4">
                                 <div class="flex-1">
                                     <label class="text-sm font-medium text-gray-600">
                                         Question No:{{ $item['blank_number'] }}
                                     </label>
-                                    <select name="questions[{{ $loop->index }}][correct_answer]"
+                                    <select name="question_data[questions][{{ $loop->index }}][correct_answer]"
                                         class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">-- Select --</option>
                                         @foreach ($item['options'] as $option)
@@ -276,22 +299,58 @@
                                     </select>
                                 </div>
                             </div>
-                        @endforeach
+                        @endforeach --}}
                     </div>
                 </div>
             @endif
             @if ($question->type === 'editing')
                 @php
-                    $items = $question->metadata['questions'] ?? [];
+                    $items = [];
                 @endphp
 
-                <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
+                <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl" x-data="editing()">
 
 
                     <div class="p-4 mt-4 border rounded bg-gray-50">
                         <h2 class="mb-3 font-semibold text-gray-700">Editing Questions:</h2>
+                        <template x-for="(item, index) in questions" :key="index">
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Box No:</label>
+                                    <input type="number" x-model="item.box"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                </div>
 
-                        @foreach ($items as $index => $item)
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Wrong Word:</label>
+                                    <input type="text" x-model="item.wrong"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-600">Correct Word:</label>
+                                    <input type="text" x-model="item.correct"
+                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
+                                    <button type="button" @click="removeQuestion(index)"
+                                        class="text-red-600 hover:underline">Remove</button>
+                                </div>
+
+                            </div>
+
+
+                        </template>
+
+                        <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
+
+                        <button type="button" @click="addQuestion"
+                            class="px-4 py-2 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                            + Add Question
+                        </button>
+
+
+
+
+                        {{-- @foreach ($items as $index => $item)
                             <div class="grid grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block mb-1 text-sm font-medium text-gray-600">Box No:</label>
@@ -314,13 +373,51 @@
                                         class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
                                 </div>
                             </div>
-                        @endforeach
+                        @endforeach --}}
                     </div>
                 </div>
             @endif
 
+            @if ($question->type === \App\Enum\QuestionTypes::GRAMMAR_CLOZE_WITH_OPTIONS)
+                <div class="p-6 bg-white border rounded shadow">
+                    <!-- Generate Button -->
+                    <div class="mb-6">
+                        <a href="javascript:void(0)" @click="parseGrammarCloze"
+                            class="px-4 py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                            Generate Grammar Cloze Questions
+                        </a>
+                    </div>
 
+                    <!-- Shared Options Input -->
+                    <div class="mb-6">
+                        <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
+                        <input type="text" x-model="sharedOptionsRaw" @input="updateGrammarClozeJson"
+                            value="{{ implode(',', $question->metadata['question_group']['shared_options'] ?? []) ?? '' }}"
+                            class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
+                    </div>
 
+                    <!-- Detected Blanks -->
+                    <template x-if="questions.length">
+                        <div class="mb-6">
+                            <h2 class="mb-4 text-xl font-bold">Detected Blanks</h2>
+                            <template x-for="(q, idx) in questions" :key="q.blank_number">
+                                <div
+                                    class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
+                                    <div><strong>Blank #</strong>: <span x-text="q.blank_number"></span></div>
+                                    <div>
+                                        <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
+                                            class="px-3 py-2 border rounded" @input="updateGrammarClozeJson">
+                                    </div>
+                                    <button @click="removeQuestion(idx)"
+                                        class="text-red-600 hover:underline">Remove</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <input type="hidden" name="question_data[metadata]" id="metadataInput"
+                        x-model="formattedJson" />
+                </div>
+            @endif
 
             <div class="flex justify-end mt-8">
                 <button type="submit" class="px-10 py-3 text-lg font-extrabold text-white transition add-btn">
@@ -331,10 +428,57 @@
     </div>
 </x-app-layout>
 <script>
+    function underlinecorrect() {
+        return {
+            questions: @json($question->metadata['questions'] ?? []),
+        }
+    }
+
+
+
+    function editing() {
+        return {
+            questions: @json($question->metadata['questions'] ?? []),
+            init() {
+                console.log(this.questions);
+            },
+            addQuestion() {
+                this.questions.push({
+                    box: this.questions.length + 1,
+                    wrong: null,
+                    correct: null
+                })
+            }
+        }
+    }
+
+    function comprehension() {
+        return {
+            questions: @json($question->metadata['subquestions'] ?? []),
+            init() {
+                console.log(this.questions);
+            },
+            addQuestion() {
+                this.questions.push({
+                    question: '',
+                    answer: ''
+                })
+            },
+            removeQuestion(index) {
+                this.questions.splice(index, 1);
+            }
+        }
+    }
+
+
+
     function questionForm() {
         return {
             quill: null,
             questionContent: @json(old('question_data.content', $question->content)),
+            questions: @json($question->metadata['questions'] ?? []),
+            sharedOptionsRaw: `{{ implode(',', $question->metadata['question_group']['shared_options'] ?? []) ?? '' }}`,
+            formattedJson: @json(json_encode($question->metadata) ?? '{}'),
             init() {
                 const toolbarOptions = [
                     ['bold', 'italic', 'underline', 'strike'],
@@ -394,7 +538,72 @@
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
                 });
-            }
+            },
+            // Grammar Cloze parse and update
+            parseGrammarCloze() {
+                if (!this.questionContent) return;
+
+                // Get raw text from Quill HTML content
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.questionContent;
+                const rawText = tempDiv.innerText.trim();
+
+                const blankRegex = /\((\d+)\)\s*_{4,}/g;
+                const matches = [];
+                let match;
+                while ((match = blankRegex.exec(rawText)) !== null) {
+                    const blankNumber = parseInt(match[1]);
+                    matches.push({
+                        id: matches.length + 1,
+                        blank_number: blankNumber,
+                        correct_answer: '',
+                        input_type: 'input'
+                    });
+                }
+
+                this.questions = matches;
+                this.updateGrammarClozeJson();
+            },
+
+            // Update ONLY Grammar Cloze JSON and hidden input
+            updateGrammarClozeJson() {
+                const sharedOptions = this.sharedOptionsRaw
+                    .split(',')
+                    .map(opt => opt.trim())
+                    .filter(opt => opt.length > 0);
+
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.questionContent;
+                const rawText = tempDiv.innerText.trim();
+
+                const output = {
+                    paragraph: rawText,
+                    question_type: 'grammar_cloze_with_options',
+                    question_group: {
+                        shared_options: sharedOptions
+                    },
+                    questions: this.questions.map(q => ({
+                        id: q.id,
+                        blank_number: q.blank_number,
+                        correct_answer: q.correct_answer,
+                        input_type: q.input_type
+                    }))
+                };
+
+                this.formattedJson = JSON.stringify(output, null, 2);
+
+                // Update hidden input for Grammar Cloze JSON (keep old #metadataInput or add new id)
+                const hiddenInput = document.querySelector('#metadataInput');
+                if (hiddenInput) {
+                    hiddenInput.value = this.formattedJson;
+                }
+            },
+
+            // Remove question for Grammar Cloze
+            removeQuestion(index) {
+                this.questions.splice(index, 1);
+                this.updateGrammarClozeJson();
+            },
         };
     }
 </script>
