@@ -32,6 +32,13 @@
                     class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
                 <input type="hidden" name="question_data[subject_id]" value="{{ $question->subject->id ?? '' }}" />
             </div>
+            <!-- Topic (readonly + hidden input) -->
+            <div>
+                <label class="block mb-2 font-semibold text-gray-800">Topic</label>
+                <input type="text" value="{{ $question->topic->name ?? '' }}" readonly
+                    class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
+                <input type="hidden" name="question_data[topic_id]" value="{{ $question->topic->id ?? '' }}" />
+            </div>
 
             <!-- Question Content -->
             <div>
