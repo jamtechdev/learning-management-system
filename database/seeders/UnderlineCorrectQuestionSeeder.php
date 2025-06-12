@@ -47,13 +47,13 @@ class UnderlineCorrectQuestionSeeder extends Seeder
                     'education_type' => $educationType,
                     'level_id' => $level->id,
                     'subject_id' => $subject->id,
-                    'type' => QuestionTypes::UNDERLINECORRECT, // make sure this constant exists
+                    'type' => QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS, // make sure this constant exists
                     'paragraph' => $paragraph,
                     'questions' => $questions
                 ];
 
                 Question::create([
-                    'type' => QuestionTypes::UNDERLINECORRECT,
+                    'type' => QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS,
                     'education_type' => $educationType,
                     'level_id' => $level->id,
                     'subject_id' => $subject->id,

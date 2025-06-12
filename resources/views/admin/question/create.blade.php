@@ -79,22 +79,22 @@
             <input type="hidden" name="question_data[type]" :value="questionType" />
             <!-- Grammar Cloze Metadata (only when type is grammar_cloze_with_options) -->
 
-            <template x-if="questionType === 'grammar_cloze_with_options'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}'">
                 <input type="hidden" name="question_data[metadata]" id="metadataInput" x-model="formattedJson" />
             </template>
 
-            <template x-if="questionType === 'underlinecorrect'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS }}'">
                 <input type="hidden" name="question_data[underline_metadata]" id="correctUnderlineInput"
                     x-model="formattedJson" />
             </template>
 
             <!-- Comprehension Metadata (only when type is comprehension) -->
-            <template x-if="questionType === 'comprehension'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::COMPREHENSION }}'">
                 <input type="hidden" id="comprehensionMetadataInput" name="question_data[comprehension_metadata]"
                     x-model="formattedJson" />
             </template>
 
-            <template x-if="questionType === 'editing'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::EDITING }}'">
                 <input type="hidden" id="editingMetadataInput" name="question_data[editing_metadata]"
                     x-model="formattedJson" />
             </template>
@@ -117,7 +117,7 @@
                     🧠
                     <span
                         x-text="
-                        questionType === 'grammar_cloze_with_options' ? 'Grammar Cloze Passage' :
+                        questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}' ? 'Open Cloze with Options' :
                         (questionType === 'comprehension' ? 'Comprehension Passage' : 'Question Content')
                     "></span>
                 </label>
@@ -128,7 +128,7 @@
             </div>
 
             <!-- MCQ Options -->
-            <template x-if="questionType === 'mcq'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::MCQ }}'">
                 <div class="p-6 bg-white border shadow rounded-xl">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-blue-700">🧩 MCQ Options</h2>
@@ -168,7 +168,7 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'true_false'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::TRUE_FALSE }}'">
                 <div>
                     <label class="block mb-3 text-lg font-semibold text-blue-700">Answer</label>
                     <select name="question_data[true_false_answer]"
@@ -181,7 +181,7 @@
             </template>
 
             {{-- Linking --}}
-            <template x-if="questionType === 'linking'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::LINKING }}'">
                 <div class="space-y-4">
                     <x-input-label value="Matching Pairs" class="mb-4 text-lg font-semibold text-blue-700" />
 
@@ -273,7 +273,7 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'rearranging'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::REARRANGING }}'">
                 <div class="space-y-4">
                     <!-- Question instruction input -->
                     <label class="block text-lg font-semibold text-blue-700">Question Instruction</label>
@@ -320,7 +320,7 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'grammar_cloze_with_options'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}'">
                 <div class="p-6 bg-white border rounded shadow">
                     <!-- Generate Button -->
                     <div class="mb-6">
@@ -358,7 +358,7 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'underlinecorrect'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS }}'">
                 <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
 
                     <button type="button" @click="parseParagraph"
@@ -395,7 +395,7 @@
 
             <!-- This auto-runs updateComprehensionJson whenever Alpine data changes -->
             <div x-effect="updateComprehensionJson()"></div>
-            <template x-if="questionType === 'comprehension'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::COMPREHENSION }}'">
                 <div class="mt-4 space-y-4">
                     <div>
                         <label class="block text-sm font-semibold">Questions & Answers</label>
@@ -420,7 +420,7 @@
                 </div>
             </template>
 
-            <template x-if="questionType === 'editing'">
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::EDITING }}'">
                 <div class="p-4 mt-6 bg-white border rounded">
                     <!-- Input Fields -->
                     <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -566,7 +566,7 @@
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
                 });
-                if (this.questionType === 'grammar_cloze_with_options') {
+                if (this.questionType === "{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}") {
                     this.parseGrammarCloze();
                 } else if (this.questionType === 'comprehension') {
                     this.updateComprehensionJson(); // ✅ auto update comprehension JSON on passage edit
@@ -643,7 +643,7 @@
 
                 const output = {
                     paragraph: rawText,
-                    question_type: 'grammar_cloze_with_options',
+                    question_type: '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}',
                     question_group: {
                         shared_options: sharedOptions
                     },
@@ -853,15 +853,7 @@
             },
 
             questionTypeLabels: '',
-            questionTypeLabels: {
-                mcq: "Multiple Choice",
-                true_false: "True or False",
-                linking: "Matching",
-                rearranging: "Rearranging",
-                grammar_cloze_with_options: "Grammar Cloze (With Options)",
-                comprehension: "Comprehension"
-            },
-
+            questionTypeLabels: @json(\App\Enum\QuestionTypes::names()),
             // === Editing Question Specific States ===
             editingParagraph: '',
             editingBoxNumber: '', // <--- NEW: Manual box number input
