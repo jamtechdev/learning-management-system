@@ -15,7 +15,7 @@ class QuestionController extends Controller
 {
     public function index(Request $request)
     {
-        $questionTypes = QuestionTypes::TYPES;
+        $questionTypes = QuestionTypes::names();
 
         $tab = $request->query('tab', 'all');
         $search = $request->query('search');
@@ -68,37 +68,37 @@ class QuestionController extends Controller
         $data = $request->input('question_data');
 
         switch ($data['type']) {
-            case 'mcq':
+            case QuestionTypes::MCQ:
                 $this->saveMcqQuestion($data);
                 break;
 
-            case 'fill_blank':
+            case QuestionTypes::FILL_IN_THE_BLANK:
                 $this->saveFillBlankQuestion($data);
                 break;
 
-            case 'true_false':
+            case QuestionTypes::TRUE_FALSE:
                 $this->saveTrueFalseQuestion($data);
                 break;
 
-            case 'linking':
+            case QuestionTypes::LINKING:
                 $this->saveLinkingQuestion($data, $request);
                 break;
 
-            case 'rearranging':
+            case QuestionTypes::REARRANGING:
                 $this->saveRearrangingQuestion($data);
                 break;
 
-            case 'comprehension':
+            case QuestionTypes::COMPREHENSION:
                 $this->saveComprehensionQuestion($data);
                 break;
 
-            case 'grammar_cloze_with_options':
+            case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
                 $this->saveGrammarClozeWithOptions($data);
                 break;
-            case 'editing':
+            case QuestionTypes::EDITING:
                 $this->saveEditingQuestion($data);
                 break;
-            case 'underlinecorrect':
+            case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
                 $this->saveUnderlineInpuQuestion($data);
                 break;
 
@@ -419,7 +419,7 @@ class QuestionController extends Controller
                 $this->updateMcqQuestion($question, $data);
                 break;
 
-            case 'fill_blank':
+            case QuestionTypes::FILL_IN_THE_BLANK:
                 $this->updateFillBlankQuestion($question, $data);
                 break;
 
@@ -434,11 +434,11 @@ class QuestionController extends Controller
             case QuestionTypes::REARRANGING:
                 $this->updateRearrangingQuestion($question, $data);
                 break;
-            case QuestionTypes::GRAMMAR_CLOZE_WITH_OPTIONS:
+            case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
                 $this->updateGrammarClozeWithOptions($question, $data);
                 break;
 
-            case QuestionTypes::UNDERLINECORRECT:
+            case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
                 $this->updateUnderlineInpuQuestion($question, $data);
                 break;
 

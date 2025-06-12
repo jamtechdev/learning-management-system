@@ -55,7 +55,7 @@
             <input type="hidden" name="question_data[type]" value="{{ $question->type }}" />
 
             <!-- Type-specific inputs -->
-            @if ($question->type === 'mcq')
+            @if ($question->type === \App\Enum\QuestionTypes::MCQ)
                 <div>
                     <label class="block mb-3 font-semibold text-gray-800">MCQ Options</label>
                     @foreach ($question->options as $index => $option)
@@ -74,7 +74,7 @@
                         Adding options in edit not supported
                     </button>
                 </div>
-            @elseif ($question->type === 'fill_blank')
+            @elseif ($question->type === \App\Enum\QuestionTypes::FILL_IN_THE_BLANK)
                 @php $blanks = old('question_data.blanks', $question->metadata['blanks'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Fill in the Blanks</label>
@@ -104,7 +104,7 @@
                     @endforeach
                     <small class="text-gray-500">To add or remove blanks/options, please recreate the question.</small>
                 </div>
-            @elseif ($question->type === 'true_false')
+            @elseif ($question->type === \App\Enum\QuestionTypes::TRUE_FALSE)
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Answer</label>
                     <select name="question_data[true_false_answer]" required
@@ -117,7 +117,7 @@
                             False</option>
                     </select>
                 </div>
-            @elseif ($question->type === 'linking')
+            @elseif ($question->type === \App\Enum\QuestionTypes::LINKING)
                 @php $pairs = old('question_data.options', $question->metadata['answer'] ?? []); @endphp
                 <div>
                     <label class="block mb-3 font-semibold text-gray-700">Linking Pairs</label>
@@ -184,7 +184,7 @@
                     <small class="text-gray-500">To add or remove pairs, please recreate the question.</small>
                 </div>
             @endif
-            @if ($question->type === 'rearranging')
+            @if ($question->type === \App\Enum\QuestionTypes::REARRANGING)
                 <div class="p-4 space-y-4 border rounded bg-gray-50">
                     {{-- @dd($question->toArray()); --}}
 
@@ -227,7 +227,7 @@
                     </div>
                 </div>
             @endif
-            @if ($question->type === 'comprehension')
+            @if ($question->type === \App\Enum\QuestionTypes::COMPREHENSION)
                 <div x-data="comprehension()" class="p-4 space-y-4 border rounded bg-gray-50">
                     <label class="block mb-4 font-semibold">Passage Questions</label>
                     <template x-for="(question, index) in questions" :key="index">
@@ -252,7 +252,7 @@
                         class="px-5 py-2 font-semibold text-white bg-indigo-500 rounded-xl">+ Add Question</button>
                 </div>
             @endif
-            @if ($question->type === 'underlinecorrect')
+            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS)
                 @php
                     $items = $question->metadata['questions'] ?? [];
                 @endphp
@@ -303,7 +303,7 @@
                     </div>
                 </div>
             @endif
-            @if ($question->type === 'editing')
+            @if ($question->type === \App\Enum\QuestionTypes::EDITING)
                 @php
                     $items = [];
                 @endphp
@@ -378,7 +378,7 @@
                 </div>
             @endif
 
-            @if ($question->type === \App\Enum\QuestionTypes::GRAMMAR_CLOZE_WITH_OPTIONS)
+            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
                 <div class="p-6 bg-white border rounded shadow">
                     <!-- Generate Button -->
                     <div class="mb-6">
@@ -578,7 +578,7 @@
 
                 const output = {
                     paragraph: rawText,
-                    question_type: 'grammar_cloze_with_options',
+                    question_type: '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}',
                     question_group: {
                         shared_options: sharedOptions
                     },

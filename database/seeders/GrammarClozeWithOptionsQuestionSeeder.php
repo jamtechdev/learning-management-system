@@ -52,7 +52,7 @@ class GrammarClozeWithOptionsQuestionSeeder extends Seeder
                 ];
 
                 Question::create([
-                    'type' => QuestionTypes::GRAMMAR_CLOZE_WITH_OPTIONS,
+                    'type' => QuestionTypes::OPEN_CLOZE_WITH_OPTIONS,
                     'content' => $paragraph,
                     'education_type' => 'primary', // or fetch dynamically
                     'level_id' => $subject->level_id,

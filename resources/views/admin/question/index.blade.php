@@ -18,10 +18,10 @@
                         All
                     </a>
 
-                    @foreach ($questionTypes as $type)
+                    @foreach ($questionTypes as $type => $label)
                         <a href="{{ route('admin.questions.index', ['tab' => $type, 'search' => request('search')]) }}"
                             class="px-4 py-2 text-sm font-semibold border rounded capitalize {{ request('tab') === $type ? 'bg-blue-700 text-white' : 'text-gray-800 hover:bg-blue-700 hover:text-white' }}">
-                            {{ str_replace('_', ' ', $type) }}
+                            {{ $label }}
                         </a>
                     @endforeach
                 </div>
@@ -80,7 +80,7 @@
                                 <!-- Options column: render based on question type -->
                                 <td class="max-w-md px-4 py-3 overflow-y-auto text-gray-900 dark:text-gray-100">
                                     @switch($question->type)
-                                        @case('mcq')
+                                        @case(\App\Enum\QuestionTypes::MCQ)
                                             <ul class="space-y-1">
                                                 @foreach ($question->options as $option)
                                                     <li class="flex items-start">
@@ -95,7 +95,7 @@
                                             </ul>
                                         @break
 
-                                        @case('true_false')
+                                        @case(\App\Enum\QuestionTypes::TRUE_FALSE)
                                             @php $correct = $question->metadata['answer']['choice'] ?? null; @endphp
                                             <div class="flex flex-col space-y-1">
                                                 <span class="{{ $correct === 'True' ? 'text-green-600 font-semibold' : '' }}">
@@ -111,7 +111,7 @@
                                             </div>
                                         @break
 
-                                        @case('fill_blank')
+                                        @case(\App\Enum\QuestionTypes::FILL_IN_THE_BLANK)
                                             <div class="space-y-2">
                                                 @foreach ($question->metadata['blanks'] ?? [] as $blank)
                                                     <div>
@@ -133,7 +133,7 @@
                                             </div>
                                         @break
 
-                                        @case('linking')
+                                        @case(\App\Enum\QuestionTypes::LINKING)
                                             <div class="space-y-2">
                                                 @foreach ($question->metadata['answer'] ?? [] as $pair)
                                                     <div class="flex items-center justify-between p-2 space-x-2 border rounded">
@@ -159,7 +159,7 @@
                                             </div>
                                         @break
 
-                                        @case('comprehension')
+                                        @case(\App\Enum\QuestionTypes::COMPREHENSION)
                                             <div class="p-4 space-y-3 bg-gray-100 rounded shadow dark:bg-gray-900">
                                                 <h4 class="font-semibold text-md">Questions & Answers</h4>
                                                 <ol class="space-y-2 list-decimal list-inside">
@@ -178,7 +178,7 @@
                                             </div>
                                         @break
 
-                                        @case('rearranging')
+                                        @case(\App\Enum\QuestionTypes::REARRANGING)
                                             <div>
                                                 <div class="mb-2 font-semibold">Available words:</div>
                                                 <ul class="flex flex-wrap gap-2">
@@ -199,7 +199,7 @@
                                             </div>
                                         @break
 
-                                        @case('grammar_cloze_with_options')
+                                        @case(\App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
                                             <div class="space-y-4">
                                                 @foreach ($question->metadata['questions'] ?? [] as $blank)
                                                     <div class="p-2 border rounded dark:border-gray-700">
@@ -211,7 +211,7 @@
                                             </div>
                                         @break
 
-                                        @case('editing')
+                                        @case(\App\Enum\QuestionTypes::EDITING)
                                             @php $mistakes = $question->metadata['questions'] ?? []; @endphp
                                             @if (count($mistakes))
                                                 <div class="space-y-2">
@@ -228,7 +228,7 @@
                                             @endif
                                         @break
 
-                                        @case('underlinecorrect')
+                                        @case(\App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS)
                                             @php $items = $question->metadata['questions'] ?? []; @endphp
                                             @if (count($items))
                                                 <div x-data="{ open: false }" class="space-y-2">
