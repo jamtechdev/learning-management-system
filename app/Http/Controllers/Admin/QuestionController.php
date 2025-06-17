@@ -159,19 +159,33 @@ class QuestionController extends Controller
     {
         $data['instruction'] = $data['instruction'] ?? '';
 
+        // Decode the JSON fill_in_the_blank_metadata to array
+        $blanks = json_decode($data['fill_in_the_blank_metadata'], true);
+
+        // Build the metadata array
+        $metadata = [
+            'instruction'   => $data['instruction'],
+            'type'  => $data['type'],
+            'question_text' => $data['content'],
+            'blanks'        => $blanks ?? [],
+        ];
+
+        // Save the Question
         $question = new Question();
-        $question->topic_id = $data['topic_id'];
-        $question->type = $data['type'];
-        $question->content = $data['content'];
-        $question->explanation = $data['explanation'] ?? null;
-        $question->level_id = $data['level_id'] ?? null;
-        $question->subject_id = $data['subject_id'] ?? null;
+        $question->topic_id       = $data['topic_id'];
+        $question->type           = $data['type'];
+        $question->content        = $data['content'];
+        $question->explanation    = $data['explanation'] ?? null;
+        $question->level_id       = $data['level_id'] ?? null;
+        $question->subject_id     = $data['subject_id'] ?? null;
         $question->education_type = $data['education_type'] ?? null;
-        $question->metadata = $data;
+        $question->metadata       = $metadata; // auto-cast to JSON via $casts
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Fill in the Blank question saved successfully!');
+        return redirect()->route('admin.questions.index')
+            ->with('success', 'Fill in the Blank question saved successfully!');
     }
+
 
     // 3. True/False
     private function saveTrueFalseQuestion($data)
@@ -575,7 +589,6 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-
     }
 
     public function updateMcqQuestion($question, array $data)

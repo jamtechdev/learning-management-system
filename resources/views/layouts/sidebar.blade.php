@@ -55,10 +55,8 @@
                         <li class="mb-[5px]">
                             <x-nav-link :href="route('admin.subjects.index')" :active="request()->routeIs('admin.subjects.*')"
                                 class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
-                                </svg>
+                                
+                                📑
                                 <span>Subjects</span>
                             </x-nav-link>
                         </li>
@@ -96,7 +94,7 @@
                 <x-nav-link href="{{ route('admin.subscriptions.index') }}" :active="request()->routeIs('admin.subscriptions.*') ||
                     request()->routeIs('admin.subscriptionplan.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
-                    👪
+                   💳
                     <span>Subscription Plans </span>
                 </x-nav-link>
             </li>

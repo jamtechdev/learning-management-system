@@ -197,7 +197,7 @@
                                     <div class="mb-1">
                                         <span class="font-medium text-blue-700">Left (Label):</span>
                                         <label class="ml-2 text-sm">
-                                            <input type="radio"selectQuestionType
+                                            <input type="radio" selectQuestionType
                                                 :name="'question_data[options][' + index + '][label_type]'"
                                                 value="text" x-model="option.label_type"> Text
                                         </label>
@@ -368,20 +368,23 @@
 
                     <div x-show="questions.length" class="p-4 mt-4 border rounded bg-gray-50">
                         <h2 class="mb-3 font-semibold text-gray-700">Select Correct Answers</h2>
-                        <template x-for="(q, index) in questions" :key="q.blank_number">
-                            <div class="mb-3">
-                                <label class="text-sm font-medium text-gray-600">
-                                    ( <span x-text="q.blank_number"></span> )
-                                </label>
-                                <select class="p-1 ml-2 border rounded" x-model="q.correct_answer"
-                                    @change="updateJSON">
-                                    <option value="">-- Select --</option>
-                                    <template x-for="opt in q.options" :key="opt">
-                                        <option :value="opt" x-text="opt"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </template>
+                        <div class="grid xl:grid-cols-2 grid-cols-1 gap-[15px]">
+                            <template x-for="(q, index) in questions" :key="q.blank_number">
+                                <div class="mb-3 flex gap-2 items-center">
+                                    <label class="text-sm font-medium text-gray-600 w-[40px]">
+                                        ( <span x-text="q.blank_number"></span> )
+                                    </label>
+                                    <select class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]" x-model="q.correct_answer"
+                                        @change="updateJSON">
+                                        <option value="">-- Select --</option>
+                                        <template x-for="opt in q.options" :key="opt">
+                                            <option :value="opt" x-text="opt"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+
                     </div>
 
                     <!-- Metadata JSON Preview -->
@@ -396,26 +399,79 @@
             <!-- This auto-runs updateComprehensionJson whenever Alpine data changes -->
             <div x-effect="updateComprehensionJson()"></div>
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::COMPREHENSION }}'">
-                <div class="mt-4 space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold">Questions & Answers</label>
-                        <template x-for="(question, index) in comprehensionQuestions" :key="index">
-                            <div class="p-3 mb-4 border rounded">
-                                <label class="block text-sm">Question</label>
-                                <input type="text" x-model="question.text"
-                                    class="w-full p-2 mt-1 border rounded" />
+                <div class="mt-4 space-y-6">
+                    <!-- Passage Display -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h2 class="font-bold text-lg mb-2">Passage</h2>
+                        <div class="min-h-[160px] border border-gray-300 p-4 rounded-lg focus-within:ring-2 focus-within:ring-blue-400" x-html="questionContent"></div>
+                    </div>
 
-                                <label class="block mt-3 text-sm">Answer</label>
-                                <input type="text" x-model="question.answer"
-                                    class="w-full p-2 mt-1 border rounded" />
+                    <!-- Question Type Selector -->
+                    <div class="bg-white p-4 rounded shadow space-y-4">
+                        <h3 class="font-semibold text-md">Add a Question</h3>
 
-                                <button type="button" class="mt-2 text-sm text-red-500"
-                                    @click="removeComprehensionQuestion(index)">Remove</button>
+                        <select x-model="selectedComprehensionType" class="p-2 border rounded w-full">
+                            <option value="">Select Question Type</option>
+                            <option value="mcq">Multiple Choice (MCQ)</option>
+                            <option value="true_false">True / False</option>
+                            <option value="fill_blank">Fill in the Blank</option>
+                            <option value="open_ended">Open-ended (Text Answer)</option>
+                            <option value="ordering">Order the Events</option>
+                        </select>
+
+                        <button type="button" @click="addComprehensionQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Question</button>
+                    </div>
+
+                    <!-- Render Questions -->
+                    <template x-for="(question, index) in comprehensionQuestions" :key="index">
+                        <div class="bg-white p-4 rounded shadow space-y-2">
+                            <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span x-text="question.type"></span>)</h4>
+
+                            <div x-show="question.type === 'mcq'" class="space-y-2">
+                                <input type="text" x-model="question.question" placeholder="Enter MCQ Question" class="p-2 border w-full rounded">
+                                <template x-for="i in 4">
+                                    <input type="text" :placeholder="'Option ' + i" x-model="question.options[i - 1]" class="p-2 border w-full rounded mt-1">
+                                </template>
+                                <label class="block font-semibold">Expected Answer</label>
+                                <input type="text" x-model="question.answer" placeholder="Correct Option (1-4)" class="p-2 border w-full rounded mt-2">
                             </div>
-                        </template>
 
-                        <button type="button" class="px-4 py-2 mt-2 text-white bg-blue-500 rounded"
-                            @click="addComprehensionQuestion()">+ Add Question</button>
+                            <div x-show="question.type === 'true_false'" class="space-y-2">
+                                <input type="text" x-model="question.question" placeholder="Enter True/False Statement" class="p-2 border w-full rounded">
+                                <label class="block font-semibold">Expected Answer</label>
+                                <select x-model="question.answer" class="p-2 border w-full rounded">
+                                    <option value="">Select Answer</option>
+                                    <option value="True">True</option>
+                                    <option value="False">False</option>
+                                </select>
+                            </div>
+
+                            <div x-show="question.type === 'fill_blank'" class="space-y-2">
+                                <input type="text" x-model="question.question" placeholder="Enter sentence with ___ for blank" class="p-2 border w-full rounded">
+                                <label class="block font-semibold">Expected Answer</label>
+                                <input type="text" x-model="question.answer" placeholder="Correct Answer" class="p-2 border w-full rounded">
+                            </div>
+
+                            <div x-show="question.type === 'open_ended'" class="space-y-2">
+                                <input type="text" x-model="question.question" placeholder="Enter Open-ended Question" class="p-2 border w-full rounded">
+                            </div>
+
+                            <div x-show="question.type === 'ordering'" class="space-y-2">
+                                <input type="text" x-model="question.question" placeholder="Enter instruction (e.g., Order the events)" class="p-2 border w-full rounded">
+                                <label class="block font-semibold">Correct Order</label>
+                                <template x-for="i in 3">
+                                    <input type="text" :placeholder="'Event ' + i" x-model="question.events[i - 1]" class="p-2 border w-full rounded mt-1">
+                                </template>
+                            </div>
+
+                            <button @click="removeComprehensionQuestion(index)" class="text-red-500 mt-2">Remove</button>
+                        </div>
+                    </template>
+
+                    <!-- JSON Output (Debugging purpose) -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="font-semibold mb-2">Generated JSON:</h3>
+                        <pre x-text="JSON.stringify(comprehensionQuestions, null, 2)" class="bg-gray-50 p-2 text-sm overflow-x-auto"></pre>
                     </div>
                 </div>
             </template>
@@ -458,6 +514,38 @@
                     </template>
                 </div>
             </template>
+
+
+            <template x-if="questionType === '{{ \App\Enum\QuestionTypes::FILL_IN_THE_BLANK }}'">
+                <div class="p-6 bg-white border shadow rounded-xl">
+                    <h2 class="text-lg font-semibold text-blue-700 mb-4">📝 Fill in the Blank Builder</h2>
+
+                    <div class="flex gap-4 mb-4">
+                        <button type="button" @click="insertBlank()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            + Insert Blank
+                        </button>
+                    </div>
+
+                    <!-- Blanks with answer inputs -->
+                    <template x-for="(blank, index) in blanks" :key="blank.blank_number">
+                        <div
+                            class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
+                            <div><strong>Blank #</strong>: <span x-text="blank.blank_number"></span></div>
+                            <div>
+                                <input type="text" x-model="blank.correct_answer" placeholder="Correct Answer"
+
+                                    class="px-3 py-2 border rounded" @input="updateJsonOutput()" />
+                            </div>
+                            <button @click="removeBlank(index)" class="text-red-600 hover:underline">Remove</button>
+                        </div>
+                    </template>
+
+                    <input type="hidden" name="question_data[fill_in_the_blank_metadata]" :value="jsonOutput" />
+
+                </div>
+            </template>
+
             <!-- Submit Buttons -->
             <div class="flex justify-between mt-10">
                 <button type="button" @click="step = step > 1 ? step - 1 : 1"
@@ -565,6 +653,7 @@
 
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
+                    this.updateBlanks();
                 });
                 if (this.questionType === "{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}") {
                     this.parseGrammarCloze();
@@ -672,13 +761,30 @@
 
             // ========== NEW FUNCTIONS FOR COMPREHENSION =============
 
-            // Add comprehension question
-
+            selectedComprehensionType: '',
             addComprehensionQuestion() {
-                this.comprehensionQuestions.push({
-                    text: '',
-                    answer: ''
-                });
+                if (!this.selectedComprehensionType) return;
+                let newQuestion = { type: this.selectedComprehensionType, question: '' };
+
+                switch (this.selectedComprehensionType) {
+                    case 'mcq':
+                        newQuestion.options = ['', '', '', ''];
+                        newQuestion.answer = '';
+                        break;
+                    case 'true_false':
+                        newQuestion.answer = '';
+                        break;
+                    case 'fill_blank':
+                        newQuestion.answer = '';
+                        break;
+                    case 'open_ended':
+                        break;
+                    case 'ordering':
+                        newQuestion.events = ['', '', ''];
+                        break;
+                }
+                this.comprehensionQuestions.push(newQuestion);
+                this.selectedComprehensionType = ''; // reset dropdown
             },
 
             removeComprehensionQuestion(index) {
@@ -694,8 +800,8 @@
                 this.comprehensionQuestions.forEach((q, index) => {
                     const i = index + 1;
                     output.subquestions.push({
-                        question: q.text.trim(),
-                        answer: q.answer.trim()
+                        question: q.question.trim(),
+                        answer: q.answer ? q.answer.trim() : ''
                     });
                 });
 
@@ -852,7 +958,6 @@
                     .join(' ');
             },
 
-            questionTypeLabels: '',
             questionTypeLabels: @json(\App\Enum\QuestionTypes::names()),
             // === Editing Question Specific States ===
             editingParagraph: '',
@@ -974,9 +1079,6 @@
                 this.updateJSON();
                 console.log("📦 Final JSON:", this.json);
             },
-
-
-
             updateJSON() {
                 this.json = {
                     questions: this.questions.map((q, idx) => ({
@@ -996,7 +1098,76 @@
             },
 
 
+            blankCounter: 12,
+            blanks: [],
+            jsonOutput: '',
 
+            insertBlank(customText = 'no') {
+                const blankText = ` (${customText})_____`;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                let insertIndex = range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ? range.index : editorLength;
+                this.quill.insertText(insertIndex, blankText, 'user');
+                this.quill.setSelection(insertIndex + blankText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+                this.updateBlanks();
+                // Show answer input immediately for new blank
+                // this.blanks.push({ number: this.blanks.length + 1, answer: '' });
+            },
+
+            updateBlanks() {
+                this.blanks = [];
+                const text = this.quill.getText();
+                const regex = /\(([^)]+)\)_____/g;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const blankNumber = match[1];
+                    // Check if blank already exists to preserve answer
+                    const existingBlank = this.blanks.find(b => b.blank_number === blankNumber);
+                    if (existingBlank) {
+                        this.blanks.push(existingBlank);
+                    } else {
+                        this.blanks.push({
+                            blank_number: blankNumber,
+                            correct_answer: '',
+                            input_type: 'input'
+                        });
+                    }
+                }
+                this.updateJsonOutput();
+            },
+
+            // New watcher to update blanks in real-time when parentheses content changes
+            watchBlanks() {
+                this.quill.on('text-change', () => {
+                    this.updateBlanks();
+                });
+            },
+
+            updateJsonOutput() {
+
+                const payload = this.blanks.map(blank => ({
+                    blank_number: blank.blank_number,
+                    correct_answer: blank.correct_answer,
+                    input_type: 'input'
+                }));
+                this.jsonOutput = JSON.stringify(payload, null, 2);
+            },
+
+            removeBlank(index) {
+                const blankNumber = this.blanks[index].blank_number;
+                this.blanks.splice(index, 1);
+
+                // Remove first occurrence of (blankNumber)_____ from editor content
+                const editorText = this.quill.getText();
+                const placeholder = `(${blankNumber})_____`;
+                const pos = editorText.indexOf(placeholder);
+                if (pos !== -1) {
+                    this.quill.deleteText(pos, placeholder.length, 'user');
+                }
+
+                this.updateJsonOutput();
+            },
 
             submitForm() {
                 this.$root.querySelector('form').submit();
