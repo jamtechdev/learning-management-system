@@ -607,10 +607,16 @@ class QuestionController extends Controller
             'format' => 'text',
         ];
 
-        $payload = $data;
-        $payload['options'] = $structuredOptions;
-        $payload['answer'] = $answer;
-        unset($payload['correct_option']);
+        // $payload = $data;
+        // $payload['options'] = $structuredOptions;
+        // $payload['answer'] = $answer;
+        // unset($payload['correct_option']);
+
+        $payload = [
+        'type' => $data['type'],
+        'options' => $structuredOptions,
+        'answer' => $answer,
+        ];
 
         // Save to DB
         $question->type = $data['type'];

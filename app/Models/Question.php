@@ -20,6 +20,7 @@ class Question extends Model
         'topic_id',
     ];
 
+
     public function level()
     {
         return $this->belongsTo(QuestionLevel::class, 'level_id');

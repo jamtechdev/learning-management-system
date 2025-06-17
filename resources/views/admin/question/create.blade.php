@@ -374,8 +374,9 @@
                                     <label class="text-sm font-medium text-gray-600 w-[40px]">
                                         ( <span x-text="q.blank_number"></span> )
                                     </label>
-                                    <select class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]" x-model="q.correct_answer"
-                                        @change="updateJSON">
+                                    <select
+                                        class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]"
+                                        x-model="q.correct_answer" @change="updateJSON">
                                         <option value="">-- Select --</option>
                                         <template x-for="opt in q.options" :key="opt">
                                             <option :value="opt" x-text="opt"></option>
@@ -403,7 +404,8 @@
                     <!-- Passage Display -->
                     <div class="bg-white p-4 rounded shadow">
                         <h2 class="font-bold text-lg mb-2">Passage</h2>
-                        <div class="min-h-[160px] border border-gray-300 p-4 rounded-lg focus-within:ring-2 focus-within:ring-blue-400" x-html="questionContent"></div>
+                        <div class="min-h-[160px] border border-gray-300 p-4 rounded-lg focus-within:ring-2 focus-within:ring-blue-400"
+                            x-html="questionContent"></div>
                     </div>
 
                     <!-- Question Type Selector -->
@@ -416,28 +418,34 @@
                             <option value="true_false">True / False</option>
                             <option value="fill_blank">Fill in the Blank</option>
                             <option value="open_ended">Open-ended (Text Answer)</option>
-                            <option value="ordering">Order the Events</option>
+
                         </select>
 
-                        <button type="button" @click="addComprehensionQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Question</button>
+                        <button type="button" @click="addComprehensionQuestion()"
+                            class="bg-blue-500 text-white px-4 py-2 rounded">Add Question</button>
                     </div>
 
                     <!-- Render Questions -->
                     <template x-for="(question, index) in comprehensionQuestions" :key="index">
                         <div class="bg-white p-4 rounded shadow space-y-2">
-                            <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span x-text="question.type"></span>)</h4>
+                            <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span
+                                    x-text="question.type"></span>)</h4>
 
                             <div x-show="question.type === 'mcq'" class="space-y-2">
-                                <input type="text" x-model="question.question" placeholder="Enter MCQ Question" class="p-2 border w-full rounded">
+                                <input type="text" x-model="question.question" placeholder="Enter MCQ Question"
+                                    class="p-2 border w-full rounded">
                                 <template x-for="i in 4">
-                                    <input type="text" :placeholder="'Option ' + i" x-model="question.options[i - 1]" class="p-2 border w-full rounded mt-1">
+                                    <input type="text" :placeholder="'Option ' + i"
+                                        x-model="question.options[i - 1]" class="p-2 border w-full rounded mt-1">
                                 </template>
                                 <label class="block font-semibold">Expected Answer</label>
-                                <input type="text" x-model="question.answer" placeholder="Correct Option (1-4)" class="p-2 border w-full rounded mt-2">
+                                <input type="text" x-model="question.answer" placeholder="Correct Option (1-4)"
+                                    class="p-2 border w-full rounded mt-2">
                             </div>
 
                             <div x-show="question.type === 'true_false'" class="space-y-2">
-                                <input type="text" x-model="question.question" placeholder="Enter True/False Statement" class="p-2 border w-full rounded">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter True/False Statement" class="p-2 border w-full rounded">
                                 <label class="block font-semibold">Expected Answer</label>
                                 <select x-model="question.answer" class="p-2 border w-full rounded">
                                     <option value="">Select Answer</option>
@@ -447,24 +455,23 @@
                             </div>
 
                             <div x-show="question.type === 'fill_blank'" class="space-y-2">
-                                <input type="text" x-model="question.question" placeholder="Enter sentence with ___ for blank" class="p-2 border w-full rounded">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter sentence with ___ for blank" class="p-2 border w-full rounded">
                                 <label class="block font-semibold">Expected Answer</label>
-                                <input type="text" x-model="question.answer" placeholder="Correct Answer" class="p-2 border w-full rounded">
+                                <input type="text" x-model="question.answer" placeholder="Correct Answer"
+                                    class="p-2 border w-full rounded">
                             </div>
 
                             <div x-show="question.type === 'open_ended'" class="space-y-2">
-                                <input type="text" x-model="question.question" placeholder="Enter Open-ended Question" class="p-2 border w-full rounded">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter Open-ended Question" class="p-2 border w-full rounded">
+                                <label class="block font-semibold">Answer</label>
+                                <input type="text" x-model="question.answer" placeholder="Enter Answer"
+                                    class="p-2 border w-full rounded">
                             </div>
 
-                            <div x-show="question.type === 'ordering'" class="space-y-2">
-                                <input type="text" x-model="question.question" placeholder="Enter instruction (e.g., Order the events)" class="p-2 border w-full rounded">
-                                <label class="block font-semibold">Correct Order</label>
-                                <template x-for="i in 3">
-                                    <input type="text" :placeholder="'Event ' + i" x-model="question.events[i - 1]" class="p-2 border w-full rounded mt-1">
-                                </template>
-                            </div>
-
-                            <button @click="removeComprehensionQuestion(index)" class="text-red-500 mt-2">Remove</button>
+                            <button @click="removeComprehensionQuestion(index)"
+                                class="text-red-500 mt-2">Remove</button>
                         </div>
                     </template>
 
@@ -534,7 +541,6 @@
                             <div><strong>Blank #</strong>: <span x-text="blank.blank_number"></span></div>
                             <div>
                                 <input type="text" x-model="blank.correct_answer" placeholder="Correct Answer"
-
                                     class="px-3 py-2 border rounded" @input="updateJsonOutput()" />
                             </div>
                             <button @click="removeBlank(index)" class="text-red-600 hover:underline">Remove</button>
@@ -764,11 +770,15 @@
             selectedComprehensionType: '',
             addComprehensionQuestion() {
                 if (!this.selectedComprehensionType) return;
-                let newQuestion = { type: this.selectedComprehensionType, question: '' };
+                let newQuestion = {
+                    type: this.selectedComprehensionType,
+                    question: ''
+                };
 
                 switch (this.selectedComprehensionType) {
                     case 'mcq':
-                        newQuestion.options = ['', '', '', ''];
+                        question_type: 'mcq',
+                            newQuestion.options = ['', '', '', ''];
                         newQuestion.answer = '';
                         break;
                     case 'true_false':
@@ -778,9 +788,7 @@
                         newQuestion.answer = '';
                         break;
                     case 'open_ended':
-                        break;
-                    case 'ordering':
-                        newQuestion.events = ['', '', ''];
+                        newQuestion.answer = '';
                         break;
                 }
                 this.comprehensionQuestions.push(newQuestion);
@@ -799,10 +807,19 @@
 
                 this.comprehensionQuestions.forEach((q, index) => {
                     const i = index + 1;
-                    output.subquestions.push({
-                        question: q.question.trim(),
-                        answer: q.answer ? q.answer.trim() : ''
-                    });
+                    const subQ = {
+                        type: q.type,
+                        question: q.question.trim()
+                    };
+
+                    if (q.options && Array.isArray(q.options)) {
+                        subQ.options = q.options.map(opt => opt.trim());
+                    }
+
+                    subQ.answer = q.answer ? q.answer.trim() : '';
+
+                    output.subquestions.push(subQ);
+
                 });
 
                 this.comprehensionJson = output;
@@ -1106,7 +1123,8 @@
                 const blankText = ` (${customText})_____`;
                 let range = this.quill.getSelection(true);
                 const editorLength = this.quill.getLength();
-                let insertIndex = range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ? range.index : editorLength;
+                let insertIndex = range && typeof range.index === 'number' && range.index >= 0 && range.index <=
+                    editorLength ? range.index : editorLength;
                 this.quill.insertText(insertIndex, blankText, 'user');
                 this.quill.setSelection(insertIndex + blankText.length, 0);
                 this.questionContent = this.quill.root.innerHTML;
