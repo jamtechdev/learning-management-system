@@ -88,7 +88,7 @@ class QuestionController extends Controller
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|integer|exists:questions,id',
             'answers.*.answer' => 'required',
-            'answers.*.type' => 'required|string|in:mcq,fill_blank,true_false,other_type'
+            'answers.*.type' => 'required|string|in:mcq,true_false,linking,rearranging,open_cloze_with_options,open_cloze_with_dropdown_options,comprehension,editing,fill_in_the_blank'
         ]);
 
         if ($validator->fails()) {
