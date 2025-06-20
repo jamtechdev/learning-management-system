@@ -82,13 +82,12 @@ class QuestionController extends Controller
         return $this->successHandler(new QuestionCollection($questions), 200, "Filtered questions fetched successfully!");
     }
 
-
     public function userAnswer(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'answers' => 'required|array|min:1', // 'answers' is an array of answer objects
-            'answers.*.question_id' => 'required|integer|exists:questions,id',
-            'answers.*.answer' => 'required|array',
+            '*.question_id' => 'required|integer|exists:questions,id',
+            '*.user_answer' => 'required',
+            '*.type' => 'required|string|in:mcq,fill_blank,true_false,other_type'
         ]);
 
         if ($validator->fails()) {
@@ -97,13 +96,16 @@ class QuestionController extends Controller
 
         $savedAnswers = [];
 
-        // Loop through each answer item in the 'answers' array
-        foreach ($request->answers as $answer) {
+        foreach ($request->all() as $answer) {
             $savedAnswers[] = UserAnswer::create([
-                'user_id' => auth()->id(),                     // from logged-in user
-                'question_id' => $answer['question_id'],       // question ID from each loop item
-                'answer_data' => $answer['answer'],            // answer array - will auto convert to JSON (if casted in model)
-                'submitted_at' => now(),                       // submission timestamp
+                'user_id' => auth()->id(),
+                'question_id' => $answer['question_id'], // For relational use
+                'answer_data' => [   // Save the full object into answer_data JSON column
+                    'question_id' => $answer['question_id'],
+                    'user_answer' => $answer['user_answer'],
+                    'type' => $answer['type']
+                ],
+                'submitted_at' => now(),
             ]);
         }
 
