@@ -85,9 +85,10 @@ class QuestionController extends Controller
     public function userAnswer(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            '*.question_id' => 'required|integer|exists:questions,id',
-            '*.user_answer' => 'required',
-            '*.type' => 'required|string|in:mcq,fill_blank,true_false,other_type'
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|integer|exists:questions,id',
+            'answers.*.answer' => 'required',
+            'answers.*.type' => 'required|string|in:mcq,fill_blank,true_false,other_type'
         ]);
 
         if ($validator->fails()) {
@@ -96,14 +97,14 @@ class QuestionController extends Controller
 
         $savedAnswers = [];
 
-        foreach ($request->all() as $answer) {
+        foreach ($request->answers as $answer) {
             $savedAnswers[] = UserAnswer::create([
                 'user_id' => auth()->id(),
-                'question_id' => $answer['question_id'], // For relational use
-                'answer_data' => [   // Save the full object into answer_data JSON column
+                'question_id' => $answer['question_id'],
+                'answer_data' => [
                     'question_id' => $answer['question_id'],
-                    'user_answer' => $answer['user_answer'],
-                    'type' => $answer['type']
+                    'user_answer' => $answer['answer'], // ✔️ Use 'answer' key from payload
+                    'type' => $answer['type'],
                 ],
                 'submitted_at' => now(),
             ]);
