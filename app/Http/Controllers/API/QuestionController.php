@@ -86,28 +86,30 @@ class QuestionController extends Controller
     public function userAnswer(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'question_id' => 'required|integer|exists:questions,id',
-            'answer' => 'required|array',
-            // 'answer.options' => 'required|array|min:1',
-            // 'answer.options.*.value' => 'required|string',
-            // 'answer.answer' => 'required|array',
-            // 'answer.answer.answer' => 'required|string',
-            // 'answer.answer.format' => 'required|string|in:text,latex,image',
+            'answers' => 'required|array|min:1', // 'answers' is an array of answer objects
+            'answers.*.question_id' => 'required|integer|exists:questions,id',
+            'answers.*.answer' => 'required|array',
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorHandler($validator->errors());
         }
 
-        $userAnswer = UserAnswer::create([
-            'user_id' => auth()->id(),
-            'question_id' => $request->question_id,
-            'answer_data' => $request->answer,
-            'submitted_at' => now(),
-        ]);
+        $savedAnswers = [];
+
+        // Loop through each answer item in the 'answers' array
+        foreach ($request->answers as $answer) {
+            $savedAnswers[] = UserAnswer::create([
+                'user_id' => auth()->id(),                     // from logged-in user
+                'question_id' => $answer['question_id'],       // question ID from each loop item
+                'answer_data' => $answer['answer'],            // answer array - will auto convert to JSON (if casted in model)
+                'submitted_at' => now(),                       // submission timestamp
+            ]);
+        }
+
         return response()->json([
-            'message' => 'Answer saved successfully.',
-            'data' => $userAnswer,
+            'message' => 'All answers saved successfully.',
+            'data' => $savedAnswers,
         ]);
     }
 }
