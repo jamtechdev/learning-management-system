@@ -376,7 +376,8 @@
                                     </label>
                                     <input type="text"
                                         class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]"
-                                        x-model="q.correct_answer" @input="updateJSON" placeholder="Enter correct answer" />
+                                        x-model="q.correct_answer" @input="updateJSON"
+                                        placeholder="Enter correct answer" />
                                 </div>
                             </template>
                         </div>
@@ -575,6 +576,8 @@
             selectedTopic: null,
             questionType: '',
             questionTypes: @json(\App\Enum\QuestionTypes::TYPES),
+            questionTypeLabels: @json(\App\Enum\QuestionTypes::names()),
+
             levelsByType: @json($levels),
             levels: [],
             subjects: [],
@@ -597,6 +600,7 @@
             comprehensionQuestions: [],
             comprehensionJson: '',
             questionInstruction: "",
+
             init() {
 
                 console.log(this.levelsByType);
@@ -853,15 +857,14 @@
                 this.selectedTopicId = '';
                 this.questionType = '';
             },
-
             onTopicChange() {
                 this.selectedTopic = this.topics.find(t => t.id == this.selectedTopicId);
                 this.questionType = '';
             },
-
+            //mcq start js
             insertMCQBlank() {
                 const blankNumber = (this.questionContent.match(/_____/g) || []).length + 1;
-                const insertText = `${blankNumber}. _____ `;
+                const insertText = ` _____ `;
 
                 let range = this.quill.getSelection(true);
                 const editorLength = this.quill.getLength();
@@ -918,6 +921,10 @@
                     opt.is_correct = (i === index);
                 });
             },
+            //end mcq
+
+            //linking js to html
+
             linkingOptions: [],
 
             addLinkingOption() {
@@ -970,7 +977,12 @@
                     .join(' ');
             },
 
-            questionTypeLabels: @json(\App\Enum\QuestionTypes::names()),
+
+            //end linking js to html
+
+
+
+
             // === Editing Question Specific States ===
             editingParagraph: '',
             editingBoxNumber: '', // <--- NEW: Manual box number input

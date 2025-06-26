@@ -559,7 +559,6 @@ class QuestionController extends Controller
         $question->save();
     }
 
-
     public function updateRearrangingQuestion($question, array $data)
     {
         $questionText = strip_tags($data['content']);
@@ -595,8 +594,7 @@ class QuestionController extends Controller
 
     public function updateMcqQuestion($question, array $data)
     {
-        $correctIndex = (int) $data['correct_option']; // Cast to int
-
+        $correctIndex = (int) $data['correct_option'];
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
                 'value' => $option,
@@ -609,45 +607,43 @@ class QuestionController extends Controller
             'format' => 'text',
         ];
 
-        // $payload = $data;
-        // $payload['options'] = $structuredOptions;
-        // $payload['answer'] = $answer;
-        // unset($payload['correct_option']);
+        $payload = $data;
+        $payload['options'] = $structuredOptions;
+        $payload['answer'] = $answer;
+        $payload['instruction'] = $data['instruction'] ?? '';
+        unset($payload['correct_option']);
 
-        $payload = [
-        'type' => $data['type'],
-        'options' => $structuredOptions,
-        'answer' => $answer,
-        ];
-
-        // Save to DB
+        // Update question
+        $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
         $question->education_type = $data['education_type'];
         $question->subject_id = $data['subject_id'];
-        $question->topic_id = $data['topic_id'];
         $question->level_id = $data['level_id'];
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $payload;
         $question->save();
 
-        // Update options
+        // Sync Question Options
+        // First, delete existing ones
         QuestionOption::where('question_id', $question->id)->delete();
 
+        // Then, recreate them
         foreach ($structuredOptions as $index => $option) {
             QuestionOption::create([
                 'question_id' => $question->id,
-                'label' => chr(65 + $index),
+                'label' => chr(65 + $index), // A, B, C, D...
                 'value' => $option['value'],
                 'is_correct' => $option['is_correct'],
             ]);
         }
+
+        return redirect()->route('admin.questions.index')->with('success', 'MCQ question updated successfully!');
     }
 
     public function updateFillBlankQuestion($question, array $data)
     {
-
-         $data['instruction'] = $data['instruction'] ?? '';
+        $data['instruction'] = $data['instruction'] ?? '';
 
         // Decode the JSON fill_in_the_blank_metadata to array
         $blanks = json_decode($data['fill_in_the_blank_metadata'], true);

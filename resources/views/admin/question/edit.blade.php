@@ -57,23 +57,42 @@
                 <input type="hidden" name="question_data[content]" :value="questionContent" x-model="questionContent">
             </div>
             @if ($question->type === \App\Enum\QuestionTypes::MCQ)
-                <div>
-                    <label class="block mb-3 font-semibold text-gray-800">MCQ Options</label>
-                    @foreach ($question->options as $index => $option)
-                        <div class="flex items-center gap-4 p-3 mb-4 border-2 bg-gray-50 rounded-xl">
-                            <input type="radio" name="question_data[correct_option]" value="{{ $index }}"
-                                {{ old('question_data.correct_option', $option->is_correct) === 1 ? 'checked' : '' }}
-                                required class="w-6 h-6 accent-gray-500" />
-                            <input type="text" name="question_data[options][]"
-                                value="{{ old('question_data.options.' . $index, $option->value) }}"
-                                placeholder="Option text" required
-                                class="flex-1 p-3 text-lg border rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-200" />
+                <div class="p-6 bg-white border shadow rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-blue-700">🧩 MCQ Options</h2>
+                        <div class="flex gap-4">
+                            <button type="button" @click="insertMCQBlank" x-show="!hasInsertedBlank"
+                                class="px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                                + Insert Blank
+                            </button>
+                            <button type="button" @click="removeMCQBlank" x-show="hasInsertedBlank"
+                                class="px-3 py-1 text-sm text-red-700 bg-red-100 rounded-lg hover:bg-red-200">
+                                ✕ Remove Blank
+                            </button>
                         </div>
-                    @endforeach
-                    <button type="button" disabled
-                        class="px-5 py-2 font-semibold text-gray-400 bg-gray-100 cursor-not-allowed rounded-xl">
-                        Adding options in edit not supported
-                    </button>
+                    </div>
+
+                    <template x-for="(option, index) in options" :key="index">
+                        <div class="flex items-center gap-3 mb-3">
+                            <input type="radio" :name="'question_data[correct_option]'" :value="index"
+                                class="w-5 h-5 text-blue-600" @change="setCorrect(index)" :checked="option.is_correct"
+                                required />
+                            <input type="text" :name="'question_data[options][' + index + ']'" x-model="option.value"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Option text"
+                                required />
+                            <button type="button" @click="removeOption(index)" class="text-red-600 hover:text-red-800"
+                                x-show="options.length > 1">
+                                ✕
+                            </button>
+                        </div>
+                    </template>
+
+                    <div class="mt-4">
+                        <button type="button" @click="addOption"
+                            class="px-4 py-2 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                            + Add Option
+                        </button>
+                    </div>
                 </div>
             @elseif ($question->type === \App\Enum\QuestionTypes::FILL_IN_THE_BLANK)
                 <div class="p-6 bg-white border shadow rounded-xl">
@@ -128,7 +147,8 @@
                                 <label class="block font-semibold text-gray-700">Left Side (Label)</label>
                                 @if (($pair['left']['match_type'] ?? 'text') === 'image')
                                     <div class="mb-2">
-                                        <img src="{{ $pair['left']['image_uri'] }}" alt="Left Image" class="h-20" />
+                                        <img src="{{ $pair['left']['image_uri'] }}" alt="Left Image"
+                                            class="h-20" />
                                         <input type="hidden"
                                             name="question_data[options][{{ $i }}][existing_label_image_uri]"
                                             value="{{ $pair['left']['image_uri'] }}" />
@@ -422,6 +442,7 @@
             </div>
         </form>
     </div>
+
 </x-app-layout>
 <script>
     function underlinecorrect() {
@@ -670,6 +691,69 @@
                 this.updateJsonOutput();
             },
 
+            //mcq question type
+            options: @json($question->metadata['options'] ?? []),
+            hasInsertedBlank: true,
+            insertMCQBlank() {
+                const blankNumber = (this.questionContent.match(/_____/g) || []).length + 1;
+                const insertText = ` _____ `;
+
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                let insertIndex = range && typeof range.index === 'number' && range.index >= 0 && range.index <=
+                    editorLength ?
+                    range.index : editorLength;
+
+                this.quill.insertText(insertIndex, insertText, 'user');
+                this.quill.setSelection(insertIndex + insertText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+                this.hasInsertedBlank = true;
+
+                this.options = [{
+                        value: '',
+                        is_correct: false
+                    },
+                    {
+                        value: '',
+                        is_correct: false
+                    },
+                ];
+            },
+
+            removeMCQBlank() {
+                const blankRegex = /\d+\.\s*_____\s*/;
+                const text = this.quill.getText();
+                const match = text.match(blankRegex);
+
+                if (match) {
+                    const index = text.indexOf(match[0]);
+                    this.quill.deleteText(index, match[0].length, 'user');
+                }
+
+                this.questionContent = this.quill.root.innerHTML;
+                this.hasInsertedBlank = false;
+                this.options = [];
+            },
+
+            addOption() {
+                this.options.push({
+                    value: '',
+                    is_correct: false
+                });
+            },
+
+            removeOption(index) {
+                if (this.options.length > 1) {
+                    this.options.splice(index, 1);
+                }
+            },
+
+            setCorrect(index) {
+                this.options.forEach((opt, i) => {
+                    opt.is_correct = (i === index);
+                });
+            },
+            //end mcq question type
 
         };
     }
