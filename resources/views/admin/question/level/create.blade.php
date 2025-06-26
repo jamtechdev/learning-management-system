@@ -27,7 +27,7 @@
                     <option value="secondary">Secondary</option>
                 </select>
                 @error('education_type')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -36,11 +36,12 @@
                 <div class="mb-6">
                     <label class="block mb-2 font-medium text-gray-700">Add Level</label>
                     <div class="flex gap-2">
-                        <input type="text" x-model="newLevel" @keyup.enter.prevent="addLevel()"
+                        <input type="text" x-model="newLevel" @input="checkInputLength" @keyup.enter.prevent="addLevel()" pattern="[0-9]*"
+                            inputmode="numeric"
                             class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter level name">
-                        <button type="button" @click="addLevel()"
-                            class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                        <button type="button" @click="addLevel()" :disabled="isAddDisabled"
+                            class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50">
                             Add
                         </button>
                     </div>
@@ -65,7 +66,7 @@
                     </template>
 
                     @error('name')
-                        <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
                     @enderror
                 </div>
             </template>
@@ -73,7 +74,7 @@
             <!-- Submit Button -->
             <div class="mt-6">
                 <button type="submit"
-                    class="px-4 py-2 text-white add-btn disabled:opacity-50"
+                    class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
                     :disabled="!educationType || selectedLevels.length === 0">
                     Submit
                 </button>
@@ -85,37 +86,100 @@
         function levelForm() {
             return {
                 educationType: @json(old('education_type') ?? ''),
-                selectedLevels: @json(old('name') ?? []),
+                levelsByType: {
+                    primary: [],
+                    secondary: []
+                },
                 newLevel: '',
                 errorMessage: '',
+                isAddDisabled: true,
+                errorTimeout: null,
+
+                checkInputLength() {
+                    this.newLevel = this.newLevel.replace(/\D/g, '');
+                    if (this.newLevel.length > 2) {
+                        this.errorMessage = 'Level number cannot exceed 2 digits.';
+                        this.isAddDisabled = true;
+                        this.hideErrorAfterDelay();
+                    } else {
+                        this.errorMessage = '';
+                        this.isAddDisabled = this.newLevel.length === 0;
+                    }
+                },
 
                 addLevel() {
-                    const level = this.newLevel.trim();
-                    const lowerLevel = level.toLowerCase();
-                    this.errorMessage = '';
+                    var level = this.newLevel.trim();
 
                     if (!this.educationType) {
                         this.errorMessage = 'Please select an education type first.';
+                        this.hideErrorAfterDelay();
                         return;
                     }
 
-                    if (!level) {
-                        this.errorMessage = 'Level name cannot be empty.';
+                    var levels = this.levelsByType[this.educationType];
+
+                    if (this.educationType === 'primary' && levels.length >= 5) {
+                        this.errorMessage = 'Maximum 5 levels allowed for Primary.';
+                        this.hideErrorAfterDelay();
                         return;
                     }
 
-                    if (this.selectedLevels.map(l => l.toLowerCase()).includes(lowerLevel)) {
-                        this.errorMessage = 'This level is already added.';
+                    if (this.educationType === 'secondary' && levels.length >= 12) {
+                        this.errorMessage = 'Maximum 12 levels allowed for Secondary.';
+                        this.hideErrorAfterDelay();
                         return;
                     }
 
-                    this.selectedLevels.push(level);
+                if (!level) {
+                    this.errorMessage = 'Level cannot be empty.';
+                    this.hideErrorAfterDelay();
+                    return;
+                }
+
+                if (!/^\d+$/.test(level)) {
+                    this.errorMessage = 'Only numeric values are allowed.';
+                    this.hideErrorAfterDelay();
+                    return;
+                }
+
+                if ((this.educationType === 'secondary' && parseInt(level) > 12) || (this.educationType === 'primary' && parseInt(level) > 5)) {
+                    this.errorMessage = 'Level number exceeds the maximum allowed for the selected education type.';
+                    this.hideErrorAfterDelay();
+                    return;
+                }
+
+                if (level.length > 2) {
+                    this.errorMessage = 'Level number cannot exceed 2 digits.';
+                    this.hideErrorAfterDelay();
+                    return;
+                }
+
+                if (levels.includes(level)) {
+                    this.errorMessage = 'This level is already added.';
+                    this.hideErrorAfterDelay();
+                    return;
+                }
+
+                    levels.push(level);
                     this.newLevel = '';
+                    this.isAddDisabled = true;
                 },
+
 
                 removeLevel(index) {
-                    this.selectedLevels.splice(index, 1);
+                    this.levelsByType[this.educationType].splice(index, 1);
                 },
+
+                hideErrorAfterDelay() {
+                    if (this.errorTimeout) clearTimeout(this.errorTimeout);
+                    this.errorTimeout = setTimeout(() => {
+                        this.errorMessage = '';
+                    }, 3000);
+                },
+
+                get selectedLevels() {
+                    return this.levelsByType[this.educationType] || [];
+                }
             }
         }
     </script>

@@ -16,7 +16,6 @@
                     value="{{ ucfirst($question->education_type) }}" readonly
                     class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
             </div>
-
             <!-- Level (readonly + hidden input) -->
             <div>
                 <label class="block mb-2 font-semibold text-gray-800">Level</label>
@@ -24,7 +23,6 @@
                     class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
                 <input type="hidden" name="question_data[level_id]" value="{{ $question->level->id ?? '' }}" />
             </div>
-
             <!-- Subject (readonly + hidden input) -->
             <div>
                 <label class="block mb-2 font-semibold text-gray-800">Subject</label>
@@ -39,6 +37,15 @@
                     class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
                 <input type="hidden" name="question_data[topic_id]" value="{{ $question->topic->id ?? '' }}" />
             </div>
+            <!-- Hidden Question Type -->
+            <div>
+                <label class="block mb-2 font-semibold text-gray-800">Type</label>
+                <input type="text" value="{{ $question->type ?? '' }}" readonly
+                    class="w-full p-3 text-lg text-black border border-gray-500 cursor-not-allowed rounded-xl bg-gray-50" />
+                <input type="hidden" name="question_data[type]" value="{{ $question->type }}" />
+            </div>
+
+            <!-- Type-specific inputs -->
 
             <!-- Question Content -->
             <div>
@@ -49,12 +56,6 @@
                 <!-- Moved input outside the Quill container -->
                 <input type="hidden" name="question_data[content]" :value="questionContent" x-model="questionContent">
             </div>
-
-
-            <!-- Hidden Question Type -->
-            <input type="hidden" name="question_data[type]" value="{{ $question->type }}" />
-
-            <!-- Type-specific inputs -->
             @if ($question->type === \App\Enum\QuestionTypes::MCQ)
                 <div>
                     <label class="block mb-3 font-semibold text-gray-800">MCQ Options</label>
@@ -75,34 +76,31 @@
                     </button>
                 </div>
             @elseif ($question->type === \App\Enum\QuestionTypes::FILL_IN_THE_BLANK)
-                @php $blanks = old('question_data.blanks', $question->metadata['blanks'] ?? []); @endphp
-                <div>
-                    <label class="block mb-3 font-semibold text-gray-700">Fill in the Blanks</label>
-                    @foreach ($blanks as $i => $blank)
-                        <div class="p-4 mb-6 border border-gray-300 rounded-lg bg-gray-50">
-                            <h3 class="mb-2 font-semibold text-gray-700">Blank #{{ $i + 1 }}</h3>
-                            <input type="hidden" name="question_data[blanks][{{ $i }}][blank_number]"
-                                value="{{ $blank['blank_number'] ?? $i + 1 }}">
-                            <label class="block mb-1 font-semibold text-gray-700">Correct Answer</label>
-                            <select name="question_data[blanks][{{ $i }}][answer]" required
-                                class="w-full p-2 mb-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-200">
-                                <option value="" disabled {{ empty($blank['answer']) ? 'selected' : '' }}>Select
-                                    correct answer</option>
-                                @foreach ($blank['options'] ?? [] as $option)
-                                    <option value="{{ $option }}"
-                                        {{ ($blank['answer'] ?? '') === $option ? 'selected' : '' }}>
-                                        {{ $option }}</option>
-                                @endforeach
-                            </select>
-                            <label class="block mb-1 font-semibold text-gray-700">Options</label>
-                            @foreach ($blank['options'] ?? [] as $optIndex => $option)
-                                <input type="text" name="question_data[blanks][{{ $i }}][options][]"
-                                    value="{{ $option }}" required
-                                    class="w-full p-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-200" />
-                            @endforeach
+                <div class="p-6 bg-white border shadow rounded-xl">
+                    <h2 class="mb-4 text-lg font-semibold text-blue-700">📝 Fill in the Blank Builder</h2>
+
+                    <div class="flex gap-4 mb-4">
+                        <button type="button" @click="insertBlank()"
+                            class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                            + Insert Blank
+                        </button>
+                    </div>
+
+                    <!-- Blanks with answer inputs -->
+                    <template x-for="(blank, index) in blanks" :key="blank.blank_number">
+                        <div
+                            class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
+                            <div><strong>Blank #</strong>: <span x-text="blank.blank_number"></span></div>
+                            <div>
+                                <input type="text" x-model="blank.correct_answer" placeholder="Correct Answer"
+                                    class="px-3 py-2 border rounded" @input="updateJsonOutput()" />
+                            </div>
+                            <button @click="removeBlank(index)" class="text-red-600 hover:underline">Remove</button>
                         </div>
-                    @endforeach
-                    <small class="text-gray-500">To add or remove blanks/options, please recreate the question.</small>
+                    </template>
+
+                    <input type="hidden" name="question_data[fill_in_the_blank_metadata]" :value="jsonOutput" />
+
                 </div>
             @elseif ($question->type === \App\Enum\QuestionTypes::TRUE_FALSE)
                 <div>
@@ -377,7 +375,6 @@
                     </div>
                 </div>
             @endif
-
             @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
                 <div class="p-6 bg-white border rounded shadow">
                     <!-- Generate Button -->
@@ -418,7 +415,6 @@
                         x-model="formattedJson" />
                 </div>
             @endif
-
             <div class="flex justify-end mt-8">
                 <button type="submit" class="px-10 py-3 text-lg font-extrabold text-white transition add-btn">
                     Update Question
@@ -433,8 +429,6 @@
             questions: @json($question->metadata['questions'] ?? []),
         }
     }
-
-
 
     function editing() {
         return {
@@ -469,8 +463,6 @@
             }
         }
     }
-
-
 
     function questionForm() {
         return {
@@ -537,6 +529,7 @@
 
                 this.quill.on('text-change', () => {
                     this.questionContent = this.quill.root.innerHTML;
+                    this.updateBlanks();
                 });
             },
             // Grammar Cloze parse and update
@@ -604,6 +597,80 @@
                 this.questions.splice(index, 1);
                 this.updateGrammarClozeJson();
             },
+            blankCounter: 12,
+            blanks: @json($question->metadata['blanks'] ?? []),
+            jsonOutput: '',
+
+            insertBlank(customText = 'no') {
+                const blankText = ` (${customText})_____`;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                let insertIndex = range && typeof range.index === 'number' && range.index >= 0 && range.index <=
+                    editorLength ? range.index : editorLength;
+                this.quill.insertText(insertIndex, blankText, 'user');
+                this.quill.setSelection(insertIndex + blankText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+                this.updateBlanks();
+                // Show answer input immediately for new blank
+                // this.blanks.push({ number: this.blanks.length + 1, answer: '' });
+            },
+
+            updateBlanks() {
+                const oldBlanks = this.blanks.slice();
+                this.blanks = [];
+                const text = this.quill.getText();
+                const regex = /\(([^)]+)\)_____/g;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const blankNumber = match[1];
+                    // Check if blank already exists to preserve answer
+                    const existingBlank = oldBlanks.find(b => b.blank_number === blankNumber);
+                    if (existingBlank) {
+                        this.blanks.push(existingBlank);
+                    } else {
+                        this.blanks.push({
+                            blank_number: blankNumber,
+                            correct_answer: '',
+                            input_type: 'input'
+                        });
+                    }
+                }
+                this.updateJsonOutput();
+            },
+
+            // New watcher to update blanks in real-time when parentheses content changes
+            watchBlanks() {
+                this.quill.on('text-change', () => {
+                    this.updateBlanks();
+                });
+            },
+
+            updateJsonOutput() {
+
+                const payload = this.blanks.map(blank => ({
+                    blank_number: blank.blank_number,
+                    correct_answer: blank.correct_answer,
+                    input_type: 'input'
+                }));
+                this.jsonOutput = JSON.stringify(payload, null, 2);
+            },
+
+            removeBlank(index) {
+                const blankNumber = this.blanks[index].blank_number;
+                this.blanks.splice(index, 1);
+
+                // Remove first occurrence of (blankNumber)_____ from editor content
+                const editorText = this.quill.getText();
+                const placeholder = `(${blankNumber})_____`;
+                const pos = editorText.indexOf(placeholder);
+                if (pos !== -1) {
+                    this.quill.deleteText(pos, placeholder.length, 'user');
+                }
+
+                this.updateJsonOutput();
+            },
+
+
         };
     }
 </script>

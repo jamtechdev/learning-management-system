@@ -367,21 +367,16 @@
                     </button>
 
                     <div x-show="questions.length" class="p-4 mt-4 border rounded bg-gray-50">
-                        <h2 class="mb-3 font-semibold text-gray-700">Select Correct Answers</h2>
+                        <h2 class="mb-3 font-semibold text-gray-700">Enter Correct Answers</h2>
                         <div class="grid xl:grid-cols-2 grid-cols-1 gap-[15px]">
                             <template x-for="(q, index) in questions" :key="q.blank_number">
-                                <div class="mb-3 flex gap-2 items-center">
+                                <div class="flex items-center gap-2 mb-3">
                                     <label class="text-sm font-medium text-gray-600 w-[40px]">
                                         ( <span x-text="q.blank_number"></span> )
                                     </label>
-                                    <select
+                                    <input type="text"
                                         class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]"
-                                        x-model="q.correct_answer" @change="updateJSON">
-                                        <option value="">-- Select --</option>
-                                        <template x-for="opt in q.options" :key="opt">
-                                            <option :value="opt" x-text="opt"></option>
-                                        </template>
-                                    </select>
+                                        x-model="q.correct_answer" @input="updateJSON" placeholder="Enter correct answer" />
                                 </div>
                             </template>
                         </div>
@@ -402,17 +397,17 @@
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::COMPREHENSION }}'">
                 <div class="mt-4 space-y-6">
                     <!-- Passage Display -->
-                    <div class="bg-white p-4 rounded shadow">
-                        <h2 class="font-bold text-lg mb-2">Passage</h2>
+                    <div class="p-4 bg-white rounded shadow">
+                        <h2 class="mb-2 text-lg font-bold">Passage</h2>
                         <div class="min-h-[160px] border border-gray-300 p-4 rounded-lg focus-within:ring-2 focus-within:ring-blue-400"
                             x-html="questionContent"></div>
                     </div>
 
                     <!-- Question Type Selector -->
-                    <div class="bg-white p-4 rounded shadow space-y-4">
+                    <div class="p-4 space-y-4 bg-white rounded shadow">
                         <h3 class="font-semibold text-md">Add a Question</h3>
 
-                        <select x-model="selectedComprehensionType" class="p-2 border rounded w-full">
+                        <select x-model="selectedComprehensionType" class="w-full p-2 border rounded">
                             <option value="">Select Question Type</option>
                             <option value="mcq">Multiple Choice (MCQ)</option>
                             <option value="true_false">True / False</option>
@@ -422,32 +417,32 @@
                         </select>
 
                         <button type="button" @click="addComprehensionQuestion()"
-                            class="bg-blue-500 text-white px-4 py-2 rounded">Add Question</button>
+                            class="px-4 py-2 text-white bg-blue-500 rounded">Add Question</button>
                     </div>
 
                     <!-- Render Questions -->
                     <template x-for="(question, index) in comprehensionQuestions" :key="index">
-                        <div class="bg-white p-4 rounded shadow space-y-2">
+                        <div class="p-4 space-y-2 bg-white rounded shadow">
                             <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span
                                     x-text="question.type"></span>)</h4>
 
                             <div x-show="question.type === 'mcq'" class="space-y-2">
                                 <input type="text" x-model="question.question" placeholder="Enter MCQ Question"
-                                    class="p-2 border w-full rounded">
+                                    class="w-full p-2 border rounded">
                                 <template x-for="i in 4">
                                     <input type="text" :placeholder="'Option ' + i"
-                                        x-model="question.options[i - 1]" class="p-2 border w-full rounded mt-1">
+                                        x-model="question.options[i - 1]" class="w-full p-2 mt-1 border rounded">
                                 </template>
                                 <label class="block font-semibold">Expected Answer</label>
                                 <input type="text" x-model="question.answer" placeholder="Correct Option (1-4)"
-                                    class="p-2 border w-full rounded mt-2">
+                                    class="w-full p-2 mt-2 border rounded">
                             </div>
 
                             <div x-show="question.type === 'true_false'" class="space-y-2">
                                 <input type="text" x-model="question.question"
-                                    placeholder="Enter True/False Statement" class="p-2 border w-full rounded">
+                                    placeholder="Enter True/False Statement" class="w-full p-2 border rounded">
                                 <label class="block font-semibold">Expected Answer</label>
-                                <select x-model="question.answer" class="p-2 border w-full rounded">
+                                <select x-model="question.answer" class="w-full p-2 border rounded">
                                     <option value="">Select Answer</option>
                                     <option value="True">True</option>
                                     <option value="False">False</option>
@@ -456,29 +451,29 @@
 
                             <div x-show="question.type === 'fill_blank'" class="space-y-2">
                                 <input type="text" x-model="question.question"
-                                    placeholder="Enter sentence with ___ for blank" class="p-2 border w-full rounded">
+                                    placeholder="Enter sentence with ___ for blank" class="w-full p-2 border rounded">
                                 <label class="block font-semibold">Expected Answer</label>
                                 <input type="text" x-model="question.answer" placeholder="Correct Answer"
-                                    class="p-2 border w-full rounded">
+                                    class="w-full p-2 border rounded">
                             </div>
 
                             <div x-show="question.type === 'open_ended'" class="space-y-2">
                                 <input type="text" x-model="question.question"
-                                    placeholder="Enter Open-ended Question" class="p-2 border w-full rounded">
+                                    placeholder="Enter Open-ended Question" class="w-full p-2 border rounded">
                                 <label class="block font-semibold">Answer</label>
                                 <input type="text" x-model="question.answer" placeholder="Enter Answer"
-                                    class="p-2 border w-full rounded">
+                                    class="w-full p-2 border rounded">
                             </div>
 
                             <button @click="removeComprehensionQuestion(index)"
-                                class="text-red-500 mt-2">Remove</button>
+                                class="mt-2 text-red-500">Remove</button>
                         </div>
                     </template>
 
                     <!-- JSON Output (Debugging purpose) -->
-                    <div class="bg-white p-4 rounded shadow">
-                        <h3 class="font-semibold mb-2">Generated JSON:</h3>
-                        <pre x-text="JSON.stringify(comprehensionQuestions, null, 2)" class="bg-gray-50 p-2 text-sm overflow-x-auto"></pre>
+                    <div class="p-4 bg-white rounded shadow">
+                        <h3 class="mb-2 font-semibold">Generated JSON:</h3>
+                        <pre x-text="JSON.stringify(comprehensionQuestions, null, 2)" class="p-2 overflow-x-auto text-sm bg-gray-50"></pre>
                     </div>
                 </div>
             </template>
@@ -525,11 +520,11 @@
 
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::FILL_IN_THE_BLANK }}'">
                 <div class="p-6 bg-white border shadow rounded-xl">
-                    <h2 class="text-lg font-semibold text-blue-700 mb-4">📝 Fill in the Blank Builder</h2>
+                    <h2 class="mb-4 text-lg font-semibold text-blue-700">📝 Fill in the Blank Builder</h2>
 
                     <div class="flex gap-4 mb-4">
                         <button type="button" @click="insertBlank()"
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
                             + Insert Blank
                         </button>
                     </div>
@@ -1134,6 +1129,7 @@
             },
 
             updateBlanks() {
+                const oldBlanks = this.blanks.slice();
                 this.blanks = [];
                 const text = this.quill.getText();
                 const regex = /\(([^)]+)\)_____/g;
@@ -1141,7 +1137,7 @@
                 while ((match = regex.exec(text)) !== null) {
                     const blankNumber = match[1];
                     // Check if blank already exists to preserve answer
-                    const existingBlank = this.blanks.find(b => b.blank_number === blankNumber);
+                    const existingBlank = oldBlanks.find(b => b.blank_number === blankNumber);
                     if (existingBlank) {
                         this.blanks.push(existingBlank);
                     } else {

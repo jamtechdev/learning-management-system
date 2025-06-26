@@ -157,6 +157,7 @@ class QuestionController extends Controller
     // 2. Fill in the Blank
     private function saveFillBlankQuestion($data)
     {
+
         $data['instruction'] = $data['instruction'] ?? '';
 
         // Decode the JSON fill_in_the_blank_metadata to array
@@ -424,6 +425,7 @@ class QuestionController extends Controller
     // Update existing question
     public function update(Request $request, $question)
     {
+        // dd($request->all());
         $question = Question::findOrFail($question);
 
         $data = $request->input('question_data');
@@ -644,13 +646,28 @@ class QuestionController extends Controller
 
     public function updateFillBlankQuestion($question, array $data)
     {
-        $question->type = $data['type'];
-        $question->content = $data['content'];
-        $question->explanation = $data['explanation'] ?? null;
-        $question->level_id = $data['level_id'] ?? null;
-        $question->subject_id = $data['subject_id'] ?? null;
+
+         $data['instruction'] = $data['instruction'] ?? '';
+
+        // Decode the JSON fill_in_the_blank_metadata to array
+        $blanks = json_decode($data['fill_in_the_blank_metadata'], true);
+
+        // Build the metadata array
+        $metadata = [
+            'instruction'   => $data['instruction'],
+            'type'  => $data['type'],
+            'question_text' => $data['content'],
+            'blanks'        => $blanks ?? [],
+        ];
+
+        $question->topic_id       = $data['topic_id'];
+        $question->type           = $data['type'];
+        $question->content        = $data['content'];
+        $question->explanation    = $data['explanation'] ?? null;
+        $question->level_id       = $data['level_id'] ?? null;
+        $question->subject_id     = $data['subject_id'] ?? null;
         $question->education_type = $data['education_type'] ?? null;
-        $question->metadata = $data;
+        $question->metadata       = $metadata; // auto-cast to JSON via $casts
         $question->save();
     }
 

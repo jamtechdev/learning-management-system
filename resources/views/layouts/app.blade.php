@@ -32,7 +32,7 @@
             @include('layouts.sidebar')
         </div>
         <!-- Main Content Area -->
-        <div class="relative flex flex-col flex-1">
+        <div class="relative flex flex-col flex-1 overflow-y-auto">
             <!-- Top Navigation Bar -->
             <div class="sticky top-0 bg-white shadow dark:bg-gray-800">
                 @include('layouts.navigation')
