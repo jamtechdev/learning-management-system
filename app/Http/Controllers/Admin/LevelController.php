@@ -32,7 +32,7 @@ class LevelController extends Controller
     public function store(Request $request)
     {
         $educationType = strtolower($request->input('education_type'));
-        $maxLimits = ['primary' => 5, 'secondary' => 12];
+        $maxLimits = ['primary' => 5, 'secondary' => 7]; // Max entries based on allowed levels
         $limit = $maxLimits[$educationType];
 
         $request->validate([
@@ -42,13 +42,21 @@ class LevelController extends Controller
                     $fail("You can only submit up to {$limit} levels for " . ucfirst($educationType) . ".");
                 }
 
-                if ($educationType === 'primary' || $educationType === 'secondary') {
-                    $maxLevel = $educationType === 'secondary' ? 12 : 5;
-                    foreach ($value as $levelName) {
-                        if (is_numeric($levelName) && intval($levelName) > $maxLevel) {
-                            $fail('Level number exceeds the maximum allowed for the selected education type.');
-                            break;
-                        }
+                foreach ($value as $levelName) {
+                    if (!is_numeric($levelName)) {
+                        $fail('Each level name must be a numeric value.');
+                        break;
+                    }
+
+                    $number = intval($levelName);
+                    if ($educationType === 'primary' && ($number < 1 || $number > 5)) {
+                        $fail('Primary level must be between 1 and 5.');
+                        break;
+                    }
+
+                    if ($educationType === 'secondary' && ($number < 6 || $number > 12)) {
+                        $fail('Secondary level must be between 6 and 12.');
+                        break;
                     }
                 }
             }],
@@ -65,13 +73,11 @@ class LevelController extends Controller
         $existingLevels = QuestionLevel::where('education_type', $educationType)->get();
         $existingCount = $existingLevels->count();
 
-
         if (($existingCount + $submittedNames->count()) > $limit) {
             return back()->withInput()->withErrors([
                 'name' => "Maximum allowed levels for " . ucfirst($educationType) . " is $limit. You already have $existingCount."
             ]);
         }
-
 
         $existingNames = $existingLevels->pluck('name')->map(fn($n) => strtolower($n));
         $duplicates = $submittedNames->filter(fn($n) => $existingNames->contains(strtolower($n)));
@@ -81,7 +87,6 @@ class LevelController extends Controller
                 'name' => 'The following level name(s) already exist: ' . $duplicates->join(', ')
             ]);
         }
-
 
         try {
             DB::beginTransaction();
@@ -102,6 +107,7 @@ class LevelController extends Controller
     }
 
 
+
     public function update(Request $request, $id)
     {
         $educationType = strtolower($request->input('education_type'));
@@ -114,10 +120,18 @@ class LevelController extends Controller
                 'string',
                 'max:100',
                 function ($attribute, $value, $fail) use ($educationType) {
-                    if (($educationType === 'primary' && is_numeric($value) && intval($value) > 5) ||
-                        ($educationType === 'secondary' && is_numeric($value) && intval($value) > 12)
-                    ) {
-                        $fail('please check and make');
+                    if (!is_numeric($value)) {
+                        $fail('Level name must be a numeric value.');
+                        return;
+                    }
+
+                    $number = intval($value);
+                    if ($educationType === 'primary' && ($number < 1 || $number > 5)) {
+                        $fail('Primary level must be between 1 and 5.');
+                    }
+
+                    if ($educationType === 'secondary' && ($number < 6 || $number > 12)) {
+                        $fail('Secondary level must be between 6 and 12.');
                     }
                 },
                 Rule::unique('question_levels', 'name')
