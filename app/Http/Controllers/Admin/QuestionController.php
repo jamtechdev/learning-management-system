@@ -115,10 +115,12 @@ class QuestionController extends Controller
         $correctIndex = (int) $data['correct_option'];
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
-                'value' => $option,
+                'value' => $option['value'],
+                'explanation' => $option['explanation'] ?? null,
                 'is_correct' => ($index === $correctIndex),
             ];
         }, $data['options'], array_keys($data['options']));
+
 
         $answer = [
             'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
@@ -130,6 +132,7 @@ class QuestionController extends Controller
         $payload['answer'] = $answer;
         $payload['instruction'] = $data['instruction'] ?? '';
         unset($payload['correct_option']);
+
 
         $question = new Question();
         $question->topic_id = $data['topic_id'];
@@ -595,9 +598,12 @@ class QuestionController extends Controller
     public function updateMcqQuestion($question, array $data)
     {
         $correctIndex = (int) $data['correct_option'];
+
+        // Updated: handle options with explanation
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
-                'value' => $option,
+                'value' => $option['value'],
+                'explanation' => $option['explanation'] ?? null,
                 'is_correct' => ($index === $correctIndex),
             ];
         }, $data['options'], array_keys($data['options']));
@@ -625,10 +631,8 @@ class QuestionController extends Controller
         $question->save();
 
         // Sync Question Options
-        // First, delete existing ones
         QuestionOption::where('question_id', $question->id)->delete();
 
-        // Then, recreate them
         foreach ($structuredOptions as $index => $option) {
             QuestionOption::create([
                 'question_id' => $question->id,
@@ -640,6 +644,7 @@ class QuestionController extends Controller
 
         return redirect()->route('admin.questions.index')->with('success', 'MCQ question updated successfully!');
     }
+
 
     public function updateFillBlankQuestion($question, array $data)
     {

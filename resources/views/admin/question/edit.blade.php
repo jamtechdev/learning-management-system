@@ -45,6 +45,15 @@
                 <input type="hidden" name="question_data[type]" value="{{ $question->type }}" />
             </div>
 
+
+            <div>
+                <label class="block text-lg font-semibold text-blue-700">Question Instruction</label>
+                <input type="text" name="question_data[instruction]"
+                    class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                    placeholder="e.g., Let me help you." required value="{{ $question->metadata['instruction'] }}">
+
+            </div>
+
             <!-- Type-specific inputs -->
 
             <!-- Question Content -->
@@ -72,22 +81,34 @@
                         </div>
                     </div>
 
+                    <!-- MCQ Option Loop -->
                     <template x-for="(option, index) in options" :key="index">
-                        <div class="flex items-center gap-3 mb-3">
-                            <input type="radio" :name="'question_data[correct_option]'" :value="index"
-                                class="w-5 h-5 text-blue-600" @change="setCorrect(index)" :checked="option.is_correct"
-                                required />
-                            <input type="text" :name="'question_data[options][' + index + ']'" x-model="option.value"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Option text"
-                                required />
-                            <button type="button" @click="removeOption(index)" class="text-red-600 hover:text-red-800"
-                                x-show="options.length > 1">
-                                ✕
-                            </button>
+                        <div class="flex flex-col mb-4">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" :name="'question_data[correct_option]'" :value="index"
+                                    class="w-5 h-5 text-blue-600" @change="setCorrect(index)"
+                                    :checked="option.is_correct" required />
+
+                                <!-- Option Text -->
+                                <input type="text" :name="'question_data[options][' + index + '][value]'"
+                                    x-model="option.value" class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="Option text" required />
+
+                                <!-- Remove Button -->
+                                <button type="button" @click="removeOption(index)"
+                                    class="text-red-600 hover:text-red-800" x-show="options.length > 1">✕</button>
+                            </div>
+
+                            <!-- Explanation (always visible to admin/teacher) -->
+                            <input type="text" :name="'question_data[options][' + index + '][explanation]'"
+                                x-model="option.explanation"
+                                class="w-full px-3 py-2 mt-2 text-sm border border-blue-300 rounded"
+                                placeholder="Explanation for this option (optional)" />
                         </div>
                     </template>
 
-                    <div class="mt-4">
+                    <!-- Add Option + Submit -->
+                    <div class="flex items-center justify-between mt-4">
                         <button type="button" @click="addOption"
                             class="px-4 py-2 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
                             + Add Option
@@ -442,7 +463,7 @@
             </div>
         </form>
     </div>
-
+{{-- @dd($question->metadata['options']) --}}
 </x-app-layout>
 <script>
     function underlinecorrect() {
@@ -694,6 +715,9 @@
             //mcq question type
             options: @json($question->metadata['options'] ?? []),
             hasInsertedBlank: true,
+
+
+            //mcq start js
             insertMCQBlank() {
                 const blankNumber = (this.questionContent.match(/_____/g) || []).length + 1;
                 const insertText = ` _____ `;
@@ -711,11 +735,13 @@
 
                 this.options = [{
                         value: '',
-                        is_correct: false
+                        is_correct: false,
+                          explanation:''
                     },
                     {
                         value: '',
-                        is_correct: false
+                        is_correct: false,
+                        explanation:''
                     },
                 ];
             },
@@ -738,7 +764,14 @@
             addOption() {
                 this.options.push({
                     value: '',
-                    is_correct: false
+                    is_correct: false,
+                    explanation: ''
+                });
+            },
+
+            setCorrect(index) {
+                this.options.forEach((opt, i) => {
+                    opt.is_correct = (i === index);
                 });
             },
 
@@ -748,11 +781,6 @@
                 }
             },
 
-            setCorrect(index) {
-                this.options.forEach((opt, i) => {
-                    opt.is_correct = (i === index);
-                });
-            },
             //end mcq question type
 
         };

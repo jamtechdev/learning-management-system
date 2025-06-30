@@ -144,22 +144,34 @@
                         </div>
                     </div>
 
+                    <!-- MCQ Option Loop -->
                     <template x-for="(option, index) in options" :key="index">
-                        <div class="flex items-center gap-3 mb-3">
-                            <input type="radio" :name="'question_data[correct_option]'" :value="index"
-                                class="w-5 h-5 text-blue-600" @change="setCorrect(index)"
-                                :checked="option.is_correct" required />
-                            <input type="text" :name="'question_data[options][' + index + ']'"
-                                x-model="option.value" class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                placeholder="Option text" required />
-                            <button type="button" @click="removeOption(index)"
-                                class="text-red-600 hover:text-red-800" x-show="options.length > 1">
-                                ✕
-                            </button>
+                        <div class="flex flex-col mb-4">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" :name="'question_data[correct_option]'" :value="index"
+                                    class="w-5 h-5 text-blue-600" @change="setCorrect(index)"
+                                    :checked="option.is_correct" required />
+
+                                <!-- Option Text -->
+                                <input type="text" :name="'question_data[options][' + index + '][value]'"
+                                    x-model="option.value" class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="Option text" required />
+
+                                <!-- Remove Button -->
+                                <button type="button" @click="removeOption(index)"
+                                    class="text-red-600 hover:text-red-800" x-show="options.length > 1">✕</button>
+                            </div>
+
+                            <!-- Explanation (always visible to admin/teacher) -->
+                            <input type="text" :name="'question_data[options][' + index + '][explanation]'"
+                                x-model="option.explanation"
+                                class="w-full px-3 py-2 mt-2 text-sm border border-blue-300 rounded"
+                                placeholder="Explanation for this option (optional)" />
                         </div>
                     </template>
 
-                    <div class="mt-4">
+                    <!-- Add Option + Submit -->
+                    <div class="flex items-center justify-between mt-4">
                         <button type="button" @click="addOption"
                             class="px-4 py-2 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
                             + Add Option
@@ -321,17 +333,18 @@
             </template>
 
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS }}'">
-                <div class="p-6 bg-white border rounded shadow">
-                    <!-- Generate Button -->
-                    <div class="mb-6">
-                        <a href="javascript:void(0)" @click="parseGrammarCloze"
-                            class="px-4 py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-                            Generate Grammar Cloze Questions
-                        </a>
+                <div class="p-6 space-y-6 bg-white border rounded shadow">
+
+                    <!-- Insert Blank Button -->
+                    <div>
+                        <button type="button" @click="addGrammarBlank"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                            ➕ Insert Blank
+                        </button>
                     </div>
 
                     <!-- Shared Options Input -->
-                    <div class="mb-6">
+                    <div>
                         <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
                         <input type="text" x-model="sharedOptionsRaw" @input="updateGrammarClozeJson"
                             class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
@@ -339,61 +352,95 @@
 
                     <!-- Detected Blanks -->
                     <template x-if="questions.length">
-                        <div class="mb-6">
-                            <h2 class="mb-4 text-xl font-bold">Detected Blanks</h2>
-                            <template x-for="(q, idx) in questions" :key="q.blank_number">
+                        <div>
+                            <h2 class="mb-4 text-xl font-bold text-gray-800">Detected Blanks</h2>
+                            <template x-for="(q, idx) in questions" :key="q.id">
                                 <div
                                     class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
-                                    <div><strong>Blank #</strong>: <span x-text="q.blank_number"></span></div>
+                                    <!-- Editable blank number -->
+                                    <div class="flex items-center gap-2">
+                                        <label class="font-semibold text-gray-700">Blank #</label>
+                                        <input type="text" x-model="q.blank_number"
+                                            @input="updateGrammarClozeJson"
+                                            class="w-24 px-2 py-1 text-center border rounded" />
+                                    </div>
+
+                                    <!-- Correct Answer -->
                                     <div>
                                         <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
-                                            class="px-3 py-2 border rounded" @input="updateGrammarClozeJson">
+                                            class="w-full px-3 py-2 border rounded" @input="updateGrammarClozeJson">
                                     </div>
+
+                                    <!-- Remove Button -->
                                     <button @click="removeQuestion(idx)"
-                                        class="text-red-600 hover:underline">Remove</button>
+                                        class="text-red-600 hover:underline whitespace-nowrap">
+                                        ❌ Remove
+                                    </button>
                                 </div>
                             </template>
                         </div>
                     </template>
+
+                    <!-- JSON Output Preview -->
+                    {{-- <div x-show="formattedJson">
+                        <label class="block mb-1 font-semibold text-gray-600">Generated JSON</label>
+                        <textarea x-model="formattedJson"
+                            class="w-full h-48 font-mono text-sm bg-gray-100 border rounded resize-none"
+                            readonly></textarea>
+                    </div> --}}
                 </div>
             </template>
+
 
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS }}'">
                 <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
 
-                    <button type="button" @click="parseParagraph"
-                        class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                        🔍 Generate Dropdowns
+                    <!-- Insert Blank Button -->
+                    <button type="button" @click="insertDropdownBlank"
+                        class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                        ➕ Insert Dropdown Blank
                     </button>
 
+                    <!-- Generate Button -->
+                    <button type="button" @click="parseDropdownOptions"
+                        class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                        🔍 Generate Dropdown Questions
+                    </button>
+
+                    <!-- Questions Section -->
                     <div x-show="questions.length" class="p-4 mt-4 border rounded bg-gray-50">
                         <h2 class="mb-3 font-semibold text-gray-700">Enter Correct Answers</h2>
-                        <div class="grid xl:grid-cols-2 grid-cols-1 gap-[15px]">
-                            <template x-for="(q, index) in questions" :key="q.blank_number">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <label class="text-sm font-medium text-gray-600 w-[40px]">
-                                        ( <span x-text="q.blank_number"></span> )
+
+                        <template x-for="(q, index) in questions" :key="index">
+                            <div
+                                class="grid items-center grid-cols-1 gap-4 p-4 mb-4 bg-white border rounded md:grid-cols-2">
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">
+                                        Blank Number
                                     </label>
                                     <input type="text"
-                                        class="p-1 ml-2 border rounded bg-gray-50 border-gray-200 text-center w-[100%]"
-                                        x-model="q.correct_answer" @input="updateJSON"
-                                        placeholder="Enter correct answer" />
+                                        class="w-full px-3 py-2 text-gray-600 bg-gray-100 border rounded"
+                                        :value="q.blank_number" readonly />
                                 </div>
-                            </template>
-                        </div>
 
-                    </div>
-
-                    <!-- Metadata JSON Preview -->
-                    <div x-show="formattedJson"
-                        class="p-4 mt-4 overflow-x-auto text-sm bg-gray-100 border rounded shadow">
-                        <label class="block mb-1 font-semibold text-gray-600">Generated JSON</label>
-                        <textarea x-model="formattedJson" class="w-full h-48 font-mono text-sm bg-white border rounded" readonly></textarea>
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">
+                                        Correct Answer
+                                    </label>
+                                    <select x-model="q.correct_answer" @change="updateDropdownJson"
+                                        class="w-full px-3 py-2 border rounded">
+                                        <option value="" disabled>Select correct answer</option>
+                                        <template x-for="opt in q.options">
+                                            <option :value="opt" x-text="opt"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </template>
 
-            <!-- This auto-runs updateComprehensionJson whenever Alpine data changes -->
             <div x-effect="updateComprehensionJson()"></div>
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::COMPREHENSION }}'">
                 <div class="mt-4 space-y-6">
@@ -404,7 +451,7 @@
                             x-html="questionContent"></div>
                     </div>
 
-                    <!-- Question Type Selector -->
+                    <!-- Add Question Type -->
                     <div class="p-4 space-y-4 bg-white rounded shadow">
                         <h3 class="font-semibold text-md">Add a Question</h3>
 
@@ -414,7 +461,6 @@
                             <option value="true_false">True / False</option>
                             <option value="fill_blank">Fill in the Blank</option>
                             <option value="open_ended">Open-ended (Text Answer)</option>
-
                         </select>
 
                         <button type="button" @click="addComprehensionQuestion()"
@@ -425,20 +471,39 @@
                     <template x-for="(question, index) in comprehensionQuestions" :key="index">
                         <div class="p-4 space-y-2 bg-white rounded shadow">
                             <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span
-                                    x-text="question.type"></span>)</h4>
+                                    x-text="formatQuestionType(question.type)"></span>)</h4>
 
-                            <div x-show="question.type === 'mcq'" class="space-y-2">
+                            <!-- MCQ Section -->
+                            <div x-show="question.type === 'mcq'" class="space-y-3">
                                 <input type="text" x-model="question.question" placeholder="Enter MCQ Question"
-                                    class="w-full p-2 border rounded">
-                                <template x-for="i in 4">
-                                    <input type="text" :placeholder="'Option ' + i"
-                                        x-model="question.options[i - 1]" class="w-full p-2 mt-1 border rounded">
+                                    class="w-full p-2 border rounded" />
+
+                                <template x-for="(opt, optIndex) in question.options" :key="optIndex">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="question.options[optIndex]"
+                                            class="flex-1 p-2 border rounded"
+                                            :placeholder="'Option ' + (optIndex + 1)" />
+                                        <button type="button" class="text-red-600 hover:text-red-800"
+                                            @click="question.options.splice(optIndex, 1)">🗑</button>
+                                    </div>
                                 </template>
-                                <label class="block font-semibold">Expected Answer</label>
-                                <input type="text" x-model="question.answer" placeholder="Correct Option (1-4)"
-                                    class="w-full p-2 mt-2 border rounded">
+
+                                <button type="button" @click="question.options.push('')"
+                                    class="px-3 py-1 text-sm text-white bg-gray-600 rounded hover:bg-gray-700">
+                                    ➕ Add Option
+                                </button>
+
+                                <label class="block mt-3 font-semibold text-gray-600">Correct Answer</label>
+                                <select x-model="question.answer" class="w-full p-2 border rounded">
+                                    <option value="">-- Select Correct Option --</option>
+                                    <template x-for="(opt, i) in question.options" :key="i">
+                                        <option :value="opt" x-text="'Option ' + (i + 1) + ': ' + opt">
+                                        </option>
+                                    </template>
+                                </select>
                             </div>
 
+                            <!-- True/False Section -->
                             <div x-show="question.type === 'true_false'" class="space-y-2">
                                 <input type="text" x-model="question.question"
                                     placeholder="Enter True/False Statement" class="w-full p-2 border rounded">
@@ -450,6 +515,7 @@
                                 </select>
                             </div>
 
+                            <!-- Fill Blank Section -->
                             <div x-show="question.type === 'fill_blank'" class="space-y-2">
                                 <input type="text" x-model="question.question"
                                     placeholder="Enter sentence with ___ for blank" class="w-full p-2 border rounded">
@@ -458,6 +524,7 @@
                                     class="w-full p-2 border rounded">
                             </div>
 
+                            <!-- Open Ended Section -->
                             <div x-show="question.type === 'open_ended'" class="space-y-2">
                                 <input type="text" x-model="question.question"
                                     placeholder="Enter Open-ended Question" class="w-full p-2 border rounded">
@@ -471,14 +538,13 @@
                         </div>
                     </template>
 
-                    <!-- JSON Output (Debugging purpose) -->
+                    <!-- JSON Output -->
                     <div class="p-4 bg-white rounded shadow">
                         <h3 class="mb-2 font-semibold">Generated JSON:</h3>
                         <pre x-text="JSON.stringify(comprehensionQuestions, null, 2)" class="p-2 overflow-x-auto text-sm bg-gray-50"></pre>
                     </div>
                 </div>
             </template>
-
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::EDITING }}'">
                 <div class="p-4 mt-6 bg-white border rounded">
                     <!-- Input Fields -->
@@ -517,8 +583,6 @@
                     </template>
                 </div>
             </template>
-
-
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::FILL_IN_THE_BLANK }}'">
                 <div class="p-6 bg-white border shadow rounded-xl">
                     <h2 class="mb-4 text-lg font-semibold text-blue-700">📝 Fill in the Blank Builder</h2>
@@ -583,12 +647,17 @@
             subjects: [],
             topics: [],
             options: [{
-                value: '',
-                is_correct: false
-            }, {
-                value: '',
-                is_correct: false
-            }],
+                    value: '',
+                    is_correct: false,
+                    explanation: ''
+                },
+                {
+                    value: '',
+                    is_correct: false,
+                    explanation: ''
+                },
+            ],
+
             hasInsertedBlank: false,
             // ===================== Grammar Cloze =====================
             paragraph: '',
@@ -600,6 +669,8 @@
             comprehensionQuestions: [],
             comprehensionJson: '',
             questionInstruction: "",
+            studentSelectedIndex: null,
+            isAnswerSubmitted: false,
 
             init() {
 
@@ -698,7 +769,8 @@
                 }
             },
 
-            // Grammar Cloze parse and update
+            // start grammar coze with option fill_blank
+
             parseGrammarCloze() {
                 if (!this.questionContent) return;
 
@@ -763,6 +835,102 @@
                 this.questions.splice(index, 1);
                 this.updateGrammarClozeJson();
             },
+
+            addGrammarBlank() {
+                const nextBlank = this.questions.length + 1;
+
+                const insertText = ` (${nextBlank})_____ `;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                const insertIndex =
+                    range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ?
+                    range.index :
+                    editorLength;
+
+                this.quill.insertText(insertIndex, insertText, 'user');
+                this.quill.setSelection(insertIndex + insertText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+
+                // Refresh blanks
+                this.parseGrammarCloze();
+            },
+            // end grammar coze with option fill_blank
+            //start with dropdown
+
+            insertDropdownBlank() {
+                const editorText = this.quill.getText();
+                const matches = [...editorText.matchAll(/\((\d+)\)\[[^\[\]]+\]/g)];
+                const usedNumbers = matches.map(m => parseInt(m[1])).sort((a, b) => a - b);
+
+                let nextBlankNumber = 1;
+                while (usedNumbers.includes(nextBlankNumber)) {
+                    nextBlankNumber++;
+                }
+
+                const insertText = ` (${nextBlankNumber})[option1/option2] `;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                const insertIndex =
+                    range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ?
+                    range.index :
+                    editorLength;
+
+                this.quill.insertText(insertIndex, insertText, 'user');
+                this.quill.setSelection(insertIndex + insertText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+            },
+
+            parseDropdownOptions() {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.quill.root.innerHTML;
+                const text = tempDiv.innerText
+                    .replace(/\(\s*(\d+)\s*\)/g, "($1)")
+                    .replace(/\[\s*/g, "[")
+                    .replace(/\s*\]/g, "]")
+                    .replace(/\s*\/\s*/g, "/");
+
+                const regex = /\((\d+)\)\[([^\[\]]+\/[^\[\]]+)\]/g;
+                this.questions = [];
+
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const blankNumber = parseInt(match[1]);
+                    const options = match[2].split("/").map(opt => opt.trim());
+
+                    this.questions.push({
+                        id: this.questions.length + 1,
+                        blank_number: blankNumber,
+                        options,
+                        correct_answer: "",
+                        input_type: "dropdown"
+                    });
+                }
+
+                this.updateDropdownJson();
+            },
+
+            updateDropdownJson() {
+                const output = {
+                    question_type: 'dropdown_cloze',
+                    paragraph: this.quill.root.innerText.trim(),
+                    questions: this.questions.map((q, idx) => ({
+                        id: idx + 1,
+                        blank_number: q.blank_number,
+                        options: q.options,
+                        correct_answer: q.correct_answer || null,
+                        input_type: "dropdown"
+                    }))
+                };
+
+                this.formattedJson = JSON.stringify(output, null, 2);
+
+                const hiddenInput = document.querySelector('#correctUnderlineInput');
+                if (hiddenInput) {
+                    hiddenInput.value = this.formattedJson;
+                }
+            },
+
+            //end with dropdown
 
             // ========== NEW FUNCTIONS FOR COMPREHENSION =============
 
@@ -906,7 +1074,14 @@
             addOption() {
                 this.options.push({
                     value: '',
-                    is_correct: false
+                    is_correct: false,
+                    explanation: ''
+                });
+            },
+
+            setCorrect(index) {
+                this.options.forEach((opt, i) => {
+                    opt.is_correct = (i === index);
                 });
             },
 
@@ -916,11 +1091,6 @@
                 }
             },
 
-            setCorrect(index) {
-                this.options.forEach((opt, i) => {
-                    opt.is_correct = (i === index);
-                });
-            },
             //end mcq
 
             //linking js to html
@@ -976,13 +1146,7 @@
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
             },
-
-
             //end linking js to html
-
-
-
-
             // === Editing Question Specific States ===
             editingParagraph: '',
             editingBoxNumber: '', // <--- NEW: Manual box number input
