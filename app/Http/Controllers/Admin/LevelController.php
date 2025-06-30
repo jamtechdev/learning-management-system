@@ -54,8 +54,8 @@ class LevelController extends Controller
                         break;
                     }
 
-                    if ($educationType === 'secondary' && ($number < 6 || $number > 12)) {
-                        $fail('Secondary level must be between 6 and 12.');
+                    if ($educationType === 'secondary' && ($number < 7 || $number > 12)) {
+                        $fail('Secondary level must be between 7 and 12.');
                         break;
                     }
                 }
@@ -130,8 +130,8 @@ class LevelController extends Controller
                         $fail('Primary level must be between 1 and 6.');
                     }
 
-                    if ($educationType === 'secondary' && ($number < 6 || $number > 12)) {
-                        $fail('Secondary level must be between 6 and 12.');
+                    if ($educationType === 'secondary' && ($number < 7 || $number > 12)) {
+                        $fail('Secondary level must be between 7 and 12.');
                     }
                 },
                 Rule::unique('question_levels', 'name')
