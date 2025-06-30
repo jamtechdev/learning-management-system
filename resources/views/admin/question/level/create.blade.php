@@ -124,8 +124,8 @@
                         return;
                     }
 
-                    if (this.educationType === 'secondary' && levels.length >= 6) {
-                        this.errorMessage = 'Maximum 6 levels allowed for Secondary.';
+                    if (this.educationType === 'secondary' && levels.length >= 5) {
+                        this.errorMessage = 'Maximum 5 levels allowed for Secondary.';
                         this.hideErrorAfterDelay();
                         return;
                     }
@@ -148,7 +148,7 @@
                     return;
                 }
 
-                if ((this.educationType === 'primary' && parseInt(level) < 1) || (this.educationType === 'secondary' && parseInt(level) < 7)) {
+                if ((this.educationType === 'primary' && parseInt(level) < 1) || (this.educationType === 'secondary' && parseInt(level) < 1)) {
                     this.errorMessage = 'Level number is below the minimum allowed for the selected education type.';
                     this.hideErrorAfterDelay();
                     return;

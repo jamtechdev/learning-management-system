@@ -32,7 +32,7 @@ class LevelController extends Controller
     public function store(Request $request)
     {
         $educationType = strtolower($request->input('education_type'));
-        $maxLimits = ['primary' => 6, 'secondary' => 12]; // Max entries based on allowed levels
+        $maxLimits = ['primary' => 6, 'secondary' => 5]; // Max entries based on allowed levels
         $limit = $maxLimits[$educationType];
 
         $request->validate([
@@ -54,8 +54,8 @@ class LevelController extends Controller
                         break;
                     }
 
-                    if ($educationType === 'secondary' && ($number < 7 || $number > 12)) {
-                        $fail('Secondary level must be between 7 and 12.');
+                    if ($educationType === 'secondary' && ($number < 1 || $number > 5)) {
+                        $fail('Secondary level must be between 1 and 5.');
                         break;
                     }
                 }
@@ -130,8 +130,8 @@ class LevelController extends Controller
                         $fail('Primary level must be between 1 and 6.');
                     }
 
-                    if ($educationType === 'secondary' && ($number < 7 || $number > 12)) {
-                        $fail('Secondary level must be between 7 and 12.');
+                    if ($educationType === 'secondary' && ($number < 1 || $number > 5)) {
+                        $fail('Secondary level must be between 1 and 5.');
                     }
                 },
                 Rule::unique('question_levels', 'name')
