@@ -32,7 +32,7 @@ class LevelController extends Controller
     public function store(Request $request)
     {
         $educationType = strtolower($request->input('education_type'));
-        $maxLimits = ['primary' => 5, 'secondary' => 7]; // Max entries based on allowed levels
+        $maxLimits = ['primary' => 6, 'secondary' => 12]; // Max entries based on allowed levels
         $limit = $maxLimits[$educationType];
 
         $request->validate([
@@ -49,8 +49,8 @@ class LevelController extends Controller
                     }
 
                     $number = intval($levelName);
-                    if ($educationType === 'primary' && ($number < 1 || $number > 5)) {
-                        $fail('Primary level must be between 1 and 5.');
+                    if ($educationType === 'primary' && ($number < 1 || $number > 6)) {
+                        $fail('Primary level must be between 1 and 6.');
                         break;
                     }
 
@@ -126,8 +126,8 @@ class LevelController extends Controller
                     }
 
                     $number = intval($value);
-                    if ($educationType === 'primary' && ($number < 1 || $number > 5)) {
-                        $fail('Primary level must be between 1 and 5.');
+                    if ($educationType === 'primary' && ($number < 1 || $number > 6)) {
+                        $fail('Primary level must be between 1 and 6.');
                     }
 
                     if ($educationType === 'secondary' && ($number < 6 || $number > 12)) {

@@ -142,7 +142,7 @@
                     return;
                 }
 
-                if ((this.educationType === 'secondary' && parseInt(level) > 12) || (this.educationType === 'primary' && parseInt(level) > 5)) {
+                if ((this.educationType === 'secondary' && parseInt(level) > 12) || (this.educationType === 'primary' && parseInt(level) > 6)) {
                     this.errorMessage = 'Level number exceeds the maximum allowed for the selected education type.';
                     this.hideErrorAfterDelay();
                     return;
