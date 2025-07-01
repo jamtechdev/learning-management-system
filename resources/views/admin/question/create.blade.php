@@ -537,14 +537,10 @@
                                 class="mt-2 text-red-500">Remove</button>
                         </div>
                     </template>
-
-                    <!-- JSON Output -->
-                    <div class="p-4 bg-white rounded shadow">
-                        <h3 class="mb-2 font-semibold">Generated JSON:</h3>
-                        <pre x-text="JSON.stringify(comprehensionQuestions, null, 2)" class="p-2 overflow-x-auto text-sm bg-gray-50"></pre>
-                    </div>
                 </div>
             </template>
+
+
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::EDITING }}'">
                 <div class="p-4 mt-6 bg-white border rounded">
                     <!-- Input Fields -->
@@ -583,6 +579,7 @@
                     </template>
                 </div>
             </template>
+
             <template x-if="questionType === '{{ \App\Enum\QuestionTypes::FILL_IN_THE_BLANK }}'">
                 <div class="p-6 bg-white border shadow rounded-xl">
                     <h2 class="mb-4 text-lg font-semibold text-blue-700">📝 Fill in the Blank Builder</h2>

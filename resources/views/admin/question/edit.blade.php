@@ -156,304 +156,377 @@
                     </select>
                 </div>
             @elseif ($question->type === \App\Enum\QuestionTypes::LINKING)
-                @php $pairs = old('question_data.options', $question->metadata['answer'] ?? []); @endphp
-                <div>
-                    <label class="block mb-3 font-semibold text-gray-700">Linking Pairs</label>
-                    @foreach ($pairs as $i => $pair)
-                        <div class="p-4 mb-6 border border-gray-300 rounded-lg bg-gray-50">
-                            <h3 class="mb-2 font-semibold text-gray-700">Pair #{{ $i + 1 }}</h3>
+                <div class="space-y-4">
+                    <x-input-label value="Matching Pairs" class="mb-4 text-lg font-semibold text-blue-700" />
 
-                            <!-- Left (Label) -->
-                            <div class="mb-4">
-                                <label class="block font-semibold text-gray-700">Left Side (Label)</label>
-                                @if (($pair['left']['match_type'] ?? 'text') === 'image')
-                                    <div class="mb-2">
-                                        <img src="{{ $pair['left']['image_uri'] }}" alt="Left Image"
-                                            class="h-20" />
-                                        <input type="hidden"
-                                            name="question_data[options][{{ $i }}][existing_label_image_uri]"
-                                            value="{{ $pair['left']['image_uri'] }}" />
-                                    </div>
-                                    <input type="file"
-                                        name="question_data[options][{{ $i }}][label_image]"
-                                        class="mb-2" />
-                                    <input type="hidden"
-                                        name="question_data[options][{{ $i }}][match_type]"
-                                        value="image" />
-                                @else
-                                    <input type="text"
-                                        name="question_data[options][{{ $i }}][label_text]"
-                                        value="{{ $pair['left']['word'] }}"
-                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-200" />
-                                    <input type="hidden"
-                                        name="question_data[options][{{ $i }}][match_type]"
-                                        value="text" />
-                                @endif
-                            </div>
+                    <template x-for="(option, index) in linkingOptions" :key="index">
+                        <div
+                            class="relative flex flex-col gap-4 p-3 transition-shadow duration-200 border-2 border-blue-200 rounded-xl bg-blue-50 hover:shadow-blue-200">
+                            <button type="button" class="absolute text-red-600 top-2 right-2 hover:text-red-800"
+                                @click="linkingOptions.splice(index, 1)">✕</button>
 
-                            <!-- Right (Value) -->
-                            <div class="mb-4">
-                                <label class="block font-semibold text-gray-700">Right Side (Value)</label>
-                                @if (($pair['right']['match_type'] ?? 'text') === 'image')
-                                    <div class="mb-2">
-                                        <img src="{{ $pair['right']['image_uri'] }}" alt="Right Image"
-                                            class="h-20" />
-                                        <input type="hidden"
-                                            name="question_data[options][{{ $i }}][existing_value_image_uri]"
-                                            value="{{ $pair['right']['image_uri'] }}" />
+                            <div class="flex flex-col md:flex-row md:space-x-6">
+                                <!-- Left Label -->
+                                <div class="flex-1">
+                                    <div class="mb-1">
+                                        <span class="font-medium text-blue-700">Left (Label):</span>
+                                        <label class="ml-2 text-sm">
+                                            <input type="radio" selectQuestionType
+                                                :name="'question_data[options][' + index + '][label_type]'"
+                                                value="text" x-model="option.label_type"> Text
+                                        </label>
+                                        <label class="ml-2 text-sm">
+                                            <input type="radio"
+                                                :name="'question_data[options][' + index + '][label_type]'"
+                                                value="image" x-model="option.label_type"> Image
+                                        </label>
                                     </div>
-                                    <input type="file"
-                                        name="question_data[options][{{ $i }}][value_image]"
-                                        class="mb-2" />
-                                    <input type="hidden"
-                                        name="question_data[options][{{ $i }}][value_type]"
-                                        value="image" />
-                                @else
-                                    <input type="text"
-                                        name="question_data[options][{{ $i }}][value_text]"
-                                        value="{{ $pair['right']['word'] }}"
-                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-gray-200" />
-                                    <input type="hidden"
-                                        name="question_data[options][{{ $i }}][value_type]"
-                                        value="text" />
-                                @endif
+
+                                    <template x-if="option.label_type === 'text'">
+                                        <input type="text"
+                                            class="w-full p-3 border-2 border-blue-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                            x-model="option.label_text"
+                                            :name="'question_data[options][' + index + '][label_text]'"
+                                            placeholder="Label Text">
+                                    </template>
+
+                                    <template x-if="option.label_type === 'image'">
+                                        <div class="space-y-1">
+                                            <input type="file" accept="image/*"
+                                                :name="'question_data[options][' + index + '][label_image]'"
+                                                @change="previewFile($event, option, 'label')" />
+                                            <img x-show="option.label_preview" :src="option.label_preview"
+                                                class="object-cover w-16 h-16 rounded">
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Right Value -->
+                                <div class="flex-1">
+                                    <div class="mb-1">
+                                        <span class="font-medium text-blue-700">Right (Value):</span>
+                                        <label class="ml-2 text-sm">
+                                            <input type="radio"
+                                                :name="'question_data[options][' + index + '][value_type]'"
+                                                value="text" x-model="option.value_type"> Text
+                                        </label>
+                                        <label class="ml-2 text-sm">
+                                            <input type="radio"
+                                                :name="'question_data[options][' + index + '][value_type]'"
+                                                value="image" x-model="option.value_type"> Image
+                                        </label>
+                                    </div>
+
+                                    <template x-if="option.value_type === 'text'">
+                                        <input type="text"
+                                            class="w-full p-3 border-2 border-blue-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+                                            x-model="option.value_text"
+                                            :name="'question_data[options][' + index + '][value_text]'"
+                                            placeholder="Value Text">
+                                    </template>
+
+                                    <template x-if="option.value_type === 'image'">
+                                        <div class="space-y-1">
+                                            <input type="file" accept="image/*"
+                                                :name="'question_data[options][' + index + '][value_image]'"
+                                                @change="previewFile($event, option, 'value')" />
+                                            <img x-show="option.value_preview" :src="option.value_preview"
+                                                class="object-cover w-16 h-16 rounded">
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
-                    @endforeach
-                    <small class="text-gray-500">To add or remove pairs, please recreate the question.</small>
+                    </template>
+
+                    <button type="button"
+                        class="px-6 py-2 font-semibold text-blue-800 transition bg-blue-200 rounded-xl hover:bg-blue-300"
+                        @click="addLinkingOption()">
+                        + Add Match
+                    </button>
                 </div>
             @endif
             @if ($question->type === \App\Enum\QuestionTypes::REARRANGING)
-                <div class="p-4 space-y-4 border rounded bg-gray-50">
-                    {{-- @dd($question->toArray()); --}}
+                <div x-data="rearrangingForm()" x-init="init()" class="space-y-6">
+                    <!-- Instruction Field -->
 
-                    <!-- Instruction -->
+
+                    <!-- Correct Sentence Input -->
                     <div>
-                        <label class="font-semibold">Instruction:</label>
-                        <input type="text" name="instruction"
-                            value="{{ $question->metadata['instruction'] ?? '' }}" name="question_data[instruction]"
-                            class="w-full p-2 mt-1 border rounded" placeholder="Enter instruction">
+                        <label class="block text-lg font-semibold text-blue-700">Correct Sentence</label>
+                        <input type="text" name="question_data[question_text]" x-model="sentence"
+                            class="w-full p-3 border rounded-lg focus:ring-4 focus:ring-blue-200"
+                            placeholder="e.g., Let me help you." required>
                     </div>
 
-                    <!-- Options to Rearrange -->
+                    <!-- Auto-generated word inputs -->
                     <div>
-                        <label class="font-semibold">Words (Options):</label>
-                        <div class="space-y-2">
-                            @foreach ($question->metadata['options'] ?? [] as $index => $opt)
-                                <div class="flex items-center gap-2">
-                                    <input type="text" name="question_data[options][{{ $index }}][value]"
-                                        value="{{ $opt['value'] }}" class="w-full p-2 border rounded"
-                                        placeholder="Word">
-                                    <input type="hidden" name="options[{{ $index }}][is_correct]"
-                                        value="false">
-                                </div>
-                            @endforeach
+                        <label class="block text-lg font-semibold text-blue-700">Correct Word Order</label>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <template x-for="(word, index) in wordList" :key="index">
+                                <input type="text" class="p-2 border rounded-md"
+                                    :name="'question_data[rearranging][answer][' + index + ']'"
+                                    x-model="wordList[index]" placeholder="Word or phrase" required>
+                            </template>
                         </div>
                     </div>
 
-                    <!-- Correct Answer Order -->
-                    <div>
-                        <label class="font-semibold">Correct Answer Order:</label>
-                        <div class="space-y-2">
-                            @foreach ($question->metadata['answer']['answer'] ?? [] as $index => $word)
-                                <input type="text" name="question_data[answer][{{ $index }}]"
-                                    value="{{ $word }}" class="w-full p-2 border rounded"
-                                    placeholder="Correct Word in Order">
-                            @endforeach
+                    <!-- Live Preview -->
+                    <template x-if="wordList.length > 1">
+                        <div class="mt-3">
+                            <label class="text-sm text-gray-600">Preview:</label>
+                            <div class="p-3 mt-1 bg-gray-100 rounded-lg">
+                                <span x-text="wordList.join(' ')"></span>
+                            </div>
                         </div>
-                        <input type="hidden" name="question_data[answer][format]"
-                            value="{{ $question->metadata['answer']['format'] ?? 'ordered' }}">
-                    </div>
+                    </template>
                 </div>
             @endif
-            @if ($question->type === \App\Enum\QuestionTypes::COMPREHENSION)
-                <div x-data="comprehension()" class="p-4 space-y-4 border rounded bg-gray-50">
-                    <label class="block mb-4 font-semibold">Passage Questions</label>
-                    <template x-for="(question, index) in questions" :key="index">
-                        <div class="p-4 mb-6 border border-gray-300 rounded-lg bg-gray-50">
-                            <label class="block mb-2 font-semibold">Question # <span
-                                    x-text="index + 1"></span></label>
-                            <input type="text" required x-model="question.question"
-                                class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
-                            <label class="block mb-2 font-semibold">Answer # <span x-text="index + 1"></span></label>
-                            <input type="text" required x-model="question.answer"
-                                class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-200" />
+            @if ($question->type === \App\Enum\QuestionTypes::EDITING)
+                <div class="p-4 mt-6 bg-white border rounded">
+                    <!-- Input Fields -->
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <input type="number" x-model="editingBoxNumber" class="w-1/6 p-2 border rounded"
+                            placeholder="Box #" />
+                        <input type="text" x-model="editingWrong" class="w-1/4 p-2 border rounded"
+                            placeholder="Misspelled Word" />
+                        <input type="text" x-model="editingCorrect" class="w-1/4 p-2 border rounded"
+                            placeholder="Correct Word" />
+                        <button type="button" class="px-4 py-2 text-white bg-green-600 rounded"
+                            @click="addEditingError">
+                            Add Error
+                        </button>
+                    </div>
 
-                            <button type="button" @click="removeQuestion(index)"
-                                class="text-red-600 hover:underline">Remove</button>
+                    <!-- Errors List -->
+                    <template x-if="editingErrors.length > 0">
+                        <div class="mb-4">
+                            <h3 class="mb-2 font-semibold">Mistakes Added:</h3>
+                            <template x-for="(item, idx) in editingErrors" :key="idx">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <input type="number" x-model="item.box" class="w-1/6 p-2 border rounded"
+                                        placeholder="Box #" />
+                                    <input type="text" x-model="item.wrong" class="w-1/4 p-2 border rounded"
+                                        placeholder="Misspelled Word" />
+                                    <input type="text" x-model="item.correct" class="w-1/4 p-2 border rounded"
+                                        placeholder="Correct Word" />
+                                    <button type="button" @click="removeEditingError(idx)"
+                                        class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Remove</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <input type="hidden" id="editingMetadataInput" name="question_data[metadata]"
+                        x-model="formattedJson" />
+                </div>
+            @endif
+
+            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
+                <div class="p-6 space-y-6 bg-white border rounded shadow">
+
+                    <!-- Insert Blank Button -->
+                    <div>
+                        <button type="button" @click="addGrammarBlank"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                            ➕ Insert Blank
+                        </button>
+                    </div>
+
+                    <!-- Shared Options Input -->
+                    <div>
+                        <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
+                        <input type="text" x-model="sharedOptionsRaw" @input="updateGrammarClozeJson"
+                            class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
+                    </div>
+                    <input type="hidden" name="question_data[metadata]" id="metadataInput"
+                        x-model="formattedJson" />
+                    <!-- Detected Blanks -->
+                    <template x-if="questions.length">
+                        <div>
+                            <h2 class="mb-4 text-xl font-bold text-gray-800">Detected Blanks</h2>
+                            <template x-for="(q, idx) in questions" :key="q.id">
+                                <div
+                                    class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
+                                    <!-- Editable blank number -->
+                                    <div class="flex items-center gap-2">
+                                        <label class="font-semibold text-gray-700">Blank #</label>
+                                        <input type="text" x-model="q.blank_number"
+                                            @input="updateGrammarClozeJson"
+                                            class="w-24 px-2 py-1 text-center border rounded" />
+                                    </div>
+
+                                    <!-- Correct Answer -->
+                                    <div>
+                                        <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
+                                            class="w-full px-3 py-2 border rounded" @input="updateGrammarClozeJson">
+                                    </div>
+
+                                    <!-- Remove Button -->
+                                    <button @click="removeQuestion(idx)"
+                                        class="text-red-600 hover:underline whitespace-nowrap">
+                                        ❌ Remove
+                                    </button>
+                                </div>
+                            </template>
                         </div>
 
                     </template>
-
-                    <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
-
-                    <button type="button" @click="addQuestion"
-                        class="px-5 py-2 font-semibold text-white bg-indigo-500 rounded-xl">+ Add Question</button>
                 </div>
             @endif
-            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS)
-                @php
-                    $items = $question->metadata['questions'] ?? [];
-                @endphp
 
+            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS)
                 <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl">
-                    <div class="p-4 mt-4 border rounded bg-gray-50" x-data="underlinecorrect()">
-                        <h2 class="mb-3 font-semibold text-gray-700">Select Correct Answers</h2>
-                        <template x-for="(item , index) in questions" x-key="index">
-                            <div class="flex items-center mb-3 space-x-4">
-                                <div class="flex-1">
-                                    <label class="text-sm font-medium text-gray-600">
-                                        Question No:<span x-text="item.blank_number"></span>
+
+                    <!-- Insert Blank Button -->
+                    <button type="button" @click="insertDropdownBlank"
+                        class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                        ➕ Insert Dropdown Blank
+                    </button>
+
+                    <!-- Generate Button -->
+                    <button type="button" @click="parseDropdownOptions"
+                        class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                        🔍 Generate Dropdown Questions
+                    </button>
+                    <input type="hidden" name="question_data[underline_metadata]" id="correctUnderlineInput"
+                        x-model="formattedJson" />
+                    <!-- Questions Section -->
+                    <div x-show="questions.length" class="p-4 mt-4 border rounded bg-gray-50">
+                        <h2 class="mb-3 font-semibold text-gray-700">Enter Correct Answers</h2>
+
+                        <template x-for="(q, index) in questions" :key="index">
+                            <div
+                                class="grid items-center grid-cols-1 gap-4 p-4 mb-4 bg-white border rounded md:grid-cols-2">
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">
+                                        Blank Number
                                     </label>
-                                    <select :name="`question_data[questions][${index}][correct_answer]`"
-                                        class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        x-model="item.correct_answer">
-                                        <option value="">-- Select --</option>
-                                        <template x-for="option in item.options" :key="option">
-                                            <option x-text="option" :value="option"
-                                                x-bind:selected="option == item.correct_answer"></option>
+                                    <input type="text"
+                                        class="w-full px-3 py-2 text-gray-600 bg-gray-100 border rounded"
+                                        :value="q.blank_number" readonly />
+                                </div>
+
+                                <div>
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">
+                                        Correct Answer
+                                    </label>
+                                    <select x-model="q.correct_answer" @change="updateDropdownJson"
+                                        class="w-full px-3 py-2 border rounded">
+                                        <option value="" disabled>Select correct answer</option>
+                                        <template x-for="opt in q.options">
+                                            <option :value="opt" x-text="opt"></option>
                                         </template>
                                     </select>
                                 </div>
                             </div>
                         </template>
-                        <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
-
-
-                        {{-- @foreach ($items as $item)
-                            <div class="flex items-center mb-3 space-x-4">
-                                <div class="flex-1">
-                                    <label class="text-sm font-medium text-gray-600">
-                                        Question No:{{ $item['blank_number'] }}
-                                    </label>
-                                    <select name="question_data[questions][{{ $loop->index }}][correct_answer]"
-                                        class="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Select --</option>
-                                        @foreach ($item['options'] as $option)
-                                            <option value="{{ $option }}"
-                                                {{ $option === $item['correct_answer'] ? 'selected' : '' }}>
-                                                {{ $option }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        @endforeach --}}
                     </div>
                 </div>
             @endif
-            @if ($question->type === \App\Enum\QuestionTypes::EDITING)
-                @php
-                    $items = [];
-                @endphp
 
-                <div class="p-6 mt-6 space-y-6 bg-white border shadow rounded-xl" x-data="editing()">
-
-
-                    <div class="p-4 mt-4 border rounded bg-gray-50">
-                        <h2 class="mb-3 font-semibold text-gray-700">Editing Questions:</h2>
-                        <template x-for="(item, index) in questions" :key="index">
-                            <div class="grid grid-cols-3 gap-4 mb-4">
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Box No:</label>
-                                    <input type="number" x-model="item.box"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                </div>
-
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Wrong Word:</label>
-                                    <input type="text" x-model="item.wrong"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                </div>
-
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Correct Word:</label>
-                                    <input type="text" x-model="item.correct"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                    <button type="button" @click="removeQuestion(index)"
-                                        class="text-red-600 hover:underline">Remove</button>
-                                </div>
-
-                            </div>
-
-
-                        </template>
-
-                        <input type="hidden" name="question_data[questions]" :value="JSON.stringify(questions)">
-
-                        <button type="button" @click="addQuestion"
-                            class="px-4 py-2 text-sm text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
-                            + Add Question
-                        </button>
-
-
-
-
-                        {{-- @foreach ($items as $index => $item)
-                            <div class="grid grid-cols-3 gap-4 mb-4">
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Box No:</label>
-                                    <input type="number" name="questions[{{ $index }}][box]"
-                                        value="{{ $item['box'] }}"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                </div>
-
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Wrong Word:</label>
-                                    <input type="text" name="questions[{{ $index }}][wrong]"
-                                        value="{{ $item['wrong'] }}"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                </div>
-
-                                <div>
-                                    <label class="block mb-1 text-sm font-medium text-gray-600">Correct Word:</label>
-                                    <input type="text" name="questions[{{ $index }}][correct]"
-                                        value="{{ $item['correct'] }}"
-                                        class="w-full p-2 border rounded focus:ring focus:ring-blue-300" />
-                                </div>
-                            </div>
-                        @endforeach --}}
-                    </div>
-                </div>
-            @endif
-            @if ($question->type === \App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
-                <div class="p-6 bg-white border rounded shadow">
-                    <!-- Generate Button -->
-                    <div class="mb-6">
-                        <a href="javascript:void(0)" @click="parseGrammarCloze"
-                            class="px-4 py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-                            Generate Grammar Cloze Questions
-                        </a>
+            @if ($question->type === \App\Enum\QuestionTypes::COMPREHENSION)
+                <div x-effect="updateComprehensionJson()"></div>
+                <div class="mt-4 space-y-6">
+                    <!-- Passage Display -->
+                    <div class="p-4 bg-white rounded shadow">
+                        <h2 class="mb-2 text-lg font-bold">Passage</h2>
+                        <div class="min-h-[160px] border border-gray-300 p-4 rounded-lg focus-within:ring-2 focus-within:ring-blue-400"
+                            x-html="questionContent"></div>
                     </div>
 
-                    <!-- Shared Options Input -->
-                    <div class="mb-6">
-                        <label class="block mb-2 font-semibold text-gray-700">Shared Options</label>
-                        <input type="text" x-model="sharedOptionsRaw" @input="updateGrammarClozeJson"
-                            value="{{ implode(',', $question->metadata['question_group']['shared_options'] ?? []) ?? '' }}"
-                            class="w-full px-3 py-2 border rounded" placeholder="Enter options separated by commas ,">
-                    </div>
+                    <!-- Add Question Type -->
+                    <div class="p-4 space-y-4 bg-white rounded shadow">
+                        <h3 class="font-semibold text-md">Add a Question</h3>
 
-                    <!-- Detected Blanks -->
-                    <template x-if="questions.length">
-                        <div class="mb-6">
-                            <h2 class="mb-4 text-xl font-bold">Detected Blanks</h2>
-                            <template x-for="(q, idx) in questions" :key="q.blank_number">
-                                <div
-                                    class="flex flex-col gap-4 p-4 mb-4 border rounded md:flex-row md:items-center md:justify-between bg-gray-50">
-                                    <div><strong>Blank #</strong>: <span x-text="q.blank_number"></span></div>
-                                    <div>
-                                        <input type="text" x-model="q.correct_answer" placeholder="Correct Answer"
-                                            class="px-3 py-2 border rounded" @input="updateGrammarClozeJson">
+                        <select x-model="selectedComprehensionType" class="w-full p-2 border rounded">
+                            <option value="">Select Question Type</option>
+                            <option value="mcq">Multiple Choice (MCQ)</option>
+                            <option value="true_false">True / False</option>
+                            <option value="fill_blank">Fill in the Blank</option>
+                            <option value="open_ended">Open-ended (Text Answer)</option>
+                        </select>
+
+                        <button type="button" @click="addComprehensionQuestion()"
+                            class="px-4 py-2 text-white bg-blue-500 rounded">Add Question</button>
+                    </div>
+                    <input type="hidden" id="comprehensionMetadataInput"
+                        name="question_data[comprehension_metadata]" x-model="formattedJson" />
+                    <!-- Render Questions -->
+                    <template x-for="(question, index) in comprehensionQuestions" :key="index">
+                        <div class="p-4 space-y-2 bg-white rounded shadow">
+                            <h4 class="font-semibold">Question <span x-text="index + 1"></span> (<span
+                                    x-text="formatQuestionType(question.type)"></span>)</h4>
+
+
+                            <!-- MCQ Section -->
+                            <div x-show="question.type === 'mcq'" class="space-y-3">
+                                <input type="text" x-model="question.question" placeholder="Enter MCQ Question"
+                                    class="w-full p-2 border rounded" />
+
+                                <!-- Option Inputs -->
+                                <template x-for="(opt, optIndex) in question.options" :key="optIndex">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="question.options[optIndex]"
+                                            class="flex-1 p-2 border rounded"
+                                            :placeholder="'Option ' + (optIndex + 1)" />
+                                        <button type="button" class="text-red-600 hover:text-red-800"
+                                            @click="question.options.splice(optIndex, 1)">🗑</button>
                                     </div>
-                                    <button @click="removeQuestion(idx)"
-                                        class="text-red-600 hover:underline">Remove</button>
-                                </div>
-                            </template>
+                                </template>
+
+                                <!-- Add Option -->
+                                <button type="button" @click="question.options.push('')"
+                                    class="px-3 py-1 text-sm text-white bg-gray-600 rounded hover:bg-gray-700">
+                                    ➕ Add Option
+                                </button>
+
+                                <!-- Correct Answer Dropdown -->
+                                <label class="block mt-3 font-semibold text-gray-600">Correct Answer</label>
+                                <select x-model="question.answer" class="w-full p-2 border rounded">
+                                    <option value="">-- Select Correct Option --</option>
+                                    <template x-for="(opt, i) in question.options" :key="i">
+                                        <option :value="opt" x-text="'Option ' + (i + 1) + ': ' + opt">
+                                        </option>
+                                    </template>
+                                </select>
+                            </div>
+
+
+                            <!-- True/False Section -->
+                            <div x-show="question.type === 'true_false'" class="space-y-2">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter True/False Statement" class="w-full p-2 border rounded">
+                                <label class="block font-semibold">Expected Answer</label>
+                                <select x-model="question.answer" class="w-full p-2 border rounded">
+                                    <option value="">Select Answer</option>
+                                    <option value="True">True</option>
+                                    <option value="False">False</option>
+                                </select>
+                            </div>
+
+                            <!-- Fill Blank Section -->
+                            <div x-show="question.type === 'fill_blank'" class="space-y-2">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter sentence with ___ for blank" class="w-full p-2 border rounded">
+                                <label class="block font-semibold">Expected Answer</label>
+                                <input type="text" x-model="question.answer" placeholder="Correct Answer"
+                                    class="w-full p-2 border rounded">
+                            </div>
+
+                            <!-- Open Ended Section -->
+                            <div x-show="question.type === 'open_ended'" class="space-y-2">
+                                <input type="text" x-model="question.question"
+                                    placeholder="Enter Open-ended Question" class="w-full p-2 border rounded">
+                                <label class="block font-semibold">Answer</label>
+                                <input type="text" x-model="question.answer" placeholder="Enter Answer"
+                                    class="w-full p-2 border rounded">
+                            </div>
+
+                            <button @click="removeComprehensionQuestion(index)"
+                                class="mt-2 text-red-500">Remove</button>
                         </div>
                     </template>
-                    <input type="hidden" name="question_data[metadata]" id="metadataInput"
-                        x-model="formattedJson" />
+
                 </div>
             @endif
             <div class="flex justify-end mt-8">
@@ -463,49 +536,9 @@
             </div>
         </form>
     </div>
-{{-- @dd($question->metadata['options']) --}}
+    {{-- @dd($question->metadata['subquestions']) --}}
 </x-app-layout>
 <script>
-    function underlinecorrect() {
-        return {
-            questions: @json($question->metadata['questions'] ?? []),
-        }
-    }
-
-    function editing() {
-        return {
-            questions: @json($question->metadata['questions'] ?? []),
-            init() {
-                console.log(this.questions);
-            },
-            addQuestion() {
-                this.questions.push({
-                    box: this.questions.length + 1,
-                    wrong: null,
-                    correct: null
-                })
-            }
-        }
-    }
-
-    function comprehension() {
-        return {
-            questions: @json($question->metadata['subquestions'] ?? []),
-            init() {
-                console.log(this.questions);
-            },
-            addQuestion() {
-                this.questions.push({
-                    question: '',
-                    answer: ''
-                })
-            },
-            removeQuestion(index) {
-                this.questions.splice(index, 1);
-            }
-        }
-    }
-
     function questionForm() {
         return {
             quill: null,
@@ -513,6 +546,13 @@
             questions: @json($question->metadata['questions'] ?? []),
             sharedOptionsRaw: `{{ implode(',', $question->metadata['question_group']['shared_options'] ?? []) ?? '' }}`,
             formattedJson: @json(json_encode($question->metadata) ?? '{}'),
+            blankCounter: 12,
+            blanks: @json($question->metadata['blanks'] ?? []),
+            jsonOutput: '',
+
+            options: @json($question->metadata['options'] ?? []),
+            hasInsertedBlank: true,
+
             init() {
                 const toolbarOptions = [
                     ['bold', 'italic', 'underline', 'strike'],
@@ -573,12 +613,13 @@
                     this.questionContent = this.quill.root.innerHTML;
                     this.updateBlanks();
                 });
+                this.highlightEditingMistakes();
+                this.updateEditingJson();
             },
-            // Grammar Cloze parse and update
+
             parseGrammarCloze() {
                 if (!this.questionContent) return;
 
-                // Get raw text from Quill HTML content
                 const tempDiv = document.createElement("div");
                 tempDiv.innerHTML = this.questionContent;
                 const rawText = tempDiv.innerText.trim();
@@ -588,17 +629,22 @@
                 let match;
                 while ((match = blankRegex.exec(rawText)) !== null) {
                     const blankNumber = parseInt(match[1]);
+
+                    // 👇 Try to find existing question with this blank_number
+                    const existing = this.questions.find(q => q.blank_number == blankNumber);
+
                     matches.push({
                         id: matches.length + 1,
                         blank_number: blankNumber,
-                        correct_answer: '',
-                        input_type: 'input'
+                        correct_answer: existing ? existing.correct_answer : '',
+                        input_type: existing ? existing.input_type : 'input'
                     });
                 }
 
                 this.questions = matches;
                 this.updateGrammarClozeJson();
             },
+
 
             // Update ONLY Grammar Cloze JSON and hidden input
             updateGrammarClozeJson() {
@@ -639,10 +685,107 @@
                 this.questions.splice(index, 1);
                 this.updateGrammarClozeJson();
             },
-            blankCounter: 12,
-            blanks: @json($question->metadata['blanks'] ?? []),
-            jsonOutput: '',
 
+            addGrammarBlank() {
+                const nextBlank = this.questions.length + 1;
+
+                const insertText = ` (${nextBlank})_____ `;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                const insertIndex =
+                    range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ?
+                    range.index :
+                    editorLength;
+
+                this.quill.insertText(insertIndex, insertText, 'user');
+                this.quill.setSelection(insertIndex + insertText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+
+                // Refresh blanks
+                this.parseGrammarCloze();
+            },
+
+            //start with dropdown
+
+            insertDropdownBlank() {
+                const editorText = this.quill.getText();
+                const matches = [...editorText.matchAll(/\((\d+)\)\[[^\[\]]+\]/g)];
+                const usedNumbers = matches.map(m => parseInt(m[1])).sort((a, b) => a - b);
+
+                let nextBlankNumber = 1;
+                while (usedNumbers.includes(nextBlankNumber)) {
+                    nextBlankNumber++;
+                }
+
+                const insertText = ` (${nextBlankNumber})[option1/option2] `;
+                let range = this.quill.getSelection(true);
+                const editorLength = this.quill.getLength();
+                const insertIndex =
+                    range && typeof range.index === 'number' && range.index >= 0 && range.index <= editorLength ?
+                    range.index :
+                    editorLength;
+
+                this.quill.insertText(insertIndex, insertText, 'user');
+                this.quill.setSelection(insertIndex + insertText.length, 0);
+                this.questionContent = this.quill.root.innerHTML;
+            },
+
+            parseDropdownOptions() {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.quill.root.innerHTML;
+                const text = tempDiv.innerText
+                    .replace(/\(\s*(\d+)\s*\)/g, "($1)")
+                    .replace(/\[\s*/g, "[")
+                    .replace(/\s*\]/g, "]")
+                    .replace(/\s*\/\s*/g, "/");
+
+                const regex = /\((\d+)\)\[([^\[\]]+\/[^\[\]]+)\]/g;
+                const parsed = [];
+
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const blankNumber = parseInt(match[1]);
+                    const options = match[2].split("/").map(opt => opt.trim());
+
+                    // Preserve old correct answer if it matches the blank_number
+                    const existing = this.questions.find(q => q.blank_number === blankNumber);
+
+                    parsed.push({
+                        id: parsed.length + 1,
+                        blank_number: blankNumber,
+                        options,
+                        correct_answer: existing?.correct_answer ?? '',
+                        input_type: "dropdown"
+                    });
+                }
+
+                this.questions = parsed;
+                this.updateDropdownJson();
+            },
+
+
+            updateDropdownJson() {
+                const output = {
+                    question_type: 'dropdown_cloze',
+                    paragraph: this.quill.root.innerText.trim(),
+                    questions: this.questions.map((q, idx) => ({
+                        id: idx + 1,
+                        blank_number: q.blank_number,
+                        options: q.options,
+                        correct_answer: q.correct_answer || null,
+                        input_type: "dropdown"
+                    }))
+                };
+
+                this.formattedJson = JSON.stringify(output, null, 2);
+
+                const hiddenInput = document.querySelector('#correctUnderlineInput');
+                if (hiddenInput) {
+                    hiddenInput.value = this.formattedJson;
+                }
+            },
+
+            // Fill in blank
             insertBlank(customText = 'no') {
                 const blankText = ` (${customText})_____`;
                 let range = this.quill.getSelection(true);
@@ -653,8 +796,6 @@
                 this.quill.setSelection(insertIndex + blankText.length, 0);
                 this.questionContent = this.quill.root.innerHTML;
                 this.updateBlanks();
-                // Show answer input immediately for new blank
-                // this.blanks.push({ number: this.blanks.length + 1, answer: '' });
             },
 
             updateBlanks() {
@@ -713,8 +854,6 @@
             },
 
             //mcq question type
-            options: @json($question->metadata['options'] ?? []),
-            hasInsertedBlank: true,
 
 
             //mcq start js
@@ -736,12 +875,12 @@
                 this.options = [{
                         value: '',
                         is_correct: false,
-                          explanation:''
+                        explanation: ''
                     },
                     {
                         value: '',
                         is_correct: false,
-                        explanation:''
+                        explanation: ''
                     },
                 ];
             },
@@ -780,9 +919,209 @@
                     this.options.splice(index, 1);
                 }
             },
+            // edit linking
+            linkingOptions: (() => {
+                const answer = @json($question->metadata['answer'] ?? []);
+                return Array.isArray(answer) ? answer.map(item => ({
+                    label_type: item.left.match_type,
+                    label_text: item.left.match_type === 'text' ? item.left.word : '',
+                    label_image: item.left.match_type === 'image' ? item.left.image_uri : null,
+                    label_preview: item.left.match_type === 'image' ? item.left.image_uri : '',
+                    value_type: item.right.match_type,
+                    value_text: item.right.match_type === 'text' ? item.right.word : '',
+                    value_image: item.right.match_type === 'image' ? item.right.image_uri : null,
+                    value_preview: item.right.match_type === 'image' ? item.right.image_uri : '',
+                })) : [];
+            })(),
 
-            //end mcq question type
+            addLinkingOption() {
+                this.linkingOptions.push({
+                    label_type: 'text',
+                    label_text: '',
+                    label_image: '',
+                    label_preview: '',
+                    value_type: 'text',
+                    value_text: '',
+                    value_image: '',
+                    value_preview: '',
+                });
+            },
 
+            previewFile(event, option, type) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (type === 'label') {
+                        option.label_preview = reader.result;
+                        option.label_image = file;
+                    } else {
+                        option.value_preview = reader.result;
+                        option.value_image = file;
+                    }
+                };
+                reader.readAsDataURL(file);
+            },
+            trueFalseAnswer: 'True',
+            linkingPairs: [{
+                label: '',
+                value: ''
+            }, {
+                label: '',
+                value: ''
+            }],
+            formatQuestionType(type) {
+                return type
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            },
+            // end linking
+
+            // === Editing Question Specific States ===
+            editingParagraph: '',
+            editingBoxNumber: '', // <--- NEW: Manual box number input
+            editingWrong: '',
+            editingCorrect: '',
+            editingErrors: @json($question->metadata['questions'] ?? []),
+            editingJson: '',
+
+            addEditingError() {
+                if (!this.editingWrong || !this.editingCorrect || !this.editingBoxNumber) return;
+
+                const boxNum = Number(this.editingBoxNumber.trim());
+
+                // Prevent duplicate box numbers
+                const boxExists = this.editingErrors.some(err => err.box === boxNum);
+                if (boxExists) {
+                    alert("Box number already used. Please choose a unique one.");
+                    return;
+                }
+
+                this.editingErrors.push({
+                    box: boxNum,
+                    wrong: this.editingWrong.trim(),
+                    correct: this.editingCorrect.trim()
+                });
+
+                // Clear inputs
+                this.editingBoxNumber = '';
+                this.editingWrong = '';
+                this.editingCorrect = '';
+
+                this.highlightEditingMistakes();
+                this.updateEditingJson();
+            },
+
+            removeEditingError(index) {
+                this.editingErrors.splice(index, 1);
+                this.highlightEditingMistakes();
+                this.updateEditingJson();
+            },
+
+            updateEditingJson() {
+                this.editingJson = JSON.stringify({
+                    type: 'editing',
+                    paragraph: this.questionContent.trim(),
+                    questions: this.editingErrors
+                }, null, 2);
+
+                const input = document.querySelector('#editingMetadataInput');
+                if (input) {
+                    input.value = this.editingJson;
+                }
+            },
+
+            highlightEditingMistakes() {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = this.quill.root.innerHTML;
+
+                let html = tempDiv.innerHTML;
+
+                this.editingErrors.forEach(error => {
+                    if (!error.wrong || typeof error.wrong !== 'string') return;
+
+                    const escapedWord = error.wrong.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`\\b(${escapedWord})\\b`, 'gi');
+                    html = html.replace(regex, '<strong>$1</strong>');
+                });
+
+                this.quill.root.innerHTML = html;
+                this.questionContent = this.quill.root.innerHTML;
+            },
+            // end editing
+
+            // ==== START: Comprehension Question Logic ====
+            selectedComprehensionType: '',
+            comprehensionQuestions: @json($question->metadata['subquestions'] ?? []),
+
+            addComprehensionQuestion() {
+                if (!this.selectedComprehensionType) return;
+
+                const newQuestion = {
+                    type: this.selectedComprehensionType,
+                    question: '',
+                    options: this.selectedComprehensionType === 'mcq' ? ['', ''] : [],
+                    answer: ''
+                };
+
+                this.comprehensionQuestions.push(newQuestion);
+                this.selectedComprehensionType = '';
+            },
+
+            removeComprehensionQuestion(index) {
+                this.comprehensionQuestions.splice(index, 1);
+            },
+
+            updateComprehensionJson() {
+                const output = {
+                    passage: this.questionContent.trim(),
+                    subquestions: []
+                };
+
+                this.comprehensionQuestions.forEach((q) => {
+                    const subQ = {
+                        type: q.type,
+                        question: q.question.trim(),
+                        answer: q.answer ? q.answer.trim() : ''
+                    };
+
+                    if (['mcq', 'fill_blank'].includes(q.type) && Array.isArray(q.options)) {
+                        subQ.options = q.options.map(opt => opt.trim());
+                    }
+
+                    output.subquestions.push(subQ);
+                });
+
+                this.comprehensionJson = output;
+
+                const hiddenInput = document.querySelector('#comprehensionMetadataInput');
+                if (hiddenInput) {
+                    hiddenInput.value = JSON.stringify(this.comprehensionJson);
+                }
+            },
+            // ==== END: Comprehension Question Logic ====
+
+
+        };
+    }
+
+    function rearrangingForm() {
+        return {
+            instruction: @json($question->metadata['instruction'] ?? ''),
+            sentence: @json(implode(' ', $question->metadata['answer']['answer'] ?? [])),
+            wordList: @json($question->metadata['answer']['answer'] ?? []),
+
+            init() {
+                this.$watch('sentence', (val) => {
+                    this.wordList = val
+                        .replace(/[.,!?]/g, '')
+                        .trim()
+                        .split(/\s+/)
+                        .filter(Boolean);
+                });
+            }
         };
     }
 </script>

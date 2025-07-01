@@ -196,14 +196,48 @@
                                         @break
 
                                         @case(\App\Enum\QuestionTypes::OPEN_CLOZE_WITH_OPTIONS)
-                                            <div class="space-y-4">
-                                                @foreach ($question->metadata['questions'] ?? [] as $blank)
-                                                    <div class="p-2 border rounded dark:border-gray-700">
-                                                        <span class="font-semibold">Blank {{ $blank['blank_number'] }}:</span>
-                                                        <span
-                                                            class="font-medium text-green-600">{{ $blank['correct_answer'] }}</span>
+                                            <div x-data="{ openIndex: null }" class="space-y-2">
+
+                                                {{-- Shared Options --}}
+                                                @if (!empty($question->metadata['question_group']['shared_options']))
+                                                    <div
+                                                        class="p-4 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                                                        <div class="mb-1 font-semibold text-gray-800 dark:text-gray-100">Shared
+                                                            Options:</div>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @foreach ($question->metadata['question_group']['shared_options'] as $option)
+                                                                <span
+                                                                    class="px-3 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                                                                    {{ $option }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                {{-- Accordion per Blank --}}
+                                                @foreach ($question->metadata['questions'] ?? [] as $index => $blank)
+                                                    <div class="bg-white border rounded dark:border-gray-700 dark:bg-gray-900"
+                                                        x-data="{ open: false }">
+                                                        <button @click="open = !open"
+                                                            class="flex items-center justify-between w-full px-4 py-3 font-semibold text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800">
+                                                            <span>Blank {{ $blank['blank_number'] }}</span>
+                                                            <svg :class="{ 'rotate-180': open }"
+                                                                class="w-4 h-4 transition-transform duration-200 transform"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <div x-show="open" x-transition
+                                                            class="px-4 py-2 text-green-700 border-t dark:text-green-400 dark:border-gray-700">
+                                                            Correct Answer:
+                                                            <span class="font-medium">{{ $blank['correct_answer'] }}</span>
+                                                        </div>
                                                     </div>
                                                 @endforeach
+
                                             </div>
                                         @break
 
