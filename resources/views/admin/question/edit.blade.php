@@ -1107,21 +1107,27 @@
         };
     }
 
-    function rearrangingForm() {
-        return {
-            instruction: @json($question->metadata['instruction'] ?? ''),
-            sentence: @json(implode(' ', $question->metadata['answer']['answer'] ?? [])),
-            wordList: @json($question->metadata['answer']['answer'] ?? []),
+    @if ($question->type === \App\Enum\QuestionTypes::REARRANGING)
+        <
+        script >
+            function rearrangingForm() {
+                return {
+                    instruction: @json($question->metadata['instruction'] ?? ''),
+                    sentence: @json(implode(' ', $question->metadata['answer']['answer'] ?? [])),
+                    wordList: @json($question->metadata['answer']['answer'] ?? []),
 
-            init() {
-                this.$watch('sentence', (val) => {
-                    this.wordList = val
-                        .replace(/[.,!?]/g, '')
-                        .trim()
-                        .split(/\s+/)
-                        .filter(Boolean);
-                });
+                    init() {
+                        this.$watch('sentence', (val) => {
+                            this.wordList = val
+                                .replace(/[.,!?]/g, '')
+                                .trim()
+                                .split(/\s+/)
+                                .filter(Boolean);
+                        });
+                    }
+                }
             }
-        };
-    }
+</>
+@endif
+
 </script>
