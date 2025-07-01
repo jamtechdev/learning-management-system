@@ -78,7 +78,7 @@ class QuestionController extends Controller
             ->whereHas('level', function ($q) use ($validated) {
                 $q->where('education_type', $validated['education_type']);
             });
-        $questions = $query->paginate($request->input('per_page', 10));
+        $questions = $query->inRandomOrder()->paginate($request->input('per_page', 10));
         return $this->successHandler(new QuestionCollection($questions), 200, "Filtered questions fetched successfully!");
     }
 
