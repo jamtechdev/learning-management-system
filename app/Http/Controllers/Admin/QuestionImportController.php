@@ -15,6 +15,8 @@ use App\Imports\ComprehensionQuestionImport;
 use App\Imports\GrammarClozeOptionsImport;
 use App\Imports\EditingQuestionImport;
 use App\Imports\DropdownClozeQuestionImport;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class QuestionImportController extends Controller
 {
@@ -74,5 +76,38 @@ class QuestionImportController extends Controller
         } catch (\Throwable $e) {
             return back()->with('error', 'Import failed: ' . $e->getMessage());
         }
+    }
+
+    public function downloadSample(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string'
+        ]);
+
+        $type = $request->input('type');
+
+        $map = [
+            QuestionTypes::MCQ => 'sampleMCQ.xlsx',
+            QuestionTypes::FILL_IN_THE_BLANK => 'sampleFillInTheBlank.xlsx',
+            QuestionTypes::TRUE_FALSE => 'sampleTrueFalse.xlsx',
+            QuestionTypes::LINKING => 'sampleLinking.xlsx',
+            QuestionTypes::REARRANGING => 'sampleRearrange.xlsx',
+            QuestionTypes::COMPREHENSION => 'sampleComprehension.xlsx',
+            QuestionTypes::OPEN_CLOZE_WITH_OPTIONS => 'sampleGrammarClozeWithOptions.xlsx',
+            QuestionTypes::EDITING => 'sampleEditingMultipleMistakes.xlsx',
+            QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS => 'sampleGrammarClozeWithDropdown.xlsx',
+        ];
+
+        if (!array_key_exists($type, $map)) {
+            return back()->with('error', 'Invalid type for sample download.');
+        }
+
+        $filePath = 'samples/' . $map[$type];
+
+        if (!Storage::disk('public')->exists($filePath)) {
+            return back()->with('error', 'Sample file not found.');
+        }
+
+        return Storage::disk('public')->download($filePath);
     }
 }

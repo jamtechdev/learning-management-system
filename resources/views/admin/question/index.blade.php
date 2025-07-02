@@ -11,6 +11,11 @@
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Manage All Questions</h2>
                     <div class="flex space-x-2">
+                        <button @click="showSampleModal = true"
+                            class="px-2 py-1 text-xs text-blue-700 border border-blue-700 rounded hover:bg-blue-100">
+                            📤 Download Sample
+                        </button>
+
                         <button @click="showExcelModal = true"
                             class="px-2 py-1 text-xs text-green-700 border border-green-700 rounded hover:bg-green-100">
                             📥 Import Questions
@@ -94,6 +99,7 @@
         {{-- Modal Inclusion --}}
         @include('components.question-type.question-modal')
         @include('components.question-type.excel-modal')
+        @include('components.question-type.sample-excel')
     </div>
 
     <script>
@@ -101,6 +107,8 @@
             return {
                 showModal: false,
                 showExcelModal: false,
+                showSampleModal: false,
+                showSampleSuccess: false,
                 activeQuestion: null,
                 selectedType: '',
                 types: types,

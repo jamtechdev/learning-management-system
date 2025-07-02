@@ -41,6 +41,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::put('/{id}', [QuestionController::class, 'update'])->name('update');
         Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy');
         Route::post('/import-question', [\App\Http\Controllers\Admin\QuestionImportController::class, '__invoke'])->name('import');
+        Route::post('/admin/questions/sample-download', [\App\Http\Controllers\Admin\QuestionImportController::class, 'downloadSample'])
+    ->name('download');
+
     });
 
     Route::prefix('levels')->name('admin.levels.')->group(function () {
