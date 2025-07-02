@@ -323,6 +323,7 @@ class QuestionController extends Controller
     private function saveGrammarClozeWithOptions(array $data)
     {
         $metadata = json_decode($data['metadata'], true);
+        // dd($metadata);
         $metadata['instruction'] = $data['instruction'] ?? '';
         $question = new Question();
         $question->topic_id = $data['topic_id'];
@@ -401,6 +402,7 @@ class QuestionController extends Controller
     {
         // Parse the editing_metadata JSON
         $decodedMetadata = json_decode($data['underline_metadata'], true);
+        // dd($decodedMetadata);
         $fullMetadata = [
             'instruction' => $data['instruction'] ?? '',
             'education_type' => $data['education_type'],
@@ -479,8 +481,8 @@ class QuestionController extends Controller
 
     public function updateEditingQuestion($question, array $data)
     {
-        // Parse the editing_metadata JSON
-        $decodedMetadata = json_decode($data['editing_metadata'], true);
+
+        $decodedMetadata = json_decode($data['metadata'], true);
         $fullMetadata = [
             'instruction' => $data['instruction'] ?? '',
             'education_type' => $data['education_type'],
@@ -507,7 +509,7 @@ class QuestionController extends Controller
 
     public function updateComprehensionQuestion($question, array $data)
     {
-         $decodedMetadata = is_string($data['comprehension_metadata'])
+        $decodedMetadata = is_string($data['comprehension_metadata'])
             ? json_decode($data['comprehension_metadata'], true)
             : $data['comprehension_metadata'];
 

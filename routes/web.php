@@ -40,6 +40,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', [QuestionController::class, 'edit'])->name('edit');
         Route::put('/{id}', [QuestionController::class, 'update'])->name('update');
         Route::delete('/{id}', [QuestionController::class, 'destroy'])->name('destroy');
+        Route::post('/import-question', [\App\Http\Controllers\Admin\QuestionImportController::class, '__invoke'])->name('import');
     });
 
     Route::prefix('levels')->name('admin.levels.')->group(function () {
@@ -115,5 +116,3 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::post('/plans/{plan}/assign-subjects', [SubscriptionController::class, 'assignSubjects'])->name('assignSubjects.store');
     });
 });
-
-
