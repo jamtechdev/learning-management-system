@@ -10,7 +10,7 @@ class LinkingQuestionImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        dd($row);
+        // dd($row);
         $options = json_decode($row['options'], true);
         $answer = [];
 
