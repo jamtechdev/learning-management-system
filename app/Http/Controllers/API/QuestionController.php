@@ -57,11 +57,11 @@ class QuestionController extends Controller
     public function getTypeBasedQuestions(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'education_type' => 'required|string|in:primary,secondary,senior', // adjust these values to match your data
-            'level_id' => 'required|integer|exists:question_levels,id',
-            'subject_id' => 'required|integer|exists:question_subjects,id',
-            'topic_id' => 'required|integer|exists:question_topics,id',
-            'type' => 'required|string|in:' . implode(',', QuestionTypes::TYPES), // customize per your question types
+            'education_type' => 'required|string|in:primary,secondary,senior',
+            'level_id'       => 'required|integer|exists:question_levels,id',
+            'subject_id'     => 'required|integer|exists:question_subjects,id',
+            'topic_id'       => 'required|integer|exists:question_topics,id',
+            'type'           => 'nullable|string|in:' . implode(',', QuestionTypes::TYPES),
         ]);
 
         if ($validator->fails()) {
@@ -71,16 +71,22 @@ class QuestionController extends Controller
         $validated = $validator->validated();
 
         $query = Question::query()
-            ->where('type', $validated['type'])
             ->where('subject_id', $validated['subject_id'])
             ->where('level_id', $validated['level_id'])
             ->where('topic_id', $validated['topic_id'])
             ->whereHas('level', function ($q) use ($validated) {
                 $q->where('education_type', $validated['education_type']);
             });
+
+        if (!empty($validated['type'])) {
+            $query->where('type', $validated['type']);
+        }
+
         $questions = $query->inRandomOrder()->paginate($request->input('per_page', 10));
+
         return $this->successHandler(new QuestionCollection($questions), 200, "Filtered questions fetched successfully!");
     }
+
 
     public function userAnswer(Request $request)
     {
