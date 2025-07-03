@@ -22,6 +22,10 @@
                                 </th>
                                 <th
                                     class="w-1/5 px-4 py-3 text-sm font-medium text-center text-gray-700 uppercase dark:text-gray-300">
+                                    Subject ID
+                                </th>
+                                <th
+                                    class="w-1/5 px-4 py-3 text-sm font-medium text-center text-gray-700 uppercase dark:text-gray-300">
                                     Level
                                 </th>
                                 <th
@@ -43,6 +47,9 @@
                                 <tr>
                                     <td class="w-1/5 px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">
                                         {{ $index + 1 }}
+                                    </td>
+                                    <td class="w-1/5 px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">
+                                        {{ $subject->id ?? '—' }}
                                     </td>
                                     <td class="w-1/5 px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">
                                         {{ $subject->level->name ?? '—' }}

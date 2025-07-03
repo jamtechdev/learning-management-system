@@ -26,6 +26,8 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">#</th>
+                                <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Topic Id
+                                </th>
 
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Name</th>
                                 <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Subject
@@ -44,6 +46,9 @@
                                         {{ $index + 1 }}
                                     </td>
 
+                                    <td class="px-6 py-4 text-sm text-center text-gray-700">
+                                        {{ $topic->id }}
+                                    </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-700">
                                         {{ $topic->name }}
                                     </td>

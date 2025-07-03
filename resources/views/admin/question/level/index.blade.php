@@ -5,7 +5,8 @@
 
                 <!-- Header -->
                 <div class="flex flex-col items-center justify-between mb-8 md:flex-row">
-                    <h2 class="text-3xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white md:text-left">
+                    <h2
+                        class="text-3xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white md:text-left">
                         Manage All Question Levels
                     </h2>
                     <a href="{{ route('admin.levels.create') }}"
@@ -19,16 +20,24 @@
                     <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                <th
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                                     #
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
+                                <th
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                    Level ID
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Level Name
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
+                                <th
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Education Type
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
+                                <th
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase dark:text-gray-300">
                                     Actions
                                 </th>
                             </tr>
@@ -36,13 +45,18 @@
                         <tbody class="bg-white divide-y divide-gray-100 dark:bg-gray-900 dark:divide-gray-800">
                             @forelse ($levels as $index => $level)
                                 <tr class="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
-                                    <td class="px-6 py-4 text-sm font-medium text-left text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium text-left text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                         {{ ($levels->currentPage() - 1) * $levels->perPage() + $index + 1 }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
+                                        {{ $level->id }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
                                         {{ $level->name }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-center text-gray-700 capitalize dark:text-gray-300">
+                                    <td
+                                        class="px-6 py-4 text-sm text-center text-gray-700 capitalize dark:text-gray-300">
                                         {{ $level->education_type }}
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
