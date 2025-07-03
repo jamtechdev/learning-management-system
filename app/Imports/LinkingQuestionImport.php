@@ -10,26 +10,20 @@ class LinkingQuestionImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        // dd($row);
-        $options = json_decode($row['options'], true);
-        $answer = [];
+        $answer = [[
+            'left' => [
+                'word' => $row['label_text'] ?? '',
+                'image_uri' => null,
+                'match_type' => $row['label_type'] ?? 'text',
+            ],
+            'right' => [
+                'word' => $row['value_text'] ?? '',
+                'image_uri' => null,
+                'match_type' => $row['value_type'] ?? 'text',
+            ],
+        ]];
 
-        foreach ($options as $option) {
-            $answer[] = [
-                'left' => [
-                    'word' => $option['label_text'] ?? '',
-                    'image_uri' => null,
-                    'match_type' => $option['label_type'] ?? 'text',
-                ],
-                'right' => [
-                    'word' => $option['value_text'] ?? '',
-                    'image_uri' => null,
-                    'match_type' => $option['value_type'] ?? 'text',
-                ],
-            ];
-        }
-
-        $transformed = [
+        $metadata = [
             'type' => 'linking',
             'content' => $row['content'] ?? '',
             'explanation' => $row['explanation'] ?? '',
@@ -37,8 +31,6 @@ class LinkingQuestionImport implements ToModel, WithHeadingRow
             'format' => 'mapping',
             'answer' => $answer,
         ];
-
-
 
         return new Question([
             'education_type' => $row['education_type'],
@@ -49,7 +41,7 @@ class LinkingQuestionImport implements ToModel, WithHeadingRow
             'instruction' => $row['instruction'],
             'content' => $row['content'],
             'explanation' => $row['explanation'] ?? null,
-            'metadata' => $transformed,
+            'metadata' => $metadata,
         ]);
     }
 }
