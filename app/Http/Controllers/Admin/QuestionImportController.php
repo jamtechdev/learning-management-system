@@ -102,12 +102,12 @@ class QuestionImportController extends Controller
             return back()->with('error', 'Invalid type for sample download.');
         }
 
-        $filePath = 'samples/' . $map[$type];
+        $filePath = public_path('samples/' . $map[$type]);
 
-        if (!Storage::disk('public')->exists($filePath)) {
+        if (!file_exists($filePath)) {
             return back()->with('error', 'Sample file not found.');
         }
 
-        return Storage::disk('public')->download($filePath);
+        return response()->download($filePath);
     }
 }
