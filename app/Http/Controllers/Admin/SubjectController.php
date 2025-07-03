@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\QuestionSubjectDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
 use App\Models\QuestionSubject;
@@ -11,11 +12,9 @@ use Illuminate\Support\Str;
 
 class SubjectController extends Controller
 {
-
-    public function index()
+     public function index(QuestionSubjectDataTable $dataTable)
     {
-        $subjects = QuestionSubject::with('level')->paginate(10);
-        return view('admin.question.subject.index', compact('subjects'));
+        return $dataTable->render('admin.question.subject.index');
     }
 
     public function create()

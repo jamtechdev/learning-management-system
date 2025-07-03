@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\QuestionDataTable;
 use App\Enum\QuestionTypes;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
@@ -13,29 +14,42 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-    public function index(Request $request)
+    // public function index(Request $request)
+    // {
+    //     $questionTypes = QuestionTypes::names();
+
+    //     $tab = $request->query('tab', 'all');
+    //     $search = $request->query('search');
+
+    //     $questions = Question::with(['options', 'level', 'subject', 'topic'])
+    //         ->when($tab !== 'all', function ($query) use ($tab) {
+    //             $query->where('type', $tab);
+    //         })
+    //         ->when($search, function ($query) use ($search) {
+    //             $query->where(function ($q) use ($search) {
+    //                 $q->where('content', 'ILIKE', "%$search%")
+    //                     ->orWhere('type', 'ILIKE', "%$search%");
+    //             });
+    //         })
+    //         ->orderBy('created_at', 'desc')
+    //         ->paginate(15)
+    //         ->withQueryString(); // Preserve tab/search in pagination links
+
+    //     return view('admin.question.index', compact('questions', 'questionTypes'));
+    // }
+
+    public function index(QuestionDataTable $dataTable)
     {
-        $questionTypes = QuestionTypes::names();
+        $questionTypes = \App\Enum\QuestionTypes::names();
 
-        $tab = $request->query('tab', 'all');
-        $search = $request->query('search');
-
-        $questions = Question::with(['options', 'level', 'subject', 'topic'])
-            ->when($tab !== 'all', function ($query) use ($tab) {
-                $query->where('type', $tab);
-            })
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('content', 'ILIKE', "%$search%")
-                        ->orWhere('type', 'ILIKE', "%$search%");
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(15)
-            ->withQueryString(); // Preserve tab/search in pagination links
-
-        return view('admin.question.index', compact('questions', 'questionTypes'));
+        return $dataTable->render('admin.question.index', [
+            'questionTypes' => $questionTypes,
+        ]);
     }
+
+
+
+
 
 
     public function create()

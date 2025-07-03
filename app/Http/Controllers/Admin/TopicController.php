@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\QuestionTopicDataTable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -11,12 +12,10 @@ class TopicController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+     public function index(QuestionTopicDataTable $dataTable)
     {
-        $topics = \App\Models\QuestionTopic::paginate(10);
-        return view('admin.topics.index', compact('topics'));
+        return $dataTable->render('admin.topics.index');
     }
-
     /**
      * Show the form for creating a new resource.
      */

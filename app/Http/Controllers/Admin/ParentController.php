@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\ParentDataTable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -10,11 +11,11 @@ use Spatie\Permission\Models\Role;
 
 class ParentController extends Controller
 {
-    public function index()
+    public function index(ParentDataTable $dataTable)
     {
-        $parents = User::role('Parent')->paginate(10);
-        return view('admin.parents.index', compact('parents'));
+        return $dataTable->render('admin.parents.index');
     }
+
 
     public function create()
     {

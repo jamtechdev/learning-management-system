@@ -6,24 +6,7 @@
     border-radius: 6px;
 }
 
-table tr:nth-child(even) {
-    background-color: rgb(240, 249, 255);
-}
 
-table tr:nth-child(over) {
-    background-color: rgb(240, 249, 255);
-}
-
-table thead {
-    background-image: linear-gradient(45deg, #2563eb, #1e40af);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    color: white;
-}
-
-table thead th {
-    color: white !important;
-}
 
 
 .ql-tooltip.ql-editing {

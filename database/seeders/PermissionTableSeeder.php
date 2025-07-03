@@ -134,7 +134,7 @@ class PermissionTableSeeder extends Seeder
                 'last_name' => 'User',
                 'password' => Hash::make('password@123'),
                 'parent_id' => $parent->id,
-                'lock_code' => '1234',
+                'lock_code' => '123456',
                 'lock_code_enabled' => true,
                 'address' => 'Child Address',
                 'phone' => '2222222222',

@@ -25,4 +25,13 @@ class QuestionLevel extends Model
         return $this->hasMany(QuestionTopic::class, 'level_id');
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($level) {
+            $level->subjects()->delete();
+            $level->questions()->delete();
+            $level->topics()->delete();
+        });
+    }
 }
+

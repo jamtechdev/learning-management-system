@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\QuestionLevelDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
 use Illuminate\Http\Request;
@@ -11,10 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 class LevelController extends Controller
 {
-    public function index()
+    public function index(QuestionLevelDataTable $dataTable)
     {
-        $levels = QuestionLevel::withCount(['subjects', 'questions'])->paginate(10);
-        return view('admin.question.level.index', compact('levels'));
+        return $dataTable->render('admin.question.level.index');
     }
 
     public function create()
@@ -160,9 +160,18 @@ class LevelController extends Controller
         try {
             $level = QuestionLevel::findOrFail($id);
             $level->delete();
+
+            if (request()->expectsJson()) {
+                return response()->json(['success' => true]);
+            }
+
             return redirect()->route('admin.levels.index')->with('success', 'Level deleted successfully.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Failed to delete level: ' . $e->getMessage()]);
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Failed to delete: ' . $e->getMessage()], 500);
+            }
+
+            return back()->withErrors(['error' => 'Failed to delete: ' . $e->getMessage()]);
         }
     }
 }

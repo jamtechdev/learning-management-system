@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTables\StudentDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
 use Illuminate\Http\Request;
@@ -14,12 +15,14 @@ use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
-    public function index($id)
-    {
-        $parent = User::role('parent')->where('id', $id)->first();
-        $students = User::role('child')->with('parent')->where('parent_id', $id)->paginate(10);
-        return view('admin.students.index', compact('students', 'parent'));
-    }
+    public function index(StudentDataTable $dataTable, $parentId)
+{
+    $parent = \App\Models\User::findOrFail($parentId);
+    $dataTable->with('parentId', $parentId);
+
+    return $dataTable->render('admin.students.index', compact('parent'));
+}
+
 
     public function studentsByParent(User $parent)
     {
