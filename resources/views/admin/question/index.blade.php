@@ -33,6 +33,7 @@
                             <th class="px-4 py-3 font-medium text-white">#</th>
                             <th class="px-4 py-3 font-medium text-white">Question</th>
                             <th class="px-4 py-3 font-medium text-white">Type</th>
+                            <th class="px-4 py-3 font-medium text-white">Education Type</th>
                             <th class="px-4 py-3 font-medium text-white">Level</th>
                             <th class="px-4 py-3 font-medium text-white">Subject</th>
                             <th class="px-4 py-3 font-medium text-white">Topic</th>
@@ -54,6 +55,10 @@
                                 <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
                                     <span
                                         class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">{{ str_replace('_', ' ', $question->type) }}</span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-900 capitalize dark:text-gray-100">
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">{{ str_replace('_', ' ', $question->education_type) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
                                     {{ $question->level->name ?? '-' }}</td>

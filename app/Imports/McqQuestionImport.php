@@ -10,22 +10,20 @@ class McqQuestionImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        // Skip invalid rows
         if (empty($row['question'])) {
             return null;
         }
 
-        // Structure the data for the question
         $data = [
-            'content' => $row['question'],  // Ensure 'question' column is used
+            'content' => $row['question'],
             'options' => [
                 ['value' => $row['option_a'], 'explanation' => $row['explanation_a']],
                 ['value' => $row['option_b'], 'explanation' => $row['explanation_b']],
                 ['value' => $row['option_c'], 'explanation' => $row['explanation_c']],
                 ['value' => $row['option_d'], 'explanation' => $row['explanation_d']],
             ],
-            'correct_option' => (int) $row['answer'],  // Use the column 'answer' for the correct option index
-            'explanation' => null,  // You can add a general explanation if required here
+            'correct_option' => $row['answer'],
+            'explanation' => null,
             'education_type' => $row['education_type'] ?? 'primary',
             'subject_id' => $row['subject_id'],
             'level_id' => $row['level_id'],
@@ -34,36 +32,36 @@ class McqQuestionImport implements ToModel, WithHeadingRow
             'instruction' => $row['instruction'] ?? 'This is mcq',  // Default instruction if missing
         ];
 
+
         return $this->saveMcqQuestion($data);
     }
 
     public function saveMcqQuestion(array $data)
     {
-        $correctIndex = (int) $data['correct_option'];
+        $correctValue = trim($data['correct_option']); // The correct option is a value like "did"
 
-        // Structure the options with correctness flag and their explanations
-        $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
+        $structuredOptions = array_map(function ($option) use ($correctValue) {
             return [
                 'value' => $option['value'],
                 'explanation' => $option['explanation'],
-                'is_correct' => $index === $correctIndex, // Mark the correct option
+                'is_correct' => trim($option['value']) === $correctValue, // Match by value
             ];
-        }, $data['options'], array_keys($data['options']));
+        }, $data['options']);
 
-        // Prepare the answer (using the correct option)
+        // Find the actual correct answer value
+        $correctAnswer = collect($structuredOptions)->firstWhere('is_correct', true);
+
         $answer = [
-            'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
+            'answer' => $correctAnswer['value'] ?? null,
             'format' => 'text',
         ];
 
-        // Prepare the payload for metadata
         $payload = $data;
-        $payload['options'] = $structuredOptions;  // Store the structured options
+        $payload['options'] = $structuredOptions;
         $payload['answer'] = $answer;
-        $payload['instruction'] = $data['instruction'];
-        unset($payload['correct_option']);  // Remove the raw correct option index
-
-        // Create and save the question
+        $payload['instruction'] = $data['instruction'] ?? '';
+        unset($payload['correct_option']); // Remove raw value
+        // dd($payload);
         $question = new Question();
         $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
@@ -72,7 +70,7 @@ class McqQuestionImport implements ToModel, WithHeadingRow
         $question->subject_id = $data['subject_id'];
         $question->level_id = $data['level_id'];
         $question->explanation = $data['explanation'] ?? null;
-        $question->metadata = $payload;  // Save all structured data in metadata
+        $question->metadata = $payload; // Save structured data in metadata
         $question->save();
 
         return $question;
