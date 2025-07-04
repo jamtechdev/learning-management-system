@@ -21,9 +21,8 @@ class TopicController extends Controller
             ->distinct()
             ->get();
 
-        // Ensure unique topic names by grouping them and fetching distinct values
-        $topics = \App\Models\QuestionTopic::select('name')
-            ->distinct()  // Use distinct to ensure no duplicate topics
+        $topics = \App\Models\QuestionTopic::select('name', 'education_type')
+            ->groupBy('name', 'education_type')  // Group by both name and education_type
             ->get();
 
         return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
