@@ -29,7 +29,7 @@ class QuestionDataTable extends DataTable
                 . ucwords(str_replace('_', ' ', $q->education_type)) . '</span>')
             ->addColumn('level', fn($q) => $q->level?->name ?? '-')
             ->addColumn('subject', fn($q) => $q->subject?->name ?? '-')
-->addColumn('topic', fn($q) => '<span title="' . e($q->topic?->name ?? '-') . '">' . Str::limit($q->topic?->name ?? '-', 20) . '</span>')
+            ->addColumn('topic', fn($q) => '<span title="' . e($q->topic?->name ?? '-') . '">' . Str::limit($q->topic?->name ?? '-', 20) . '</span>')
             ->addColumn('options', function ($q) {
                 $json = htmlspecialchars($q->toJson(), ENT_QUOTES, 'UTF-8');
                 return '<button @click="openModal(' . $json . ')" class="px-2 py-1 text-xs text-green-700 border border-green-700 rounded hover:bg-green-100">View Options</button>';
@@ -94,9 +94,10 @@ class QuestionDataTable extends DataTable
             $query->whereHas('subject', fn($q) => $q->where('name', 'like', "%$subjectName%"));
         }
 
-        if ($topicId = request('topic_id')) {
-            $query->where('topic_id', $topicId);
+        if ($topicName = request('topic_id')) {
+            $query->whereHas('topic', fn($q) => $q->where('name', 'like', "%$topicName%"));
         }
+
 
         return $query;
     }

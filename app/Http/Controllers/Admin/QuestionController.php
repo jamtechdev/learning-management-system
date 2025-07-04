@@ -21,7 +21,9 @@ class QuestionController extends Controller
         $subjects = \App\Models\QuestionSubject::select('name')
             ->groupBy('name')
             ->get();
-        $topics = \App\Models\QuestionTopic::all();
+        $topics = \App\Models\QuestionTopic::select('name')
+            ->groupBy('name')
+            ->get();
 
         return $dataTable->render('admin.question.index', [
             'questionTypes' => $questionTypes,
