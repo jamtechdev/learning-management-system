@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\Question;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Str;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -23,12 +24,12 @@ class QuestionDataTable extends DataTable
                     </div>';
             })
             ->addColumn('type', fn($q) => '<span class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">'
-                . ucwords(str_replace('_', ' ', $q->type)) . '</span>')
+                . $q->type . '</span>')
             ->addColumn('education_type', fn($q) => '<span class="px-2 py-1 text-xs font-semibold bg-gray-100 rounded dark:bg-gray-800">'
                 . ucwords(str_replace('_', ' ', $q->education_type)) . '</span>')
             ->addColumn('level', fn($q) => $q->level?->name ?? '-')
             ->addColumn('subject', fn($q) => $q->subject?->name ?? '-')
-            ->addColumn('topic', fn($q) => '<span title="' . e($q->topic?->name ?? '-') . '">' . \Str::limit($q->topic?->name ?? '-', 20) . '</span>')
+->addColumn('topic', fn($q) => '<span title="' . e($q->topic?->name ?? '-') . '">' . Str::limit($q->topic?->name ?? '-', 20) . '</span>')
             ->addColumn('options', function ($q) {
                 $json = htmlspecialchars($q->toJson(), ENT_QUOTES, 'UTF-8');
                 return '<button @click="openModal(' . $json . ')" class="px-2 py-1 text-xs text-green-700 border border-green-700 rounded hover:bg-green-100">View Options</button>';
@@ -75,11 +76,29 @@ class QuestionDataTable extends DataTable
 
     public function query(Question $model): QueryBuilder
     {
-        return $model->newQuery()
+        $query = $model->newQuery()
             ->with(['level', 'subject', 'topic'])
             ->when(request('type'), function ($q) {
                 $q->where('type', request('type'));
             });
+
+        if ($educationType = request('education_type')) {
+            $query->where('education_type', $educationType);
+        }
+
+        if ($levelId = request('level_id')) {
+            $query->where('level_id', $levelId);
+        }
+
+        if ($subjectName = request('subject_id')) {
+            $query->whereHas('subject', fn($q) => $q->where('name', 'like', "%$subjectName%"));
+        }
+
+        if ($topicId = request('topic_id')) {
+            $query->where('topic_id', $topicId);
+        }
+
+        return $query;
     }
 
     public function html(): HtmlBuilder

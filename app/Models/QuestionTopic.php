@@ -14,6 +14,7 @@ class QuestionTopic extends Model
         'description',
         'level_id',
         'subject_id',
+        'education_type',
     ];
 
     public function questions()

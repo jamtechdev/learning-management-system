@@ -24,16 +24,56 @@
                     </div>
                 </div>
 
-                <!-- Type Filter -->
+                <!-- Filters -->
                 <div class="pb-0 card-body border-bottom">
-                    <div class="mb-3 d-flex align-items-center">
-                        <label for="typeFilter" class="me-2 fw-bold">Filter by Type:</label>
-                        <select id="typeFilter" class="w-auto form-select form-select-sm">
-                            <option value="">All</option>
-                            @foreach ($questionTypes as $type)
-                                <option value="{{ $type }}">{{ ucwords(str_replace('_', ' ', $type)) }}</option>
-                            @endforeach
-                        </select>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-auto d-flex align-items-center">
+                            <label for="typeFilter" class="mb-0 me-2 fw-bold">Type:</label>
+                            <select id="typeFilter" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                @foreach ($questionTypes as $type)
+                                    <option value="{{ $type }}">{{$type}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex align-items-center">
+                            <label for="educationTypeFilter" class="mb-0 me-2 fw-bold">Education Type:</label>
+                            <select id="educationTypeFilter" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                <option value="primary">Primary</option>
+                                <option value="secondary">Secondary</option>
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex align-items-center">
+                            <label for="levelFilter" class="mb-0 me-2 fw-bold">Level:</label>
+                            <select id="levelFilter" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                @foreach ($levels as $level)
+                                    <option value="{{ $level->id }}">  {{ $level->name . ' (' . $level->education_type . ')' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex align-items-center">
+                            <label for="subjectFilter" class="mb-0 me-2 fw-bold">Subject:</label>
+                            <select id="subjectFilter" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                @foreach ($subjects as $subject)
+                                    <option value="{{ $subject->name }}">{{ $subject->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex align-items-center">
+                            <label for="topicFilter" class="mb-0 me-2 fw-bold">Topic:</label>
+                            <select id="topicFilter" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                @foreach ($topics as $topic)
+                                    <option value="{{ $topic->id }}">{{ $topic->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button id="filterReset" class="btn btn-secondary btn-sm">Reset Filters</button>
+                        </div>
                     </div>
                 </div>
 
@@ -85,8 +125,13 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const table = $('#question-table').DataTable();
 
-                $('#typeFilter').on('change', function() {
-                    const type = $(this).val();
+                function reloadTable() {
+                    const type = $('#typeFilter').val();
+                    const educationType = $('#educationTypeFilter').val();
+                    const level = $('#levelFilter').val();
+                    const subject = $('#subjectFilter').val();
+                    const topic = $('#topicFilter').val();
+
                     const url = new URL(table.ajax.url());
 
                     if (type) {
@@ -95,7 +140,42 @@
                         url.searchParams.delete('type');
                     }
 
+                    if (educationType) {
+                        url.searchParams.set('education_type', educationType);
+                    } else {
+                        url.searchParams.delete('education_type');
+                    }
+
+                    if (level) {
+                        url.searchParams.set('level_id', level);
+                    } else {
+                        url.searchParams.delete('level_id');
+                    }
+
+                    if (subject) {
+                        url.searchParams.set('subject_id', subject);
+                    } else {
+                        url.searchParams.delete('subject_id');
+                    }
+
+                    if (topic) {
+                        url.searchParams.set('topic_id', topic);
+                    } else {
+                        url.searchParams.delete('topic_id');
+                    }
+
                     table.ajax.url(url.toString()).load();
+                }
+
+                $('#typeFilter, #educationTypeFilter, #levelFilter, #subjectFilter, #topicFilter').on('change', reloadTable);
+
+                $('#filterReset').on('click', function() {
+                    $('#typeFilter').val('');
+                    $('#educationTypeFilter').val('');
+                    $('#levelFilter').val('');
+                    $('#subjectFilter').val('');
+                    $('#topicFilter').val('');
+                    reloadTable();
                 });
             });
         </script>

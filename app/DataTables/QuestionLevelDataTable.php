@@ -84,16 +84,15 @@ class QuestionLevelDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('id')->title('Id'),
-            Column::make('name')->title('Level'),
-            Column::make('education_type')->title('Type'),
-            Column::make('created_at')->title('Added At'),
+            Column::make('id')->title('LEVEL ID')->addClass('text-center')->headerClass('text-center'),
+            Column::make('name')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
+            Column::make('education_type')->title('TYPE')->addClass('text-center')->headerClass('text-center'),
+            Column::make('created_at')->title('ADDED AT')->addClass('text-center')->headerClass('text-center'),
             Column::computed('actions')
-                ->title('Actions')
+                ->title('ACTIONS')
                 ->exportable(false)
                 ->printable(false)
-
-                ->addClass('text-center'),
+                ->addClass('text-center')->headerClass('text-center'),
         ];
     }
 

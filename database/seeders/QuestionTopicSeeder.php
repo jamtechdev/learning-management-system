@@ -2,28 +2,56 @@
 
 namespace Database\Seeders;
 
-use App\Models\QuestionLevel;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\QuestionTopic;
+use App\Models\QuestionLevel;
+use App\Models\QuestionSubject;
 
 class QuestionTopicSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
-        foreach (range(1, 10) as $key => $value) {
-            $level = QuestionLevel::with('subjects')->inRandomOrder()->first();
-            $subject = $level->subjects()->inRandomOrder()->first();
-            $topic = [
-                'level_id' => $level->id,
-                'subject_id' => $subject->id,
-                'name' => fake()->sentence(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            \App\Models\QuestionTopic::create($topic);
+        // Get some levels and subjects to associate with topics
+        $levels = QuestionLevel::all();
+        $subjects = QuestionSubject::all();
+
+        if ($levels->isEmpty() || $subjects->isEmpty()) {
+            $this->command->info('No levels or subjects found, skipping QuestionTopic seeding.');
+            return;
         }
+
+        // Create sample topics
+        $topics = [
+            [
+                'name' => 'Algebra Basics',
+                'description' => 'Introduction to algebraic concepts',
+                'level_id' => $levels->random()->id,
+                'subject_id' => $subjects->random()->id,
+            ],
+            [
+                'name' => 'Geometry Fundamentals',
+                'description' => 'Basic principles of geometry',
+                'level_id' => $levels->random()->id,
+                'subject_id' => $subjects->random()->id,
+            ],
+            [
+                'name' => 'Grammar Rules',
+                'description' => 'English grammar essentials',
+                'level_id' => $levels->random()->id,
+                'subject_id' => $subjects->random()->id,
+            ],
+            [
+                'name' => 'World History',
+                'description' => 'Overview of historical events',
+                'level_id' => $levels->random()->id,
+                'subject_id' => $subjects->random()->id,
+            ],
+        ];
+
+        foreach ($topics as $topic) {
+            QuestionTopic::create($topic);
+        }
+
+        $this->command->info('QuestionTopic seeder completed.');
     }
 }

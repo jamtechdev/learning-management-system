@@ -9,6 +9,20 @@
                     @csrf
                     @method('PUT')
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2" x-data="form()">
+                        <!-- Education Type -->
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700">Education Type</label>
+                            <select name="education_type"
+                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('education_type') ? 'border-red-500' : '' }}"
+                                id="education_type" x-model="education_type" @change="onEducationChange">
+                                <option value="">Select Education Type</option>
+                                <option value="primary" :selected="education_type == 'primary'">Primary</option>
+                                <option value="secondary" :selected="education_type == 'secondary'">Secondary</option>
+                            </select>
+                            @error('education_type')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                         <!-- Level -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Select Topic Level</label>
@@ -16,7 +30,7 @@
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('level_id') ? 'border-red-500' : '' }}"
                                 id="level_id" x-model="level_id" @change="onLevelChange">
                                 <option value="">Select Level</option>
-                                <template x-for="level in levels" :key="level.id">
+                                <template x-for="level in filteredLevels" :key="level.id">
                                     <option :value="level.id" :selected="level.id == level_id" x-text="level.name">
                                     </option>
                                 </template>
@@ -25,13 +39,13 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        <!-- Level -->
+                        <!-- Subject -->
                         <div x-show="level_id" x-transition x-cloak>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Select Topic Subject</label>
                             <select name="subject_id"
                                 class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-indigo-200 {{ $errors->has('subject_id') ? 'border-red-500' : '' }}"
                                 id="subject_id" x-model="subject_id">
-                                <option value="">Select Level</option>
+                                <option value="">Select Subject</option>
                                 <template x-for="subject in subjects" :key="subject.id">
                                     <option :value="subject.id" :selected="subject.id == subject_id"
                                         x-text="subject.name"></option>
@@ -54,15 +68,15 @@
                     </div>
 
                     <!-- Button Container -->
-                    <div class="mt-6 flex justify-end space-x-2 items-end">
+                    <div class="flex items-end justify-end mt-6 space-x-2">
                         <!-- Submit Button -->
                         <button type="submit"
-                            class="px-6 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md focus:outline-none">
+                            class="px-6 py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none">
                             Save Topic
                         </button>
                         <!-- Back Button -->
                         <a href="{{ route('admin.topics.index') }}"
-                            class="px-6 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md shadow-md focus:outline-none">
+                            class="px-6 py-2 text-gray-700 bg-gray-200 rounded-md shadow-md hover:bg-gray-300 focus:outline-none">
                             Back
                         </a>
                     </div>

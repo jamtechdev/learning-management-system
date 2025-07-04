@@ -14,43 +14,22 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $questionTypes = QuestionTypes::names();
-
-    //     $tab = $request->query('tab', 'all');
-    //     $search = $request->query('search');
-
-    //     $questions = Question::with(['options', 'level', 'subject', 'topic'])
-    //         ->when($tab !== 'all', function ($query) use ($tab) {
-    //             $query->where('type', $tab);
-    //         })
-    //         ->when($search, function ($query) use ($search) {
-    //             $query->where(function ($q) use ($search) {
-    //                 $q->where('content', 'ILIKE', "%$search%")
-    //                     ->orWhere('type', 'ILIKE', "%$search%");
-    //             });
-    //         })
-    //         ->orderBy('created_at', 'desc')
-    //         ->paginate(15)
-    //         ->withQueryString(); // Preserve tab/search in pagination links
-
-    //     return view('admin.question.index', compact('questions', 'questionTypes'));
-    // }
-
     public function index(QuestionDataTable $dataTable)
     {
-        $questionTypes = \App\Enum\QuestionTypes::names();
+        $questionTypes = \App\Enum\QuestionTypes::TYPES;
+        $levels = \App\Models\QuestionLevel::with('subjects', 'subjects.topics')->get();
+        $subjects = \App\Models\QuestionSubject::select('name')
+            ->groupBy('name')
+            ->get();
+        $topics = \App\Models\QuestionTopic::all();
 
         return $dataTable->render('admin.question.index', [
             'questionTypes' => $questionTypes,
+            'levels' => $levels,
+            'subjects' => $subjects,
+            'topics' => $topics,
         ]);
     }
-
-
-
-
-
 
     public function create()
     {

@@ -15,8 +15,9 @@ class QuestionTopicDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->addColumn('level_name', fn($row) => $row->level?->name ?? 'N/A')
+            ->addColumn('level_name', fn($row) => $row->level?->name . ' (' . $row->level?->education_type . ')' ?? 'N/A')
             ->addColumn('subject_name', fn($row) => $row->subject?->name ?? 'N/A')
+            ->addColumn('education_type', fn($row) => ucfirst($row->education_type) ?? 'N/A')
             ->addColumn('actions', function ($row) {
                 $buttons = [
                     [
@@ -46,15 +47,33 @@ class QuestionTopicDataTable extends DataTable
 
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
-            ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i'))
-            ->editColumn('updated_at', fn($row) => $row->updated_at?->format('Y-m-d H:i'))
             ->rawColumns(['actions'])
             ->setRowId('id');
     }
 
     public function query(QuestionTopic $model): QueryBuilder
     {
-        return $model->newQuery()->with(['level', 'subject']);
+        $query = $model->newQuery()->with(['level', 'subject']);
+
+        if ($educationType = request('education_type')) {
+            $query->where('education_type', $educationType);
+        }
+
+        if ($levelId = request('level_id')) {
+            $query->where('level_id', $levelId);
+        }
+
+        if ($subjectName = request('subject_id')) {
+            $query->whereHas('subject', function ($q) use ($subjectName) {
+                $q->where('name', $subjectName);
+            });
+        }
+
+        if ($topicName = request('topic_id')) {
+            $query->where('id', $topicName);
+        }
+
+        return $query;
     }
 
     public function html(): HtmlBuilder
@@ -82,18 +101,15 @@ class QuestionTopicDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('id')->title('ID'),
-            Column::make('name')->title('Topic'),
-            Column::computed('level_name')->title('Level'),
-            Column::computed('subject_name')->title('Subject'),
-            Column::make('created_at')->title('Created At'),
-            Column::make('updated_at')->title('Updated At'),
+            Column::make('id')->title('TOPIC ID')->addClass('text-center')->headerClass('text-center'),
+            Column::make('education_type')->title('EDUCATION TYPE')->addClass('text-center')->headerClass('text-center'),
+            Column::make('name')->title('NAME')->addClass('text-center')->headerClass('text-center'),
+            Column::computed('level_name')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
+            Column::computed('subject_name')->title('SUBJECT')->addClass('text-center')->headerClass('text-center'),
             Column::computed('actions')
-                ->title('Actions')
+                ->title('Actions')->addClass('text-center')->headerClass('text-center')
                 ->exportable(false)
-                ->printable(false)
-                ->addClass('text-center')
-                ->width(100),
+                ->printable(false),
         ];
     }
 

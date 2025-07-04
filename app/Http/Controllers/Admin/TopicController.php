@@ -12,9 +12,16 @@ class TopicController extends Controller
     /**
      * Display a listing of the resource.
      */
-     public function index(QuestionTopicDataTable $dataTable)
+    public function index(QuestionTopicDataTable $dataTable)
     {
-        return $dataTable->render('admin.topics.index');
+        $levels = \App\Models\QuestionLevel::with('subjects')->get();
+
+        $subjects = \App\Models\QuestionSubject::select('name')
+            ->groupBy('name')
+            ->get();
+        $topics = \App\Models\QuestionTopic::get();
+
+        return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
     }
     /**
      * Show the form for creating a new resource.
@@ -34,15 +41,16 @@ class TopicController extends Controller
             'name' => 'required',
             'level_id' => 'required|exists:question_levels,id',
             'subject_id' => 'required|exists:question_subjects,id',
+            'education_type' => 'required|in:primary,secondary',
         ]);
         $topic = new \App\Models\QuestionTopic();
         $topic->name = $request->name;
         $topic->level_id = $request->level_id;
         $topic->subject_id = $request->subject_id;
+        $topic->education_type = $request->education_type;
         $topic->save();
 
         return redirect()->route('admin.topics.index')->with('success', 'Topic created successfully.');
-
     }
 
 
@@ -67,11 +75,13 @@ class TopicController extends Controller
             'name' => 'required',
             'level_id' => 'required|exists:question_levels,id', // Corrected
             'subject_id' => 'required|exists:question_subjects,id', // Corrected
+            'education_type' => 'required|in:primary,secondary',
         ]);
 
         $topic->name = $request->name;
         $topic->level_id = $request->level_id;
         $topic->subject_id = $request->subject_id;
+        $topic->education_type = $request->education_type;
         $topic->save();
 
         return redirect()->route('admin.topics.index')->with('success', 'Topic updated successfully.');

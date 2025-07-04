@@ -46,13 +46,25 @@ class QuestionSubjectDataTable extends DataTable
             })
             ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i'))
             ->editColumn('level_id', fn($row) => $row->level->name ?? '')
+            ->editColumn('education_type', fn($row) => ucfirst($row->education_type))
             ->rawColumns(['actions'])
             ->setRowId('id');
     }
 
     public function query(QuestionSubject $model): QueryBuilder
     {
-        return $model->newQuery()->with('level');
+        $query = $model->newQuery();
+
+        if ($educationType = request('education_type')) {
+            $query->where('education_type', $educationType);
+        }
+        if ($levelId = request('level_id')) {
+            $query->where('level_id', $levelId);
+        }
+        if ($name = request('subject_id')) {
+            $query->where('name', $name);
+        }
+        return $query;
     }
 
     public function html(): HtmlBuilder
@@ -79,15 +91,17 @@ class QuestionSubjectDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('id')->title('ID'),
-            Column::make('name')->title('Subject'),
-            Column::make('level_id')->title('Level'),
-            Column::make('created_at')->title('Created At'),
+            Column::make('id')->title('SUBJECT ID')->addClass('text-center')->headerClass('text-center'),
+            Column::make('name')->title('NAME')->addClass('text-center')->headerClass('text-center'),
+            Column::make('education_type')->title('EDUCATION TYPE')->addClass('text-center')->headerClass('text-center'),
+            Column::make('level_id')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
+            Column::make('created_at')->title('ADDED AT')->addClass('text-center')->headerClass('text-center'),
             Column::computed('actions')
                 ->title('Actions')
                 ->exportable(false)
                 ->printable(false)
-                ->addClass('text-center'),
+                ->addClass('text-center')
+                ->headerClass('text-center'),
         ];
     }
 

@@ -12,9 +12,13 @@ use Illuminate\Support\Str;
 
 class SubjectController extends Controller
 {
-     public function index(QuestionSubjectDataTable $dataTable)
+    public function index(QuestionSubjectDataTable $dataTable)
     {
-        return $dataTable->render('admin.question.subject.index');
+        $levels = \App\Models\QuestionLevel::all();
+        $subjects = \App\Models\QuestionSubject::select('name')
+            ->groupBy('name')
+            ->get();
+        return $dataTable->render('admin.question.subject.index', compact('levels', 'subjects'));
     }
 
     public function create()
@@ -42,7 +46,7 @@ class SubjectController extends Controller
                 'max:100',
                 Rule::unique('question_subjects', 'name')
                     ->where(function ($query) use ($request, $inputName) {
-                        return $query->where(['education_type'=> $request->education_type,'level_id'=>$request->level_id])
+                        return $query->where(['education_type' => $request->education_type, 'level_id' => $request->level_id])
                             ->whereRaw('LOWER(name) = ?', [$inputName]);
                     }),
             ],

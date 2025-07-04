@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enum\EductionType;
 use App\Models\QuestionLevel;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class LevelSeeder extends Seeder
 {
@@ -14,19 +13,31 @@ class LevelSeeder extends Seeder
      */
     public function run(): void
     {
-
-        // QuestionLevel::truncate();
+        // Disable foreign key checks to allow truncation
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        QuestionLevel::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $data = [];
-        foreach (EductionType::all() as $eduType => $levels) {
-            foreach ($levels as $level) {
-                $data[] = [
-                    'education_type' => $eduType,
-                    'name' => $level,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
+
+        // Primary education levels 1 to 6
+        for ($i = 1; $i <= 6; $i++) {
+            $data[] = [
+                'education_type' => 'primary',
+                'name' => (string)$i,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Secondary education levels 1 to 5
+        for ($i = 1; $i <= 5; $i++) {
+            $data[] = [
+                'education_type' => 'secondary',
+                'name' => (string)$i,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
 
         QuestionLevel::insert($data);
