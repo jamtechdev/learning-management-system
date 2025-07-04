@@ -16,19 +16,15 @@ class TopicController extends Controller
     {
         $levels = \App\Models\QuestionLevel::with('subjects')->get();
 
-        // Use distinct() to ensure no duplicate subjects
         $subjects = \App\Models\QuestionSubject::select('name')
-            ->distinct()
+            ->groupBy('name')
             ->get();
-        $topics = \App\Models\QuestionTopic::select('name', 'level_id', 'subject_id', 'education_type')
-            ->groupBy('name', 'level_id', 'subject_id', 'education_type')  // Group by all the relevant fields
+        $topics = \App\Models\QuestionTopic::select('name')
+            ->groupBy('name')
             ->get();
-
 
         return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
     }
-
-
     /**
      * Show the form for creating a new resource.
      */

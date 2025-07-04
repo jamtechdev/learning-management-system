@@ -19,13 +19,11 @@ class QuestionController extends Controller
         $questionTypes = \App\Enum\QuestionTypes::TYPES;
         $levels = \App\Models\QuestionLevel::with('subjects', 'subjects.topics')->get();
         $subjects = \App\Models\QuestionSubject::select('name')
+           ->groupBy('name')
+            ->get();
+        $topics = \App\Models\QuestionTopic::select('name')
             ->groupBy('name')
             ->get();
-      $topics = \App\Models\QuestionTopic::select('name', 'level_id', 'subject_id', 'education_type')
-    ->groupBy('name', 'level_id', 'subject_id', 'education_type')  // Group by all the relevant fields
-    ->get();
-
-
 
         return $dataTable->render('admin.question.index', [
             'questionTypes' => $questionTypes,
