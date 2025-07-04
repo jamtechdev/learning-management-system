@@ -18,12 +18,14 @@ class QuestionController extends Controller
     {
         $questionTypes = \App\Enum\QuestionTypes::TYPES;
         $levels = \App\Models\QuestionLevel::with('subjects', 'subjects.topics')->get();
-        $subjects = \App\Models\QuestionSubject::select('name')
-           ->groupBy('name')
-            ->get();
-        $topics = \App\Models\QuestionTopic::select('name')
-            ->groupBy('name')
-            ->get();
+
+        // Get all subjects and topics first
+        $subjects = \App\Models\QuestionSubject::select('name')->get();
+        $topics = \App\Models\QuestionTopic::select('name')->get();
+
+        // Ensure unique names using the collection's unique method
+        $subjects = $subjects->unique('name'); // Unique by 'name'
+        $topics = $topics->unique('name'); // Unique by 'name'
 
         return $dataTable->render('admin.question.index', [
             'questionTypes' => $questionTypes,
@@ -32,6 +34,7 @@ class QuestionController extends Controller
             'topics' => $topics,
         ]);
     }
+
 
     public function create()
     {
