@@ -20,10 +20,9 @@ class TopicController extends Controller
         $subjects = \App\Models\QuestionSubject::select('name')
             ->distinct()
             ->get();
-
-       $topics = \App\Models\QuestionTopic::select('name', 'level_id')
-    ->groupBy('name', 'level_id')  // Group by both name and level_id
-    ->get();
+        $topics = \App\Models\QuestionTopic::select('name', 'level_id', 'subject_id', 'education_type')
+            ->groupBy('name', 'level_id', 'subject_id', 'education_type')  // Group by all the relevant fields
+            ->get();
 
 
         return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
