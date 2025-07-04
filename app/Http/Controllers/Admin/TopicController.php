@@ -14,19 +14,21 @@ class TopicController extends Controller
      */
     public function index(QuestionTopicDataTable $dataTable)
     {
-        // Get levels with subjects
         $levels = \App\Models\QuestionLevel::with('subjects')->get();
 
-        // Get all subjects and topics first
-        $subjects = \App\Models\QuestionSubject::select('name')->get();
-        $topics = \App\Models\QuestionTopic::select('name')->get();
+        // Use distinct() to ensure no duplicate subjects
+        $subjects = \App\Models\QuestionSubject::select('name')
+            ->distinct()
+            ->get();
 
-        // Ensure unique subjects and topics using the collection's unique method
-        $subjects = $subjects->unique('name'); // Unique by 'name'
-        $topics = $topics->unique('name'); // Unique by 'name'
+        // Ensure unique topic names by grouping them and fetching distinct values
+        $topics = \App\Models\QuestionTopic::select('name')
+            ->distinct()  // Use distinct to ensure no duplicate topics
+            ->get();
 
         return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
     }
+
 
     /**
      * Show the form for creating a new resource.
