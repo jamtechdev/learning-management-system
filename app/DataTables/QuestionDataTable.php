@@ -36,17 +36,17 @@ class QuestionDataTable extends DataTable
             })
             ->addColumn('actions', function ($q) {
                 $buttons = [
-                    [
-                        'tag' => 'a',
-                        'href' => route('admin.questions.edit', $q->id),
-                        'class' => 'text-sm text-blue-600 hover:underline me-2',
-                        'icon' => 'fas fa-pen',
-                        'title' => 'Edit',
-                        'data' => [
-                            'id' => $q->id,
-                            'table_id' => 'question-table',
-                        ],
-                    ],
+                    // [
+                    //     'tag' => 'a',
+                    //     'href' => route('admin.questions.edit', $q->id),
+                    //     'class' => 'text-sm text-blue-600 hover:underline me-2',
+                    //     'icon' => 'fas fa-pen',
+                    //     'title' => 'Edit',
+                    //     'data' => [
+                    //         'id' => $q->id,
+                    //         'table_id' => 'question-table',
+                    //     ],
+                    // ],
                     [
                         'tag' => 'button',
                         'href' => 'javascript:void(0);',
