@@ -19,7 +19,9 @@ class TopicController extends Controller
         $subjects = \App\Models\QuestionSubject::select('name')
             ->groupBy('name')
             ->get();
-        $topics = \App\Models\QuestionTopic::get();
+        $topics = \App\Models\QuestionTopic::select('name')
+            ->groupBy('name')
+            ->get();
 
         return $dataTable->render('admin.topics.index', compact('levels', 'subjects', 'topics'));
     }

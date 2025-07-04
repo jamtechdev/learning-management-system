@@ -48,7 +48,7 @@
                             <select id="filterTopic" class="form-select form-select-sm">
                                 <option value="">All</option>
                                 @foreach ($topics as $topic)
-                                    <option value="{{ $topic->id }}">{{ $topic->name }}</option>
+                                    <option value="{{ $topic->name }}">{{ $topic->name }}</option>
                                 @endforeach
                             </select>
                         </div>

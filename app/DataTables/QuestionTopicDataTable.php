@@ -70,7 +70,7 @@ class QuestionTopicDataTable extends DataTable
         }
 
         if ($topicName = request('topic_id')) {
-            $query->where('id', $topicName);
+            $query->where('name', $topicName);
         }
 
         return $query;
