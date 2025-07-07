@@ -52,8 +52,8 @@
                     class="block w-full px-4 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring focus:ring-blue-300" />
             </div>
 
-            {{-- Hidden input for type --}}
-            <input type="hidden" name="type" :value="selectedType">
+            {{-- Hidden input for type change by rudra--}}
+            <input type="hidden" name="type" :value="types[selectedType]">
 
             {{-- Submit --}}
             <div class="flex justify-end">

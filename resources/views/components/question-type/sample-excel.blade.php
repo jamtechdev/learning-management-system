@@ -23,7 +23,7 @@
                     <form :action="`{{ route('admin.questions.download') }}`" method="POST"
                         @submit="showSampleSuccess = true; setTimeout(() => showSampleSuccess = false, 3000)">
                         @csrf
-                        <input type="hidden" name="type" :value="typeKey">
+                        <input type="hidden" name="type" :value="label">
                         <button type="submit"
                             class="flex items-center w-full p-2 space-x-2 text-sm border rounded cursor-pointer dark:text-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-800">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-500" fill="none"
