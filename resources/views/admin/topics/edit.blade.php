@@ -3,12 +3,12 @@
         <div class="mx-auto max-w-8xl sm:px-6 lg:px-8">
             <div class="p-6 bg-white shadow-xl sm:rounded-lg">
                 <h2 class="mb-6 text-2xl font-bold text-gray-800">
-                    Add New Topic
+                    Edit Topic
                 </h2>
                 <form action="{{ route('admin.topics.update', $topic->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2" x-data="form()">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2" x-data="form()" x-init="init()">
                         <!-- Education Type -->
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Education Type</label>
@@ -85,29 +85,46 @@
         </div>
     </div>
 
-    @php
-        $subjects = [];
-        $subject_id = old('subject_id', $topic->subject_id);
-        $level_id = old('level_id', $topic->level_id);
-        $name = old('name', $topic->name);
-        if ($subject_id) {
-            $subjects = $levels->find($level_id)->subjects;
-        }
-    @endphp
+    {{-- Removed PHP logic moved to controller --}}
     @push('scripts')
         <script>
             function form() {
                 return {
                     levels: @json($levels),
+                    education_type: '{{ $education_type }}',
                     level_id: '{{ $level_id }}',
                     subjects: @json($subjects),
                     subject_id: '{{ $subject_id }}',
                     name: '{{ $name }}',
+                    filteredLevels: [],
+
+                    init() {
+                        if (this.education_type) {
+                            this.filterLevels();
+                        }
+                    },
+
+                    onEducationChange() {
+                        this.level_id = '';
+                        this.filterLevels();
+                    },
+
+                    filterLevels() {
+                        if (!this.education_type) {
+                            this.filteredLevels = [];
+                            return;
+                        }
+                        this.filteredLevels = this.levels.filter(level =>
+                            level.education_type.toLowerCase() === this.education_type.toLowerCase()
+                        );
+                    },
+
                     onLevelChange() {
-                        console.log(this.level_id, this.levels.find(l => l.id == this.level_id));
                         const level = this.levels.find(l => l.id == this.level_id);
                         if (level) {
                             this.subjects = level.subjects || [];
+                        } else {
+                            this.subjects = [];
                         }
                         this.subject_id = '';
                         this.name = '';

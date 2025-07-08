@@ -63,7 +63,21 @@ class TopicController extends Controller
     {
         $levels = \App\Models\QuestionLevel::with('subjects')->get();
         $topic = \App\Models\QuestionTopic::findOrFail($id);
-        return view('admin.topics.edit', compact('topic', 'levels'));
+
+        $subject_id = old('subject_id', $topic->subject_id);
+        $level_id = old('level_id', $topic->level_id);
+        $education_type = old('education_type', $topic->education_type);
+        $name = old('name', $topic->name);
+
+        $subjects = [];
+        if ($level_id) {
+            $level = $levels->find($level_id);
+            if ($level) {
+                $subjects = $level->subjects;
+            }
+        }
+
+        return view('admin.topics.edit', compact('topic', 'levels', 'subject_id', 'level_id', 'education_type', 'name', 'subjects'));
     }
 
     /**

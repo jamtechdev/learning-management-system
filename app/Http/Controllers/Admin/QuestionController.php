@@ -19,7 +19,7 @@ class QuestionController extends Controller
         $questionTypes = \App\Enum\QuestionTypes::TYPES;
         $levels = \App\Models\QuestionLevel::with('subjects', 'subjects.topics')->get();
         $subjects = \App\Models\QuestionSubject::select('name')
-           ->groupBy('name')
+            ->groupBy('name')
             ->get();
         $topics = \App\Models\QuestionTopic::select('name')
             ->groupBy('name')
