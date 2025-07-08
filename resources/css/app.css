@@ -1,7 +1,7 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "datatables.net-bs5/css/dataTables.bootstrap5.css";
+@import "toastr/build/toastr.min.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-

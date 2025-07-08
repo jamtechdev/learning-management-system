@@ -58,7 +58,11 @@ class AssignmentQuestionController extends Controller
                 'user_id' => $request->student_id
             ]);
         }
-
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Assessment question  Created successfully!'
+        ]);
         return redirect()->route('admin.assignments.question', ['assessment_id' => $request->assessment_id])
             ->with('success', 'Questions assigned successfully.');
     }
@@ -109,7 +113,11 @@ class AssignmentQuestionController extends Controller
                 'question_id' => $questionId,
             ]);
         }
-
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Assessment question  Updated successfully!'
+        ]);
         return redirect()->route('admin.assignments.question', ['assessment_id' => $assessment_id])
             ->with('success', 'Assessment questions updated successfully.');
     }
@@ -117,7 +125,11 @@ class AssignmentQuestionController extends Controller
     {
         $questionAssignment = AssessmentQuestion::find($id);
         $questionAssignment->delete();
-
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Assessment question  deleted successfully!'
+        ]);
         return redirect()->back()->with('success', 'Assessment question deleted successfully.');
     }
 }

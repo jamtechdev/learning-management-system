@@ -101,7 +101,7 @@ class QuestionController extends Controller
                 return response()->json(['error' => 'Invalid question type'], 400);
         }
 
-        return redirect()->route('admin.questions.index')->with('message', 'Question created successfully!');
+        return redirect()->route('admin.questions.index');
     }
 
     // 1. MCQ
@@ -148,8 +148,12 @@ class QuestionController extends Controller
                 'is_correct' => $option['is_correct'],
             ]);
         }
-
-        return redirect()->route('admin.questions.index')->with('success', 'MCQ question created successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'MCQ question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     // 2. Fill in the Blank
@@ -180,9 +184,12 @@ class QuestionController extends Controller
         $question->education_type = $data['education_type'] ?? null;
         $question->metadata       = $metadata; // auto-cast to JSON via $casts
         $question->save();
-
-        return redirect()->route('admin.questions.index')
-            ->with('success', 'Fill in the Blank question saved successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Fill in the blank type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
 
@@ -214,8 +221,12 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'True/False question saved successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'True and False type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     // 4. Linking
@@ -272,8 +283,12 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'Linking question saved successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Linking type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     // 5. Rearranging
@@ -310,8 +325,12 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'Rearranging question saved successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Rearrange type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     // 6. Grammar Cloze With Options
@@ -330,8 +349,12 @@ class QuestionController extends Controller
         $question->explanation = $metadata['explanation'] ?? null;
         $question->metadata = $metadata;
         $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'Grammar Cloze With Options question saved successfully!');
+        // Success message with Toastr
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Grammar Cloze With Options type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     // 7. Comprehension
@@ -361,8 +384,11 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $fullMetadata;
         $question->save();
-
-        return redirect()->route('admin.questions.index')->with('success', 'Comprehension question saved successfully!');
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Comprehension  type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     protected function saveEditingQuestion($data)
@@ -390,7 +416,12 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $fullMetadata;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'Editing spelling  question saved successfully!');
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Editing type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
     protected function saveClozeWithDropdownOptions($data)
@@ -418,14 +449,362 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $fullMetadata;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'Underline correct  question saved successfully!');
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Cloze With Dropdown Options type question created successfully.!'
+        ]);
+        return redirect()->route('admin.questions.index');
     }
 
 
-    // Update existing question
+    // // Update existing question
+    // public function update(Request $request, $question)
+    // {
+    //     // dd($request->all());
+    //     $question = Question::findOrFail($question);
+
+    //     $data = $request->input('question_data');
+
+    //     switch ($data['type']) {
+    //         case QuestionTypes::MCQ:
+    //             $this->updateMcqQuestion($question, $data);
+    //             break;
+
+    //         case QuestionTypes::FILL_IN_THE_BLANK:
+    //             $this->updateFillBlankQuestion($question, $data);
+    //             break;
+
+    //         case QuestionTypes::TRUE_FALSE:
+    //             $this->updateTrueFalseQuestion($question, $data);
+    //             break;
+
+    //         case QuestionTypes::LINKING:
+    //             $this->updateLinkingQuestion($question, $data, $request);
+    //             break;
+
+    //         case QuestionTypes::REARRANGING:
+    //             $this->updateRearrangingQuestion($question, $data);
+    //             break;
+    //         case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
+    //             $this->updateGrammarClozeWithOptions($question, $data);
+    //             break;
+
+    //         case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
+    //             $this->updateClozeWithDropdownOptions($question, $data);
+    //             break;
+
+    //         case QuestionTypes::COMPREHENSION:
+    //             $this->updateComprehensionQuestion($question, $data);
+    //             break;
+
+    //         case QuestionTypes::EDITING:
+    //             $this->updateEditingQuestion($question, $data);
+    //             break;
+    //         default:
+    //             return redirect()->route('admin.questions.index');
+    //     }
+
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+
+
+    // public function updateEditingQuestion($question, array $data)
+    // {
+
+    //     $decodedMetadata = json_decode($data['metadata'], true);
+    //     $fullMetadata = [
+    //         'instruction' => $data['instruction'] ?? '',
+    //         'education_type' => $data['education_type'],
+    //         'level_id' => $data['level_id'],
+    //         'subject_id' => $data['subject_id'],
+    //         'type' => $data['type'],
+    //         'paragraph' => $decodedMetadata['paragraph'] ?? null,
+    //         'questions' => $decodedMetadata['questions'] ?? [],
+    //     ];
+
+    //     // dd($fullMetadata);
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->content = $data['content'] ?? '';
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $fullMetadata;
+    //     $question->save();
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+
+    // public function updateComprehensionQuestion($question, array $data)
+    // {
+    //     $decodedMetadata = is_string($data['comprehension_metadata'])
+    //         ? json_decode($data['comprehension_metadata'], true)
+    //         : $data['comprehension_metadata'];
+
+    //     $fullMetadata = [
+    //         'education_type' => $data['education_type'],
+    //         'level_id' => $data['level_id'],
+    //         'subject_id' => $data['subject_id'],
+    //         'type' => $data['type'],
+    //         'instruction' => $data['instruction'] ?? '',
+    //         'passage' => $decodedMetadata['passage'] ?? null,
+    //         'subquestions' => $decodedMetadata['subquestions'] ?? [],
+    //     ];
+
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->content = $fullMetadata['passage'] ?? '';
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $fullMetadata;
+    //     $question->save();
+
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+    // protected function updateClozeWithDropdownOptions($question, array $data)
+    // {
+    //     // Parse the editing_metadata JSON
+    //     $decodedMetadata = json_decode($data['underline_metadata'], true);
+    //     $fullMetadata = [
+    //         'instruction' => $data['instruction'] ?? '',
+    //         'education_type' => $data['education_type'],
+    //         'level_id' => $data['level_id'],
+    //         'subject_id' => $data['subject_id'],
+    //         'type' => $data['type'],
+    //         'paragraph' => $data['content'] ?? null,
+    //         'questions' => $decodedMetadata['questions'] ?? [],
+    //     ];
+
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->content = $data['content'] ?? '';
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $fullMetadata;
+    //     $question->save();
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+
+    // public function updateGrammarClozeWithOptions($question, array $data)
+    // {
+    //     $metadata = json_decode($data['metadata'], true);
+    //     // dd($metadata);
+    //     $metadata['instruction'] = $data['instruction'] ?? '';
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->content = $metadata['paragraph'] ?? '';
+    //     $question->education_type = $data['education_type'] ?? null;
+    //     $question->level_id = $data['level_id'] ?? null;
+    //     $question->subject_id = $data['subject_id'] ?? null;
+    //     $question->explanation = $metadata['explanation'] ?? null;
+    //     $question->metadata = $metadata;
+    //     $question->save();
+
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+    // public function updateRearrangingQuestion($question, array $data)
+    // {
+    //     $questionText = $data['question_text'];
+    //     $orderedAnswer = preg_split('/\s+/', trim($questionText));
+    //     $shuffled = $orderedAnswer;
+    //     shuffle($shuffled);
+
+    //     $options = collect($shuffled)->map(fn($word) => [
+    //         'value' => $word,
+    //         'is_correct' => false,
+    //     ])->values()->toArray();
+
+    //     $transformed = [
+    //         'type' => 'rearranging',
+    //         'content' => $data['content'] ?? '',
+    //         'instruction' => $data['instruction'] ?? '',
+    //         'options' => $options,
+    //         'answer' => [
+    //             'answer' => $orderedAnswer,
+    //             'format' => 'ordered'
+    //         ],
+    //     ];
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->content = $data['content'];
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $transformed;
+    //     $question->save();
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+    // public function updateMcqQuestion($question, array $data)
+    // {
+    //     $correctIndex = (int) $data['correct_option'];
+
+    //     // Updated: handle options with explanation
+    //     $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
+    //         return [
+    //             'value' => $option['value'],
+    //             'explanation' => $option['explanation'] ?? null,
+    //             'is_correct' => ($index === $correctIndex),
+    //         ];
+    //     }, $data['options'], array_keys($data['options']));
+
+    //     $answer = [
+    //         'answer' => $structuredOptions[$correctIndex]['value'] ?? null,
+    //         'format' => 'text',
+    //     ];
+
+    //     $payload = $data;
+    //     $payload['options'] = $structuredOptions;
+    //     $payload['answer'] = $answer;
+    //     $payload['instruction'] = $data['instruction'] ?? '';
+    //     unset($payload['correct_option']);
+
+    //     // Update question
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->content = $data['content'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $payload;
+    //     $question->save();
+
+    //     // Sync Question Options
+    //     QuestionOption::where('question_id', $question->id)->delete();
+
+    //     foreach ($structuredOptions as $index => $option) {
+    //         QuestionOption::create([
+    //             'question_id' => $question->id,
+    //             'label' => chr(65 + $index), // A, B, C, D...
+    //             'value' => $option['value'],
+    //             'is_correct' => $option['is_correct'],
+    //         ]);
+    //     }
+
+    //     return redirect()->route('admin.questions.index');
+    // }
+
+
+    // public function updateFillBlankQuestion($question, array $data)
+    // {
+    //     $data['instruction'] = $data['instruction'] ?? '';
+
+    //     // Decode the JSON fill_in_the_blank_metadata to array
+    //     $blanks = json_decode($data['fill_in_the_blank_metadata'], true);
+
+    //     // Build the metadata array
+    //     $metadata = [
+    //         'instruction'   => $data['instruction'],
+    //         'type'  => $data['type'],
+    //         'question_text' => $data['content'],
+    //         'blanks'        => $blanks ?? [],
+    //     ];
+
+    //     $question->topic_id       = $data['topic_id'];
+    //     $question->type           = $data['type'];
+    //     $question->content        = $data['content'];
+    //     $question->explanation    = $data['explanation'] ?? null;
+    //     $question->level_id       = $data['level_id'] ?? null;
+    //     $question->subject_id     = $data['subject_id'] ?? null;
+    //     $question->education_type = $data['education_type'] ?? null;
+    //     $question->metadata       = $metadata; // auto-cast to JSON via $casts
+    //     $question->save();
+    // }
+
+    // public function updateTrueFalseQuestion(Question $question, array $data)
+    // {
+    //     $transformed = [
+    //         'type' => 'true_false',
+    //         'content' => $data['content'],
+    //         'options' => [
+    //             ['value' => 'True'],
+    //             ['value' => 'False'],
+    //         ],
+    //         'answer' => [
+    //             'choice' => $data['true_false_answer'],
+    //             'explanation' => $data['explanation'] ?? null,
+    //             'format' => $data['format'] ?? 'text',
+    //         ],
+    //     ];
+
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->content = $data['content'];
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $transformed;
+    //     $question->save();
+    // }
+
+    // public function updateLinkingQuestion($question, array $data, Request $request)
+    // {
+    //     $answer = [];
+
+    //     foreach ($data['options'] as $index => $option) {
+    //         $leftImageUri = null;
+    //         $rightImageUri = null;
+
+    //         if (($option['label_type'] ?? '') === 'image' && $request->hasFile("question_data.options.$index.label_image")) {
+    //             $leftImage = $request->file("question_data.options.$index.label_image");
+    //             $storedPath = $leftImage->store('uploads/linking', 'public');
+    //             $leftImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
+    //         }
+
+    //         if (($option['value_type'] ?? '') === 'image' && $request->hasFile("question_data.options.$index.value_image")) {
+    //             $rightImage = $request->file("question_data.options.$index.value_image");
+    //             $storedPath = $rightImage->store('uploads/linking', 'public');
+    //             $rightImageUri = $storedPath ? asset('storage/' . $storedPath) : null;
+    //         }
+
+    //         $answer[] = [
+    //             'left' => [
+    //                 'word' => $option['label_text'] ?? '',
+    //                 'image_uri' => $leftImageUri,
+    //                 'match_type' => $option['label_type'] ?? 'text',
+    //             ],
+    //             'right' => [
+    //                 'word' => $option['value_text'] ?? '',
+    //                 'image_uri' => $rightImageUri,
+    //                 'match_type' => $option['value_type'] ?? 'text',
+    //             ],
+    //         ];
+    //     }
+
+    //     $transformed = [
+    //         'type' => 'linking',
+    //         'content' => $data['content'] ?? '',
+    //         'explanation' => $data['explanation'] ?? '',
+    //         'instruction' => $data['instruction'] ?? '',
+    //         'format' => 'mapping',
+    //         'answer' => $answer,
+    //     ];
+    //     $question->topic_id = $data['topic_id'];
+    //     $question->type = $data['type'];
+    //     $question->education_type = $data['education_type'];
+    //     $question->level_id = $data['level_id'];
+    //     $question->subject_id = $data['subject_id'];
+    //     $question->content = $data['content'];
+    //     $question->explanation = $data['explanation'] ?? null;
+    //     $question->metadata = $transformed;
+    //     $question->save();
+
+    //     return redirect()->route('admin.questions.index');
+    // }
     public function update(Request $request, $question)
     {
-        // dd($request->all());
         $question = Question::findOrFail($question);
 
         $data = $request->input('question_data');
@@ -466,17 +845,17 @@ class QuestionController extends Controller
                 $this->updateEditingQuestion($question, $data);
                 break;
             default:
-                return redirect()->route('admin.questions.index')->with('message', 'Invalid question type!');
+                session()->flash('toastr', [
+                    'type' => 'success',
+                    'message' => 'Question updated successfully!',
+                ]);
+                return redirect()->route('admin.questions.index');
         }
-
-        return redirect()->route('admin.questions.index')->with('message', 'Question updated successfully!');
+        return redirect()->route('admin.questions.index');
     }
-
-
 
     public function updateEditingQuestion($question, array $data)
     {
-
         $decodedMetadata = json_decode($data['metadata'], true);
         $fullMetadata = [
             'instruction' => $data['instruction'] ?? '',
@@ -488,7 +867,6 @@ class QuestionController extends Controller
             'questions' => $decodedMetadata['questions'] ?? [],
         ];
 
-        // dd($fullMetadata);
         $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->education_type = $data['education_type'];
@@ -498,9 +876,14 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $fullMetadata;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'Editing spelling  question updated successfully!');
-    }
 
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Editing question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
+    }
 
     public function updateComprehensionQuestion($question, array $data)
     {
@@ -528,12 +911,16 @@ class QuestionController extends Controller
         $question->metadata = $fullMetadata;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Comprehension question saved successfully!');
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Comprehension type question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
     protected function updateClozeWithDropdownOptions($question, array $data)
     {
-        // Parse the editing_metadata JSON
         $decodedMetadata = json_decode($data['underline_metadata'], true);
         $fullMetadata = [
             'instruction' => $data['instruction'] ?? '',
@@ -554,14 +941,18 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $fullMetadata;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'Underline correct  question Updated successfully!');
-    }
 
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Cloze with dropdown options question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
+    }
 
     public function updateGrammarClozeWithOptions($question, array $data)
     {
         $metadata = json_decode($data['metadata'], true);
-        // dd($metadata);
         $metadata['instruction'] = $data['instruction'] ?? '';
         $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
@@ -573,7 +964,12 @@ class QuestionController extends Controller
         $question->metadata = $metadata;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Grammar Cloze With Options question Updated  successfully!');
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Grammar cloze with options question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
     public function updateRearrangingQuestion($question, array $data)
@@ -607,14 +1003,19 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
-        return redirect()->route('admin.questions.index')->with('success', 'Rearrange question updated successfully!');
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Rearranging question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
     public function updateMcqQuestion($question, array $data)
     {
         $correctIndex = (int) $data['correct_option'];
 
-        // Updated: handle options with explanation
         $structuredOptions = array_map(function ($option, $index) use ($correctIndex) {
             return [
                 'value' => $option['value'],
@@ -634,7 +1035,6 @@ class QuestionController extends Controller
         $payload['instruction'] = $data['instruction'] ?? '';
         unset($payload['correct_option']);
 
-        // Update question
         $question->topic_id = $data['topic_id'];
         $question->type = $data['type'];
         $question->content = $data['content'];
@@ -645,7 +1045,6 @@ class QuestionController extends Controller
         $question->metadata = $payload;
         $question->save();
 
-        // Sync Question Options
         QuestionOption::where('question_id', $question->id)->delete();
 
         foreach ($structuredOptions as $index => $option) {
@@ -657,34 +1056,43 @@ class QuestionController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.questions.index')->with('success', 'MCQ question updated successfully!');
-    }
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'MCQ question updated successfully!',
+        ]);
 
+        return redirect()->route('admin.questions.index');
+    }
 
     public function updateFillBlankQuestion($question, array $data)
     {
         $data['instruction'] = $data['instruction'] ?? '';
 
-        // Decode the JSON fill_in_the_blank_metadata to array
         $blanks = json_decode($data['fill_in_the_blank_metadata'], true);
 
-        // Build the metadata array
         $metadata = [
-            'instruction'   => $data['instruction'],
-            'type'  => $data['type'],
+            'instruction' => $data['instruction'],
+            'type' => $data['type'],
             'question_text' => $data['content'],
-            'blanks'        => $blanks ?? [],
+            'blanks' => $blanks ?? [],
         ];
 
-        $question->topic_id       = $data['topic_id'];
-        $question->type           = $data['type'];
-        $question->content        = $data['content'];
-        $question->explanation    = $data['explanation'] ?? null;
-        $question->level_id       = $data['level_id'] ?? null;
-        $question->subject_id     = $data['subject_id'] ?? null;
+        $question->topic_id = $data['topic_id'];
+        $question->type = $data['type'];
+        $question->content = $data['content'];
+        $question->explanation = $data['explanation'] ?? null;
+        $question->level_id = $data['level_id'] ?? null;
+        $question->subject_id = $data['subject_id'] ?? null;
         $question->education_type = $data['education_type'] ?? null;
-        $question->metadata       = $metadata; // auto-cast to JSON via $casts
+        $question->metadata = $metadata;
         $question->save();
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Fill in the blank question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
     public function updateTrueFalseQuestion(Question $question, array $data)
@@ -712,6 +1120,13 @@ class QuestionController extends Controller
         $question->explanation = $data['explanation'] ?? null;
         $question->metadata = $transformed;
         $question->save();
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'True/False question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
     public function updateLinkingQuestion($question, array $data, Request $request)
@@ -766,7 +1181,12 @@ class QuestionController extends Controller
         $question->metadata = $transformed;
         $question->save();
 
-        return redirect()->route('admin.questions.index')->with('success', 'Linking question saved successfully!');
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Linking question updated successfully!',
+        ]);
+
+        return redirect()->route('admin.questions.index');
     }
 
 
@@ -802,6 +1222,6 @@ class QuestionController extends Controller
             }
         }
         $question->delete();
-        return redirect()->route('admin.questions.index')->with('success', 'Question deleted successfully!');
+        return redirect()->route('admin.questions.index');
     }
 }

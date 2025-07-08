@@ -12,3 +12,4 @@ window.$ = window.jQuery = $;
 
 import 'bootstrap/dist/js/bootstrap.bundle.js';
 import 'datatables.net-bs5/js/dataTables.bootstrap5.js';
+
