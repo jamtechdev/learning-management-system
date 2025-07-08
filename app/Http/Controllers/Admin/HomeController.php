@@ -12,6 +12,7 @@ class HomeController extends Controller
 {
     public function dashboard()
     {
+
         $totalUsers = \App\Models\User::count();
         $parentCount = \App\Models\User::role('parent')->count();
         $childCount = \App\Models\User::role('child')->count();

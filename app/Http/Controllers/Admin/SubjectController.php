@@ -54,9 +54,13 @@ class SubjectController extends Controller
 
         QuestionSubject::create($request->all());
 
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Question subject created successfully.!'
+        ]);
+
         return redirect()->route('admin.subjects.index')->with('success', 'Subject created successfully.');
     }
-
 
     public function edit($id)
     {
@@ -64,7 +68,6 @@ class SubjectController extends Controller
         $levels = QuestionLevel::get();
         return view('admin.question.subject.edit', compact('subject', 'levels'));
     }
-
 
     /**
      * Update the specified subject.
@@ -83,8 +86,14 @@ class SubjectController extends Controller
         $subject = QuestionSubject::findOrFail($id);
         $subject->update($request->all());
 
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Question subject updated  successfully.!'
+        ]);
+
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
     }
+
     /**
      * Remove the specified subject from storage.
      *
@@ -95,6 +104,11 @@ class SubjectController extends Controller
     {
         $subject = QuestionSubject::findOrFail($id);
         $subject->delete();
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Question subject delete successfully.!'
+        ]);
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject deleted successfully.');
     }

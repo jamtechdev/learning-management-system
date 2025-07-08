@@ -44,9 +44,18 @@ class QuestionSubjectDataTable extends DataTable
 
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
-            ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i'))
             ->editColumn('level_id', fn($row) => $row->level->name ?? '')
             ->editColumn('education_type', fn($row) => ucfirst($row->education_type))
+            ->filterColumn('education_type', function ($query, $keyword) {
+                $query->where('education_type', 'like', "%$keyword%");
+            })
+            ->filterColumn('level_id', function ($query, $keyword) {
+                $query->whereHas('level', fn($q) => $q->where('name', 'like', "%$keyword%"));
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('name', 'like', "%$keyword%");
+            })
+
             ->rawColumns(['actions'])
             ->setRowId('id');
     }
@@ -92,10 +101,9 @@ class QuestionSubjectDataTable extends DataTable
     {
         return [
             Column::make('id')->title('SUBJECT ID')->addClass('text-center')->headerClass('text-center'),
-            Column::make('name')->title('NAME')->addClass('text-center')->headerClass('text-center'),
             Column::make('education_type')->title('EDUCATION TYPE')->addClass('text-center')->headerClass('text-center'),
             Column::make('level_id')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
-            Column::make('created_at')->title('ADDED AT')->addClass('text-center')->headerClass('text-center'),
+            Column::make('name')->title('NAME')->addClass('text-center')->headerClass('text-center'),
             Column::computed('actions')
                 ->title('Actions')
                 ->exportable(false)

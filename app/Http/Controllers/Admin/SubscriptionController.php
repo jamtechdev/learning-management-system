@@ -5,20 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
 use Illuminate\Http\Request;
-
+use App\DataTables\SubscriptionPlanDataTable;
 use App\Models\SubscriptionPlan;
 use App\Models\QuestionSubject;
-use Symfony\Component\CssSelector\Node\FunctionNode;
 
 class SubscriptionController extends Controller
 {
-
-    public function plans()
+    public function plans(SubscriptionPlanDataTable $dataTable)
     {
-        $plans = SubscriptionPlan::all();
-        return view('admin.subscription.index', compact('plans'));
+        return $dataTable->render('admin.subscription.index');
     }
-
 
     public function create()
     {
@@ -33,11 +29,14 @@ class SubscriptionController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'description' => 'nullable|string',
-
         ]);
 
         $plan = SubscriptionPlan::create($validated);
 
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Subscription plan created successfully.'
+        ]);
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan created successfully.');
     }
@@ -55,10 +54,14 @@ class SubscriptionController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'description' => 'nullable|string',
-
         ]);
 
         $plan->update($validated);
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Subscription plan updated successfully.'
+        ]);
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan updated successfully.');
     }
@@ -66,6 +69,11 @@ class SubscriptionController extends Controller
     public function destroy(SubscriptionPlan $plan)
     {
         $plan->delete();
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Subscription plan deleted successfully.'
+        ]);
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan deleted successfully.');
     }
@@ -77,7 +85,6 @@ class SubscriptionController extends Controller
 
         return view('admin.subscription.assign-subjects', compact('plan', 'subjects', 'levels'));
     }
-
 
     public function assignSubjects(Request $request, SubscriptionPlan $plan)
     {
@@ -91,6 +98,11 @@ class SubscriptionController extends Controller
         } else {
             $plan->subjects()->detach();
         }
+
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Subjects assigned successfully.'
+        ]);
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subjects assigned successfully.');
     }

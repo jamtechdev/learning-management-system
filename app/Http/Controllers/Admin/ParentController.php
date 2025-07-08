@@ -59,9 +59,12 @@ class ParentController extends Controller
             if ($parentRole) {
                 $parent->assignRole($parentRole);
             }
-
-            return redirect()->route('admin.parents.index')
-                ->with('success', 'Parent created successfully!');
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Parent created successfully!'
+            ]);
+            return redirect()->route('admin.parents.index');
         } catch (\Exception $e) {
             dd($e);
             return back()->withInput()
@@ -99,9 +102,12 @@ class ParentController extends Controller
             }
 
             $parent->update($data);
-
-            return redirect()->route('admin.parents.index')
-                ->with('success', 'Parent updated successfully!');
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Parent updated successfully!'
+            ]);
+            return redirect()->route('admin.parents.index');
         } catch (\Exception $e) {
             dd($e);
             return back()->withInput()
@@ -113,9 +119,12 @@ class ParentController extends Controller
     {
         try {
             $parent->delete();
-
-            return redirect()->route('admin.parents.index')
-                ->with('success', 'Parent deleted successfully!');
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Parent deleted successfully!'
+            ]);
+            return redirect()->route('admin.parents.index');
         } catch (\Exception $e) {
             dd($e);
             return back()->withErrors(['error' => 'An error occurred while deleting the parent.']);

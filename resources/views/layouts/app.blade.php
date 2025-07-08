@@ -27,6 +27,7 @@
 <body class="font-sans antialiased bg-[#edf2fe] dark:bg-gray-900">
     <div class="flex min-h-screen">
 
+
         <!-- Sidebar (Static) -->
         <div class="hidden w-64 bg-white border-r dark:bg-gray-800 md:block">
             @include('layouts.sidebar')
@@ -39,6 +40,7 @@
             </div>
             <!-- Page Content -->
             <main class="flex-1 p-4">
+                @include('layouts._toasts') <!-- Include toastr notifications -->
                 @if (session('message'))
                     <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
                         class="relative p-4 mb-4 text-green-700 bg-green-100 rounded">

@@ -50,6 +50,16 @@ class ParentDataTable extends DataTable
                     ]
                 ])->render();
             })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('first_name', 'like', "%$keyword%")
+                    ->orWhere('last_name', 'like', "%$keyword%");
+            })
+            ->filterColumn('email', function ($query, $keyword) {
+                $query->where('email', 'like', "%$keyword%");
+            })
+            ->filterColumn('phone', function ($query, $keyword) {
+                $query->where('phone', 'like', "%$keyword%");
+            })
             ->rawColumns(['avatar', 'students', 'actions']);
     }
 
@@ -57,7 +67,6 @@ class ParentDataTable extends DataTable
     {
         return $model->newQuery()->role('parent');
     }
-
 
     public function html(): HtmlBuilder
     {
@@ -82,11 +91,11 @@ class ParentDataTable extends DataTable
         return [
             Column::computed('DT_RowIndex')->title('#')->width(30)->addClass('text-center')->orderable(false)->searchable(false),
             Column::computed('avatar')->title('Avatar')->orderable(false)->searchable(false),
-            Column::computed('name')->title('Name'),
-            Column::make('email')->title('Email'),
-            Column::make('phone')->title('Phone'),
+            Column::computed('name')->title('Name')->searchable(true)->orderable(true),
+            Column::make('email')->title('Email')->searchable(true)->orderable(true),
+            Column::make('phone')->title('Phone')->searchable(true)->orderable(true),
             Column::computed('students')->title('Add Student')->orderable(false)->searchable(false)->addClass('text-center'),
-            Column::computed('actions')->title('Actions')->exportable(false)->printable(false)->addClass('text-center'),
+            Column::computed('actions')->title('Actions')->exportable(false)->printable(false)->addClass('text-center')->searchable(false)->orderable(false),
         ];
     }
 

@@ -99,6 +99,11 @@ class LevelController extends Controller
             }
 
             DB::commit();
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Level(s) created successfully.!'
+            ]);
             return redirect()->route('admin.levels.index')->with('success', 'Level(s) created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -149,6 +154,11 @@ class LevelController extends Controller
                 'education_type' => $educationType,
                 'name' => Str::title($inputName),
             ]);
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Level(s) updated successfully.!'
+            ]);
             return redirect()->route('admin.levels.index')->with('success', 'Level updated successfully.');
         } catch (\Exception $e) {
             return back()->withInput()->withErrors(['error' => 'Failed to update level: ' . $e->getMessage()]);
@@ -164,7 +174,11 @@ class LevelController extends Controller
             if (request()->expectsJson()) {
                 return response()->json(['success' => true]);
             }
-
+            // Success message with Toastr
+            session()->flash('toastr', [
+                'type' => 'success',
+                'message' => 'Level(s) deleted  successfully.!'
+            ]);
             return redirect()->route('admin.levels.index')->with('success', 'Level deleted successfully.');
         } catch (\Exception $e) {
             if (request()->expectsJson()) {

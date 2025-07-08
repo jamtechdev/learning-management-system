@@ -41,7 +41,13 @@ class QuestionLevelDataTable extends DataTable
 
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
-            ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i'))
+            ->filterColumn('education_type', function ($query, $keyword) {
+                $query->where('education_type', 'like', "%$keyword%");
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('name', 'like', "%$keyword%");
+            })
+
             ->rawColumns(['actions'])
             ->setRowId('id');
     }
@@ -85,9 +91,8 @@ class QuestionLevelDataTable extends DataTable
     {
         return [
             Column::make('id')->title('LEVEL ID')->addClass('text-center')->headerClass('text-center'),
-            Column::make('name')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
             Column::make('education_type')->title('TYPE')->addClass('text-center')->headerClass('text-center'),
-            Column::make('created_at')->title('ADDED AT')->addClass('text-center')->headerClass('text-center'),
+            Column::make('name')->title('LEVEL')->addClass('text-center')->headerClass('text-center'),
             Column::computed('actions')
                 ->title('ACTIONS')
                 ->exportable(false)

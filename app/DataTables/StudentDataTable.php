@@ -56,6 +56,16 @@ class StudentDataTable extends DataTable
 
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('first_name', 'like', "%$keyword%")
+                    ->orWhere('last_name', 'like', "%$keyword%");
+            })
+            ->filterColumn('email', function ($query, $keyword) {
+                $query->where('email', 'like', "%$keyword%");
+            })
+            ->filterColumn('phone', function ($query, $keyword) {
+                $query->where('phone', 'like', "%$keyword%");
+            })
             ->rawColumns(['avatar', 'actions']);
     }
 

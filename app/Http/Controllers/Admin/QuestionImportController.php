@@ -34,38 +34,74 @@ class QuestionImportController extends Controller
             switch ($type) {
                 case QuestionTypes::MCQ:
                     Excel::import(new McqQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'MCQ type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::FILL_IN_THE_BLANK:
                     Excel::import(new FillBlankQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Fill in the blank type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::TRUE_FALSE:
                     Excel::import(new TrueFalseQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'True/False type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::LINKING:
                     Excel::import(new LinkingQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Linking type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::REARRANGING:
                     Excel::import(new RearrangingQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Rearranging type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::COMPREHENSION:
                     Excel::import(new ComprehensionQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Comprehension type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
                     Excel::import(new GrammarClozeOptionsImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Grammar cloze with options type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::EDITING:
                     Excel::import(new EditingQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Editing type questions imported successfully!',
+                    ]);
                     break;
 
                 case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
                     Excel::import(new DropdownClozeQuestionImport, $request->file('file'));
+                    session()->flash('toastr', [
+                        'type' => 'success',
+                        'message' => 'Grammar cloze with dropdown options type questions imported successfully!',
+                    ]);
                     break;
 
                 default:
@@ -86,6 +122,7 @@ class QuestionImportController extends Controller
 
         $type = $request->input('type');
 
+        // Mapping of question types to sample file names
         $map = [
             QuestionTypes::MCQ => 'sampleMCQ.xlsx',
             QuestionTypes::FILL_IN_THE_BLANK => 'sampleFillInTheBlank.xlsx',
@@ -98,15 +135,24 @@ class QuestionImportController extends Controller
             QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS => 'sampleGrammarClozeWithDropdown.xlsx',
         ];
 
+        // Check if the provided type exists in the map
         if (!array_key_exists($type, $map)) {
             return back()->with('error', 'Invalid type for sample download.');
         }
 
+        // Define the file path to the sample file
         $filePath = public_path('samples/' . $map[$type]);
 
+        // Check if the sample file exists
         if (!file_exists($filePath)) {
             return back()->with('error', 'Sample file not found.');
         }
+
+        // Return the sample file for download
+        session()->flash('toastr', [
+            'type' => 'success',
+            'message' => 'Sample file downloaded successfully!',
+        ]);
 
         return response()->download($filePath);
     }
