@@ -129,29 +129,20 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Validation outside try block
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email:rfc,dns|exists:users,email',
-            'password' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationErrorHandler($validator->errors());
-        }
-
-        DB::beginTransaction(); // Begin Transaction
-
         try {
+            $request->validate([
+                'email' => 'required|string|email:rfc,dns|exists:users,email',
+                'password' => 'required|string',
+            ]);
+
             $user = User::where('email', $request->email)->firstOrFail();
 
-            if (!$user->email_verified_at) {
-                return $this->errorHandler(403, 'Email not verified. Please verify your email to log in.');
-            }
-
+            // Check password
             if (!Hash::check($request->password, $user->password)) {
                 return $this->errorHandler(401, 'Invalid credentials');
             }
 
+            // Allow only parents
             if (!$user->hasRole('parent')) {
                 return $this->errorHandler(403, 'Access restricted to parent accounts only');
             }
@@ -161,15 +152,53 @@ class AuthController extends Controller
             $token = $user->createToken($user->email, ['remember_me' => $remember])->plainTextToken;
             $user['token'] = $token;
 
-            DB::commit(); // Commit Transaction
-
-            return $this->successHandler(new AuthResource($user), 200, 'Login Successful');
+            return $this->successHandler(
+                new \App\Http\Resources\AuthResource($user),
+                200,
+                'Login Successful'
+            );
         } catch (ValidationException $e) {
-            DB::rollBack(); // Rollback Transaction on Error
-            return $this->validationErrorHandler($e->validator->errors());
+            $errors = $e->errors();
+            foreach ($errors as $field => $messages) {
+                return $this->errorHandler(422, $messages[0]);
+            }
+            return $this->errorHandler(422, 'Validation failed');
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback Transaction on Error
-            return $this->serverErrorHandler($e);
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
+        }
+    }
+
+
+    public function studentLogin(Request $request)
+    {
+        try {
+            $request->validate([
+                'lock_code' => 'required|string',
+            ]);
+
+            // Find the user by lock_code
+            $user = User::where('lock_code_enabled', true)
+                ->where('lock_code', $request->lock_code)
+                ->first();
+
+            if (!$user) {
+                return $this->errorHandler(403, 'Invalid or unauthorized lock code.');
+            }
+
+            // Log in the user
+            Auth::login($user);
+            $token = $user->createToken('lock_code_login')->plainTextToken;
+            $user['token'] = $token;
+
+            return $this->successHandler(
+                new \App\Http\Resources\AuthResource($user),
+                200,
+                'Login with lock code successful'
+            );
+        } catch (ValidationException $e) {
+            return $this->errorHandler(422, collect($e->errors())->first()[0]);
+        } catch (\Exception $e) {
+            return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
         }
     }
 

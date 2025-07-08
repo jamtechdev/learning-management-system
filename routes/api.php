@@ -20,9 +20,13 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('update-password', [AuthController::class, 'updatePassword']);
     });
 
+    // Authenticated routes with middleware
     Route::middleware('auth:sanctum')->group(function () {
+
         Route::post('/password-reset', [AuthController::class, 'resetPassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
+
+        // Questions routes
         Route::prefix('questions')->group(function () {
             Route::get('levels', [QuestionController::class, 'getAllLevels']);
             Route::get('subjects', [QuestionController::class, 'getAllSubjects']);
@@ -31,13 +35,14 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('user-answer', [QuestionController::class, 'userAnswer']);
             Route::get('all', [QuestionController::class, 'getAllQuestions']);
         });
-    });
 
-    Route::middleware(['auth:sanctum', 'role:parent'])->prefix('parent')->group(function () {
-        Route::apiResource('student', \App\Http\Controllers\API\StudentController::class)->except('update');
-        Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
-        Route::post('student/{student}', [\App\Http\Controllers\API\StudentController::class, 'update']);
-        Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
-        Route::get('my-students', [ParentController::class, 'getStudents']);
+        // Parent Role Protected Routes
+        Route::middleware('role:parent')->prefix('parent')->group(function () {
+            Route::apiResource('student', \App\Http\Controllers\API\StudentController::class)->except('update');
+            Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
+            Route::post('student/{student}', [\App\Http\Controllers\API\StudentController::class, 'update']);
+            Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
+            Route::get('my-students', [ParentController::class, 'getStudents']);
+        });
     });
 });
