@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionLevel;
 use Illuminate\Http\Request;
-
+use App\DataTables\SubscriptionPlanDataTable;
 use App\Models\SubscriptionPlan;
 use App\Models\QuestionSubject;
 use Symfony\Component\CssSelector\Node\FunctionNode;
@@ -13,10 +13,10 @@ use Symfony\Component\CssSelector\Node\FunctionNode;
 class SubscriptionController extends Controller
 {
 
-    public function plans()
+
+    public function plans(SubscriptionPlanDataTable $dataTable)
     {
-        $plans = SubscriptionPlan::all();
-        return view('admin.subscription.index', compact('plans'));
+        return $dataTable->render('admin.subscription.index');
     }
 
 
