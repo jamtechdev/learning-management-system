@@ -46,6 +46,16 @@ class QuestionSubjectDataTable extends DataTable
             })
             ->editColumn('level_id', fn($row) => $row->level->name ?? '')
             ->editColumn('education_type', fn($row) => ucfirst($row->education_type))
+            ->filterColumn('education_type', function ($query, $keyword) {
+                $query->where('education_type', 'like', "%$keyword%");
+            })
+            ->filterColumn('level_id', function ($query, $keyword) {
+                $query->whereHas('level', fn($q) => $q->where('name', 'like', "%$keyword%"));
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('name', 'like', "%$keyword%");
+            })
+
             ->rawColumns(['actions'])
             ->setRowId('id');
     }

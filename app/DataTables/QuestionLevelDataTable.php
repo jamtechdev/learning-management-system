@@ -41,6 +41,13 @@ class QuestionLevelDataTable extends DataTable
 
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
+            ->filterColumn('education_type', function ($query, $keyword) {
+                $query->where('education_type', 'like', "%$keyword%");
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('name', 'like', "%$keyword%");
+            })
+
             ->rawColumns(['actions'])
             ->setRowId('id');
     }

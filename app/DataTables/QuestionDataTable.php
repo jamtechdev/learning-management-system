@@ -62,6 +62,7 @@ class QuestionDataTable extends DataTable
                 ];
                 return view('components.datatable.buttons', ['data' => $buttons])->render();
             })
+            // Filter columns
             ->filterColumn('level', function ($query, $keyword) {
                 $query->whereHas('level', fn($q) => $q->where('name', 'like', "%$keyword%"));
             })
@@ -70,6 +71,10 @@ class QuestionDataTable extends DataTable
             })
             ->filterColumn('topic', function ($query, $keyword) {
                 $query->whereHas('topic', fn($q) => $q->where('name', 'like', "%$keyword%"));
+            })
+            ->filterColumn('type', function ($query, $keyword) {
+                // Search based on the type column
+                $query->where('type', 'like', "%$keyword%");
             })
             ->rawColumns(['question', 'type', 'education_type', 'topic', 'options', 'actions']);
     }
@@ -97,7 +102,6 @@ class QuestionDataTable extends DataTable
         if ($topicName = request('topic_id')) {
             $query->whereHas('topic', fn($q) => $q->where('name', 'like', "%$topicName%"));
         }
-
 
         return $query;
     }
@@ -132,14 +136,14 @@ class QuestionDataTable extends DataTable
     {
         return [
             Column::computed('DT_RowIndex')->title('#')->width(30)->addClass('text-center')->orderable(false)->searchable(false),
-            Column::make('content')->title('Question'),
-            Column::computed('type')->title('Type'),
-            Column::computed('education_type')->title('Education Type'),
-            Column::computed('level')->title('Level'),
-            Column::computed('subject')->title('Subject'),
-            Column::computed('topic')->title('Topic'),
-            Column::computed('options')->title('Options')->exportable(false)->printable(false)->addClass('text-center'),
-            Column::computed('actions')->title('Actions')->exportable(false)->printable(false)->addClass('text-center'),
+            Column::make('content')->title('Question')->searchable(true)->orderable(true),
+            Column::computed('type')->title('Type')->searchable(true)->orderable(true),
+            Column::computed('education_type')->title('Education Type')->searchable(true)->orderable(true),
+            Column::computed('level')->title('Level')->searchable(true)->orderable(true),
+            Column::computed('subject')->title('Subject')->searchable(true)->orderable(true),
+            Column::computed('topic')->title('Topic')->searchable(true)->orderable(true),
+            Column::computed('options')->title('Options')->exportable(false)->printable(false)->addClass('text-center')->searchable(false)->orderable(false),
+            Column::computed('actions')->title('Actions')->exportable(false)->printable(false)->addClass('text-center')->searchable(false)->orderable(false),
         ];
     }
 
