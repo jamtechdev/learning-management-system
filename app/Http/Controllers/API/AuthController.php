@@ -85,12 +85,17 @@ class AuthController extends Controller
 
             DB::commit(); // Commit Transaction
 
-            return $this->successHandler(null, 200, 'Email successfully verified!');
+            $frontendUrl = env('FRONTEND_URL');
+            $redirectUrl = $frontendUrl ? $frontendUrl . '/login' : 'https://qtnvault.com';
+
+            return redirect($redirectUrl);
         } catch (\Exception $e) {
             DB::rollBack(); // Rollback Transaction on Error
             return $this->errorHandler(400, 'Invalid or expired verification token.');
         }
     }
+
+
 
     public function resendVerificationEmail(Request $request)
     {
