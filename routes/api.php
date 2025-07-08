@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\QuestionController;
+use App\Http\Controllers\API\ParentController;
 
 Route::group(['prefix' => 'v1'], function () {
 
@@ -32,5 +33,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
             Route::post('student/{student}', [\App\Http\Controllers\API\StudentController::class, 'update']);
             Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
+
+             Route::get('my-students', [\App\Http\Controllers\API\ParentController::class, 'getStudents']);
         });
 });
