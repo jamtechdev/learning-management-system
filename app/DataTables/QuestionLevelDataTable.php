@@ -20,7 +20,7 @@ class QuestionLevelDataTable extends DataTable
                         'tag'   => 'a',
                         'href'  => route('admin.levels.edit', $row->id),
                         'class' => 'text-sm text-blue-600 hover:underline me-2',
-                        'icon'  => 'fas fa-pen',
+                        'icon'  => 'fas fa-edit fa-lg',
                         'title' => 'Edit',
                         'data'  => ['id' => $row->id],
                     ],
@@ -28,7 +28,7 @@ class QuestionLevelDataTable extends DataTable
                         'tag'   => 'button',
                         'href'  => 'javascript:void(0);',
                         'class' => 'text-sm text-red-600 hover:underline btn-delete',
-                        'icon'  => 'fas fa-trash',
+                        'icon'  => 'fas fa-trash-alt fa-lg',
                         'title' => 'Delete',
                         'data'  => [
                             'id' => $row->id,

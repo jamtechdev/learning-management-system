@@ -39,7 +39,7 @@ class ParentDataTable extends DataTable
                             'tag' => 'button',
                             'href' => 'javascript:void(0);',
                             'class' => 'text-red-600 hover:text-red-800 btn-delete',
-                            'icon' => 'fas fa-trash-alt fa-lg',
+                            'icon' => 'fas fa-trash-alt fa-lg-alt fa-lg',
                             'title' => 'Delete',
                             'data' => [
                                 'url' => route('admin.parents.destroy', $user->id),

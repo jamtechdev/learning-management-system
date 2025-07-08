@@ -36,7 +36,7 @@ class StudentDataTable extends DataTable
                         'tag' => 'a',
                         'href' => route('admin.student.edit', $student->id),
                         'class' => 'text-sm text-blue-600 hover:underline',
-                        'icon' => 'fas fa-pen',
+                        'icon' => 'fas fa-edit fa-lg',
                         'title' => 'Edit',
                         'data' => [],
                     ],
@@ -44,7 +44,7 @@ class StudentDataTable extends DataTable
                         'tag' => 'button',
                         'href' => 'javascript:void(0);',
                         'class' => 'text-sm text-red-600 hover:underline btn-delete',
-                        'icon' => 'fas fa-trash-alt',
+                        'icon' => 'fas fa-trash-alt fa-lg-alt',
                         'title' => 'Delete',
                         'data' => [
                             'url' => route('admin.student.destroy', $student->id),

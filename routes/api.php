@@ -38,7 +38,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('student/{student}/lock-code', [\App\Http\Controllers\API\StudentController::class, 'lockCode']);
         Route::post('student/{student}', [\App\Http\Controllers\API\StudentController::class, 'update']);
         Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
-
-         Route::get('my-students', [ParentController::class, 'getStudents']);
+        Route::get('my-students', [ParentController::class, 'getStudents']);
     });
 });
