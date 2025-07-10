@@ -68,9 +68,23 @@ class AuthController extends Controller
 
     public function sendVerificationEmail($user, $token)
     {
-        $verificationUrl = URL::temporarySignedRoute('email.verify', now()->addMinutes(60), ['token' => $token]);
-        Mail::to($user->email)->send(new EmailVerificationMail($verificationUrl));
+        try {
+            $verificationUrl = URL::temporarySignedRoute('email.verify', now()->addMinutes(60), ['token' => $token]);
+
+            // Log that the email is about to be sent
+            Log::info('Sending verification email to: ' . $user->email);
+
+            // Send the email
+            Mail::to($user->email)->send(new EmailVerificationMail($verificationUrl));
+
+            // Log that the email has been sent successfully
+            Log::info('Verification email sent successfully to: ' . $user->email);
+        } catch (\Exception $e) {
+            // Log any errors that occur while sending the email
+            Log::error('Failed to send verification email to ' . $user->email . '. Error: ' . $e->getMessage());
+        }
     }
+
 
     public function verifyEmail(Request $request, $token)
     {
