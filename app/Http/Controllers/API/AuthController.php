@@ -142,6 +142,12 @@ class AuthController extends Controller
                 return $this->errorHandler(401, 'Invalid credentials');
             }
 
+            // Check if the email is verified
+            if (!$user->email_verified_at) {
+                return $this->errorHandler(401, 'Email not verified. Please verify your email first.');
+            }
+
+
             // Allow only parents
             if (!$user->hasRole('parent')) {
                 return $this->errorHandler(403, 'Access restricted to parent accounts only');
