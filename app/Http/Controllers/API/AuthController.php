@@ -171,6 +171,7 @@ class AuthController extends Controller
             Auth::login($user, $remember);
             $token = $user->createToken($user->email, ['remember_me' => $remember])->plainTextToken;
             $user['token'] = $token;
+            $user['is_student_mode'] = false;
 
             return $this->successHandler(
                 new \App\Http\Resources\AuthResource($user),
@@ -192,35 +193,43 @@ class AuthController extends Controller
     public function studentLogin(Request $request)
     {
         try {
+            // Validate the request input
             $request->validate([
+                'child_id' => 'required|exists:users,id',
                 'lock_code' => 'required|string',
             ]);
 
-            // Find the user by lock_code
-            $user = User::where('lock_code_enabled', true)
-                ->where('lock_code', $request->lock_code)
-                ->first();
+            // Find the user by child_id
+            $user = User::find($request->child_id);
 
+            // Check if user exists
             if (!$user) {
-                return $this->errorHandler(403, 'Invalid or unauthorized lock code.');
+                return $this->errorHandler(404, 'User not found.');
             }
 
-            // Log in the user
-            Auth::login($user);
-            $token = $user->createToken('lock_code_login')->plainTextToken;
-            $user['token'] = $token;
+            // Check if the lock_code is correct and enabled
+            if ($user->lock_code !== $request->lock_code || !$user->lock_code_enabled) {
+                return $this->errorHandler(403, 'Lock code does not match for this user.');
+            }
 
+            // Set is_student_mode to true for student users
+            $user['is_student_mode'] = true;
+
+            // Return success with user data and token
             return $this->successHandler(
                 new \App\Http\Resources\AuthResource($user),
                 200,
                 'Login with lock code successful'
             );
         } catch (ValidationException $e) {
+            // Handle validation exception
             return $this->errorHandler(422, collect($e->errors())->first()[0]);
         } catch (\Exception $e) {
+            // Handle any other exceptions
             return $this->errorHandler(500, 'Server Error', ['message' => $e->getMessage()]);
         }
     }
+
 
     public function logout(Request $request)
     {
