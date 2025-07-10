@@ -6,24 +6,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Assignment;
 use App\Http\Resources\AssignmentResource;
+use App\Traits\ApiResponseTrait;
 
 class AssignmentController extends Controller
 {
+    use ApiResponseTrait;
     public function index()
     {
         $assignments = Assignment::all();
-        return AssignmentResource::collection($assignments);
+        return $this->successHandler(AssignmentResource::collection($assignments));
     }
 
     public function show($id)
     {
         $assignment = Assignment::find($id);
         if ($assignment) {
-            return new AssignmentResource($assignment);
+            return $this->successHandler(new AssignmentResource($assignment));
         }
-        return response()->json([
-            'message' => 'Assignment not found'
-        ], 404);
+        return $this->notFoundHandler('Assignment not found');
     }
 
     public function store(Request $request)
@@ -39,16 +39,16 @@ class AssignmentController extends Controller
         $validated['recurrence_rule'] = $validated['recurrence_rule'] ?? null;
 
         $assignment = Assignment::create($validated);
-        
-        return new AssignmentResource($assignment);
+
+        return $this->successHandler(new AssignmentResource($assignment));
     }
 
     public function update(Request $request, $id)
     {
-        $assignment=Assignment::find($id);
+        $assignment = Assignment::find($id);
 
         if (!$assignment) {
-            return response()->json(['message' => 'Assignment not found'], 404);
+            return $this->notFoundHandler('Assignment not found');
         }
 
         $validated = $request->validate([
@@ -59,18 +59,18 @@ class AssignmentController extends Controller
             'recurrence_rule' => 'nullable|json',
         ]);
         $assignment->update($validated);
-        return new AssignmentResource($assignment);
+        return $this->successHandler(new AssignmentResource($assignment));
     }
 
     public function destroy($id)
     {
-        $assignment=Assignment::find($id);
+        $assignment = Assignment::find($id);
 
-        if (!$assignment){
-            return response()->json(['message' => 'Assignment not found'], 404);
+        if (!$assignment) {
+            return $this->notFoundHandler('Assignment not found');
         }
 
         $assignment->delete();
-        return response()->json(['message' => 'Assignment deleted successfully']);
+        return $this->successHandler(null, 200, 'Assignment deleted successfully');
     }
 }
