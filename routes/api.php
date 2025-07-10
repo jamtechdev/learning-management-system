@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\QuestionController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ParentController;
+use App\Http\Controllers\API\AssignmentController;
 
 Route::group(['prefix' => 'v1'], function () {
 
@@ -44,5 +45,15 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('get-student-level', [\App\Http\Controllers\API\StudentController::class, 'getStudentLevel']);
             Route::get('my-students', [ParentController::class, 'getStudents']);
         });
+
+        // Assignment Routes
+        Route::prefix('assignments')->group(function () {
+            Route::get('/', [AssignmentController::class, 'index']);
+            Route::get('/{id}', [AssignmentController::class, 'show']);
+            Route::post('/', [AssignmentController::class, 'store']);
+            Route::put('/{id}', [AssignmentController::class, 'update']);
+            Route::delete('/{id}', [AssignmentController::class, 'destroy']);
+        });
+        
     });
 });
