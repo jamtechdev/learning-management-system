@@ -5,17 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Assessment extends Model
+class Assignment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'title',
-        'is_weekly',
-        'status'
+        'description',
+        'due_date',
+        'is_recurring',
+        'recurrence_rule',
+        'user_id',
     ];
 
+    protected $casts = [
+        'recurrence_rule' => 'array',
+    ];
+
+    // Relationship with User
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -23,6 +30,6 @@ class Assessment extends Model
 
     public function questions()
     {
-        return $this->hasMany(AssessmentQuestion::class);
+        return $this->belongsToMany(Question::class, 'assignment_questions');
     }
 }
