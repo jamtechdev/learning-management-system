@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('assignment_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
-            $table->foreignId('question_id')->constrained()->onDelete('cascade');
+            // Explicitly specify the referenced table
+            $table->foreignId('assignment_id')->constrained('assignments')->onDelete('cascade');
+            // Explicitly specify the referenced table for the 'question_id' foreign key
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -11,10 +11,12 @@ Artisan::command('inspire', function () {
         $value = str($value)->studly();
         Artisan::call("make:seeder {$value}QuestionSeeder");
     }
-
 })->purpose('Display an inspiring quote');
 
 
 Artisan::command('weekly:assign', function (string $user) {
     $this->info("Sending email to: {$user}!");
 });
+
+
+Schedule::command('assign:questions')->weeklyOn(1, '00:00');

@@ -2,32 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'title',
         'description',
         'due_date',
         'is_recurring',
         'recurrence_rule',
-        'user_id',
+        'student_id', // Student to whom the assignment is assigned
+        'created_by', // Parent who created the assignment
     ];
 
-    protected $casts = [
-        'recurrence_rule' => 'array',
-    ];
-
-    // Relationship with User
-    public function user()
+    // Relationship to the Student (assigned to this assignment)
+    public function student()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'student_id');
     }
 
+    // Relationship to the Parent (creator of the assignment)
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Relationship to Questions
     public function questions()
     {
         return $this->belongsToMany(Question::class, 'assignment_questions');
