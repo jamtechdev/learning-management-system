@@ -28,7 +28,8 @@ class AuthResource extends JsonResource
             'token' => $this->token,
             'level_id' => $this->student_level,
             'level' => $this->level,
-            'role' => $this->roles?->first()?->name
+            'role' => $this->roles?->first()?->name,
+             'is_student_mode' => $this->is_student_mode ?? false, // Ensure this value is included
         ];
 
         if ($this->role === 'child') {
