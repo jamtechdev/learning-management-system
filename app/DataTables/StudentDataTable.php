@@ -13,7 +13,12 @@ class StudentDataTable extends DataTable
 {
     protected $parentId;
 
-    public function __construct($parentId = null)
+    public function __construct()
+    {
+        $this->parentId = null;
+    }
+
+    public function setParentId($parentId)
     {
         $this->parentId = $parentId;
     }
@@ -71,9 +76,10 @@ class StudentDataTable extends DataTable
 
     public function query(User $model): QueryBuilder
     {
-        return $model->newQuery()
-            ->role('child') // Using Spatie role
-            ->when($this->parentId, fn($q) => $q->where('parent_id', $this->parentId));
+        if ($this->parentId) {
+            return $model->newQuery()->where('parent_id', $this->parentId);
+        }
+        return $model->newQuery();
     }
 
     public function html(): HtmlBuilder

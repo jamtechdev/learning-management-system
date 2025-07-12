@@ -6,6 +6,9 @@ use App\Http\Controllers\API\QuestionController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\AssignmentController;
+use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
+
+Route::get('/parents/{parent_id}/students', [AdminAssignmentController::class, 'getChildrenByParent']);
 
 Route::group(['prefix' => 'v1'], function () {
 
@@ -48,12 +51,10 @@ Route::group(['prefix' => 'v1'], function () {
 
         // Assignment Routes
         Route::prefix('assignments')->group(function () {
-            Route::get('/', [AssignmentController::class, 'index']);
-            Route::get('/{id}', [AssignmentController::class, 'show']);
-            Route::post('/', [AssignmentController::class, 'store']);
-            Route::put('/{id}', [AssignmentController::class, 'update']);
-            Route::delete('/{id}', [AssignmentController::class, 'destroy']);
+            Route::post('/get', [AssignmentController::class, 'index']);
+            Route::post('/create', [AssignmentController::class, 'store']);
+            Route::post('/update', [AssignmentController::class, 'update']);
+            Route::post('/delete', [AssignmentController::class, 'destroy']);
         });
-        
     });
 });

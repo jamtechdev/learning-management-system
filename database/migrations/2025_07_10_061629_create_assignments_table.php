@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->dateTime('due_date');
-            $table->boolean('is_recurring')->default(false);
-            $table->json('recurrence_rule')->nullable(); // Store recurring rules like "every Monday"
-            $table->foreignId('student_id')->constrained('users')->onDelete('cascade'); // Foreign key to User (Student)
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade'); // Foreign key to User (Parent who created the assignment)
+            $table->dateTime('due_date')->nullable();
+            $table->enum('recurrence_type', ['none', 'every_monday'])->default('none');
+            $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('subject_id')->constrained('question_subjects')->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['pending', 'completed'])->default('pending');
             $table->timestamps();
         });

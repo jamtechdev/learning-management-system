@@ -16,12 +16,11 @@ use Illuminate\Support\Facades\Storage;
 class StudentController extends Controller
 {
     public function index(StudentDataTable $dataTable, $parentId)
-{
-    $parent = \App\Models\User::findOrFail($parentId);
-    $dataTable->with('parentId', $parentId);
-
-    return $dataTable->render('admin.students.index', compact('parent'));
-}
+    {
+        $parent = \App\Models\User::findOrFail($parentId);
+        $dataTable->setParentId($parentId);
+        return $dataTable->render('admin.students.index', compact('parent'));
+    }
 
 
     public function studentsByParent(User $parent)

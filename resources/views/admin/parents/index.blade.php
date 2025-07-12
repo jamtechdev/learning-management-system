@@ -6,7 +6,7 @@
                 <!-- Header -->
                 <div class="py-3 bg-white card-header d-flex justify-content-between align-items-center border-bottom">
                     <h2 class="mb-0 h4 text-dark">Manage Parents Record</h2>
-                    <a href="{{ route('admin.subjects.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.parents.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i> Add
                     </a>
                 </div>

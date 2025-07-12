@@ -9,9 +9,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 px-4 py-6 overflow-y-auto" x-data="{
-        open: {{ request()->routeIs('admin.topics.*') || request()->routeIs('admin.levels.*') || request()->routeIs('admin.subjects.*') || request()->routeIs('admin.questions.*') ? 'true' : 'false' }}
-    }" aria-label="Main menu">
+    <nav class="flex-1 px-4 py-6 overflow-y-auto" aria-label="Main menu">
         <ul class="space-y-3 text-sm font-medium text-white dark:text-white">
 
             <!-- Dashboard -->
@@ -23,63 +21,41 @@
                 </x-nav-link>
             </li>
 
-            <!-- Question Management Parent -->
+            <!-- Question Management -->
             <li>
-                <button @click="open = !open" :aria-expanded="open.toString()" aria-controls="submenu-questions"
-                    class="flex items-center w-full gap-2 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 hover:text-black dark:hover:text-black dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:bg-indigo-100 focus:text-black focus:ring-indigo-500">
-                    📝
-                    <span class="flex-1 font-semibold text-left">Question
-                        Management</span>
-
-                    <svg :class="open ? 'rotate-180' : ''"
-                        class="w-5 h-5 transition-transform duration-200 dark:text-indigo-400"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                <x-nav-link :href="route('admin.levels.index')" :active="request()->routeIs('admin.levels.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
-                </button>
-
-                <!-- Submenu -->
-                <div id="submenu-questions" x-show="open" x-collapse class="mt-3 space-y-1 " style="display: none;">
-                    <ul>
-                        <li class="mb-[5px]">
-                            <x-nav-link :href="route('admin.levels.index')" :active="request()->routeIs('admin.levels.*')"
-                                class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                                <span>Levels</span>
-                            </x-nav-link>
-                        </li>
-                        <li class="mb-[5px]">
-                            <x-nav-link :href="route('admin.subjects.index')" :active="request()->routeIs('admin.subjects.*')"
-                                class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                
-                                📑
-                                <span>Subjects</span>
-                            </x-nav-link>
-                        </li>
-                        <li class="mb-[5px]">
-                            <x-nav-link :href="route('admin.topics.index')" :active="request()->routeIs('admin.topics.*')"
-                                class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                🗂️
-                                <span>Topics</span>
-                            </x-nav-link>
-                        </li>
-                        <li class="mb-[5px]">
-                            <x-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')"
-                                class="flex items-center w-full gap-3 px-4 py-2 transition-colors duration-200 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                                </svg>
-                                <span>Questions</span>
-                            </x-nav-link>
-                        </li>
-                    </ul>
-                </div>
+                    <span>Levels</span>
+                </x-nav-link>
+            </li>
+            <li>
+                <x-nav-link :href="route('admin.subjects.index')" :active="request()->routeIs('admin.subjects.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    📑
+                    <span>Subjects</span>
+                </x-nav-link>
+            </li>
+            <li>
+                <x-nav-link :href="route('admin.topics.index')" :active="request()->routeIs('admin.topics.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    🗂️
+                    <span>Topics</span>
+                </x-nav-link>
+            </li>
+            <li>
+                <x-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 w-5 h-5 " fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                    </svg>
+                    <span>Questions</span>
+                </x-nav-link>
             </li>
 
             <!-- Add Parents -->
@@ -87,26 +63,28 @@
                 <x-nav-link href="{{ route('admin.parents.index') }}" :active="request()->routeIs('admin.parents.*') || request()->routeIs('admin.student.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     👪
-                    <span>Add Parents </span>
+                    <span>Add Parents</span>
                 </x-nav-link>
             </li>
+
+            <!-- Subscription Plans -->
             <li>
                 <x-nav-link href="{{ route('admin.subscriptions.index') }}" :active="request()->routeIs('admin.subscriptions.*') ||
                     request()->routeIs('admin.subscriptionplan.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
-                   💳
-                    <span>Subscription Plans </span>
+                    💳
+                    <span>Subscription Plans</span>
                 </x-nav-link>
             </li>
 
-            <!-- Question Bank -->
-            {{-- <li>
+            <!-- Assignments -->
+            <li>
                 <x-nav-link href="{{ route('admin.assignments.index') }}" :active="request()->routeIs('admin.assignments.*')"
                     class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     🗂️
-                    <span>Question Assignments</span>
+                    <span>Assignments</span>
                 </x-nav-link>
-            </li> --}}
+            </li>
 
         </ul>
     </nav>

@@ -5,34 +5,28 @@ namespace App\Console\Commands;
 use App\Models\Assignment;
 use App\Models\Question;
 use App\Models\User;
+use App\Models\Subject;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\AssignmentPendingReminder;
 use App\Mail\NewAssignmentCreated;
+use App\Models\QuestionSubject;
+use Illuminate\Support\Facades\Log;
 
 class AssignQuestionToAssignment extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'assign:questions';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create recurring assignments every Monday for all parents and their children based on their student level';
-
+    protected $description = 'Create recurring English Paper assignments every Monday for all children based on their student level';
 
     public function handle()
     {
+        // Log the start of the command execution
+        Log::info('Assigning questions to assignments command started.');
+
         $parents = User::role('parent')->get();
         if ($parents->isEmpty()) {
             $this->error('No parent users found.');
+            Log::error('No parent users found.');
             return;
         }
 
@@ -45,26 +39,17 @@ class AssignQuestionToAssignment extends Command
             }
 
             foreach ($children as $child) {
-                $pendingAssignment = Assignment::where('student_id', $child->id)
-                    ->where('status', 'pending')
-                    ->first();
-
-                if ($pendingAssignment) {
-                    Mail::to($parent->email)->send(new AssignmentPendingReminder($pendingAssignment, $child, $parent));
-                    $this->info("Pending assignment reminder sent to parent with ID: {$parent->id} for child ID: {$child->id}");
-                } else {
-                    $this->createNewAssignment($parent, $child);
-                }
+                $this->createEnglishAssignmentForMonday($parent, $child);
             }
         }
 
-        $this->info('Recurring assignments created and questions assigned successfully for all parents and their children!');
+        // Log the successful completion of the command
+        Log::info('Recurring English Paper assignments successfully created for all parents and their children!');
+        $this->info('Recurring English Paper assignments successfully created for all parents and their children!');
     }
 
-
-    protected function createNewAssignment($parent, $child)
+    protected function createEnglishAssignmentForMonday($parent, $child)
     {
-
         $levelId = $child->student_level;
 
         if (!$levelId) {
@@ -72,37 +57,41 @@ class AssignQuestionToAssignment extends Command
             return;
         }
 
-        $level = \App\Models\QuestionLevel::find($levelId);
-
-        if (!$level) {
-            $this->error("No level found for level ID: {$levelId}.");
+        $englishSubjectId = QuestionSubject::where('name', 'English')->value('id');
+        if (!$englishSubjectId) {
+            $this->error("No English subject found in the database.");
             return;
         }
 
-        $questions = Question::where('level_id', $level->id)->take(10)->get();
+        $questions = Question::where(['level_id' => $levelId, 'subject_id' => $englishSubjectId])->pluck('id');
 
         if ($questions->isEmpty()) {
-            $this->error("No questions found for level: {$level->name}.");
+            $this->error("No English questions found for child with ID: {$child->id}.");
             return;
         }
 
         $today = Carbon::now();
-        $dueDate = $today->isMonday() ? $today : $today->next(Carbon::MONDAY);
+        $dueDate = $today->next(Carbon::MONDAY);
 
         $assignment = Assignment::create([
             'title' => 'English Paper 1',
             'description' => 'This is an English assignment with multiple questions.',
-            'due_date' => $dueDate,
             'is_recurring' => true,
-            'recurrence_rule' => json_encode(['frequency' => 'weekly', 'day_of_week' => 'monday']),
+            'recurrence_type' => 'every_monday',
             'student_id' => $child->id,
             'created_by' => $parent->id,
+            'status' => 'pending',
+            'due_date' => $dueDate,
+            'subject_id' => $englishSubjectId,
         ]);
 
-        $assignment->questions()->attach($questions->pluck('id'));
+        $assignment->questions()->attach($questions);
 
-        Mail::to($parent->email)->send(new NewAssignmentCreated($assignment, $child, $parent));
-
-        $this->info("Recurring assignment created for child with ID: {$child->id} and questions assigned for Monday, {$dueDate->toDateString()}.");
+        // Send the email notification
+        try {
+            Mail::to($parent->email)->send(new NewAssignmentCreated($assignment, $child, $parent));
+        } catch (\Exception $e) {
+            $this->error("Failed to send email to parent with ID: {$parent->id} for child with ID: {$child->id}. Error: " . $e->getMessage());
+        }
     }
 }

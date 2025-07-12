@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\AssignQuestionToAssignment;
 use App\Enum\QuestionTypes;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -14,9 +15,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-Artisan::command('weekly:assign', function (string $user) {
-    $this->info("Sending email to: {$user}!");
-});
+// Artisan::command('assign:questions', function () {
+//     $this->call(AssignQuestionToAssignment::class);
+// })->describe('Assign questions based on student level');
 
-
-Schedule::command('assign:questions')->weeklyOn(1, '00:00');
+Schedule::command('assign:questions')->weekly()->mondays()->at('00:00');

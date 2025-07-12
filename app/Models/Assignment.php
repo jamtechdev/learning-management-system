@@ -2,33 +2,50 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Assignment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'description',
         'due_date',
-        'is_recurring',
-        'recurrence_rule',
-        'student_id', // Student to whom the assignment is assigned
-        'created_by', // Parent who created the assignment
+        'recurrence_type',
+        'student_id',
+        'created_by',
+        'subject_id',
+        'status'
     ];
 
-    // Relationship to the Student (assigned to this assignment)
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The student the assignment is assigned to
+     */
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
     }
 
-    // Relationship to the Parent (creator of the assignment)
-    public function creator()
+    /**
+     * The subject of the assignment
+     */
+    public function subject()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(QuestionSubject::class, 'subject_id');
     }
 
-    // Relationship to Questions
+    /**
+     * The questions assigned to this assignment
+     */
     public function questions()
     {
         return $this->belongsToMany(Question::class, 'assignment_questions');

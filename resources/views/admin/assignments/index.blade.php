@@ -1,91 +1,34 @@
 <x-app-layout>
-    <div class="py-6">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="p-6 bg-white shadow-xl dark:bg-gray-900 sm:rounded-lg">
+    <div class="py-4">
+        <div class="container-fluid">
+            <div class="border-0 shadow card rounded-3">
 
                 <!-- Header -->
-                <div class="flex flex-col items-center justify-between mb-8 md:flex-row">
-                    <h2
-                        class="text-3xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white md:text-left">
-                        Manage All Question Assessments
-                    </h2>
-                    <a href="{{ route('admin.assignments.create') }}"
-                        class="inline-block px-6 py-3 mt-4 text-sm font-semibold text-white transition add-btn">
-                        + Add Assessments
+                <div class="py-3 bg-white card-header d-flex justify-content-between align-items-center border-bottom">
+                    <h2 class="mb-0 h4 text-dark">Manage Assignments</h2>
+                    <a href="{{ route('admin.assignments.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i> Add Assignment
                     </a>
                 </div>
 
                 <!-- Table -->
-                <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm dark:border-gray-700">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    ID</th>
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Title</th>
-
-                                <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Created At</th>
-
-                                     <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Actions</th>
-                                     <th
-                                    class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Add Questions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($assessments as $assessment)
-                                <tr>
-                                    <td class="px-4 py-2 text-sm text-gray-900">{{ $assessment->id }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-900">{{ $assessment->title }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-900">
-                                        {{ $assessment->created_at->format('d M Y') }}</td>
-
-                                    <td class="px-4 py-2 text-sm text-gray-900">
-                                        <a href="{{route('admin.assignments.edit', $assessment->id)}}"
-                                            class="inline-block px-3 py-1 mr-2 text-sm text-white-600 add-btn">
-                                            Edit
-                                        </a>
-                                         <form action="{{ route('admin.assignments.delete', $assessment->id) }}"
-                                            method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Are you sure you want to delete this assessment?')"
-                                                class="inline-block px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        <a href="{{route('admin.assignments.question', $assessment->id)}}"
-                                            class="inline-block px-3 py-1 mr-2 text-sm bg-green-400 text-white-600">
-                                            Questions
-                                        </a>
-                                    </td>
-
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-4 py-4 text-sm text-center text-gray-500">No
-                                        assessments found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="pt-0 card-body">
+                    <div class="table-responsive">
+                        {!! $dataTable->table(
+                            [
+                                'class' => 'table table-striped table-hover table-bordered w-100',
+                                'id' => 'assignments-table',
+                            ],
+                            true,
+                        ) !!}
+                    </div>
                 </div>
 
-                <!-- Pagination -->
-                <div class="mt-6">
-                    {{ $assessments->links('pagination::tailwind') }}
-                </div>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        {!! $dataTable->scripts() !!}
+    @endpush
 </x-app-layout>
