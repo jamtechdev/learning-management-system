@@ -21,7 +21,7 @@ class AssignmentController extends Controller
      */
     public function index(Request $request)
     {
-        $assignments = Assignment::all();
+        $assignments = Assignment::get();
         return $this->successHandler(AssignmentResource::collection($assignments), 200, "Assignments fetched successfully.");
     }
 
@@ -104,9 +104,16 @@ class AssignmentController extends Controller
         $validator = Validator::make($request->all(), [
             'assignment_id' => 'required|exists:assignments,id',
             'title' => 'required|string',
+            'student_id' => 'required|exists:users,id',
+            'subject_id' => 'required|exists:question_subjects,id',
             'description' => 'nullable|string',
             'due_date' => 'required|date',
-            'recurrence_type' => 'nullable|in:none,every_monday,weekly,monthly',
+            'question_ids' => ['required', function ($attribute, $value, $fail) {
+                $ids = array_filter(explode(',', $value));
+                if (count($ids) === 0) {
+                    $fail('Please select at least one question.');
+                }
+            }],
         ]);
 
         if ($validator->fails()) {
@@ -115,35 +122,27 @@ class AssignmentController extends Controller
 
         try {
             return DB::transaction(function () use ($request) {
+                // Find the assignment by ID
                 $assignment_id = $request->input('assignment_id');
                 $assignment = Assignment::find($assignment_id);
 
-                // Handle recurrence logic
-                $dueDate = Carbon::parse($request->input('due_date'));
-
-                if ($request->input('recurrence_type') !== 'none') {
-                    $dueDate = null; // Remove the due date for recurring assignments
+                if (!$assignment) {
+                    return $this->notFoundHandler('Assignment not found');
                 }
 
                 // Update the assignment
                 $assignment->update($request->only([
                     'title',
+                    'student_id',
+                    'subject_id',
                     'description',
                     'due_date',
-                    'recurrence_type',
                 ]));
 
-                // If the assignment is recurring, create the next assignment based on the recurrence type
-                if ($assignment->recurrence_type !== 'none') {
-                    $nextDueDate = $assignment->getNextDueDate();
-                    Assignment::create([
-                        'title' => $assignment->title,
-                        'description' => $assignment->description,
-                        'due_date' => $nextDueDate,
-                        'recurrence_type' => $assignment->recurrence_type,
-                        'student_id' => $assignment->student_id,
-                        'created_by' => $assignment->created_by,
-                    ]);
+                // Sync selected questions
+                if ($request->has('question_ids')) {
+                    $questionIds = explode(',', $request->input('question_ids'));
+                    $assignment->questions()->sync($questionIds);
                 }
 
                 return $this->successHandler(new AssignmentResource($assignment), 200, "Assignment updated successfully.");
@@ -152,6 +151,7 @@ class AssignmentController extends Controller
             return $this->serverErrorHandler($e);
         }
     }
+
 
     /**
      * Delete an assignment.
