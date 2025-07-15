@@ -254,6 +254,14 @@ class AssignmentController extends Controller
                 continue; // Skip if question is not found
             }
 
+            // Check if the question has already been attempted
+            $attempted = $assignment->questions()->wherePivot('question_id', $answerData['question_id'])->wherePivot('is_attempt', true)->exists();
+
+            if ($attempted) {
+                // Return a message if the question has already been attempted
+                return $this->validationErrorHandler((object) ['error' => 'You have already attempted this question.']);
+            }
+
             // Initialize variables for checking correctness
             $correctAnswer = null;
             $isCorrect = false;
@@ -326,6 +334,11 @@ class AssignmentController extends Controller
                 'correct_answer' => $correctAnswer,
                 'is_correct' => $isCorrect,
             ];
+
+            // Update the pivot table 'is_attempt' field to true
+            $assignment->questions()->updateExistingPivot($answerData['question_id'], [
+                'is_attempt' => true, // Mark the question as attempted
+            ]);
         }
 
         // Store the result in the assignment_results table
@@ -342,6 +355,8 @@ class AssignmentController extends Controller
         // Return a success response
         return $this->successHandler(['result' => $result], 200, 'Assignment submitted and graded successfully!');
     }
+
+
 
     private function checkMcqAnswer($question, $userAnswer)
     {

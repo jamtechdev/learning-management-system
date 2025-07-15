@@ -82,10 +82,15 @@ class AssignmentController extends Controller
         $assignment = Assignment::findOrFail($id);
         $children = User::role('child')->with('parent')->get();
         $subjects = QuestionSubject::all();
-        $questions = $assignment->questions; // Get questions associated with the assignment
+
+        // Fetch questions based on the assignment's subject
+        $questions = $assignment->questions->isEmpty()
+            ? Question::where('subject_id', $assignment->subject_id)->get()  // Return all questions based on the subject if no questions assigned
+            : $assignment->questions; // Otherwise, return assigned questions
 
         return view('admin.assignments.edit', compact('assignment', 'children', 'subjects', 'questions'));
     }
+
 
     public function update(Request $request, $id)
     {
