@@ -52,6 +52,7 @@ Route::group(['prefix' => 'v1'], function () {
         // Assignment Routes
         Route::prefix('assignments')->group(function () {
             Route::post('/get', [AssignmentController::class, 'index']);
+            Route::post('/student-assignment', [AssignmentController::class, 'showStudentAssignment']);
             Route::post('/create', [AssignmentController::class, 'store']);
             Route::post('/update', [AssignmentController::class, 'update']);
             Route::post('/delete', [AssignmentController::class, 'destroy']);

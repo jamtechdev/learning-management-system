@@ -53,6 +53,34 @@ class AssignmentController extends Controller
         return $this->notFoundHandler('Assignment not found');
     }
 
+    public function showStudentAssignment(Request $request)
+    {
+        // New method to fetch all assignments for a student
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorHandler($validator->errors());
+        }
+
+        $studentId = $request->input('student_id');
+        $assignments = Assignment::where('student_id', $studentId)
+            ->with('questions')
+            ->orderBy('due_date', 'desc')
+            ->get();
+
+        if ($assignments->isEmpty()) {
+            return $this->notFoundHandler('No assignments found for this student.');
+        }
+        return $this->successHandler(AssignmentResource::collection($assignments), 200, 'Assignments fetched successfully.');
+    }
+
+
+
+
+
+
     /**
      * Store a newly created assignment (ad-hoc or recurring).
      */
@@ -183,15 +211,17 @@ class AssignmentController extends Controller
             return $this->serverErrorHandler($e);
         }
     }
+
+
     public function submitAssignment(Request $request)
     {
         // Validate the incoming data
         $validator = Validator::make($request->all(), [
             'assignment_id' => 'required|exists:assignments,id',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.user_answer' => 'required|string',
-            'answers.*.type' => 'required|string|in:' . implode(',', QuestionTypes::TYPES),
+            'answers' => 'required|array', // This ensures 'answers' is an array
+            'answers.*.question_id' => 'required|exists:questions,id', // Ensures each question_id exists in the questions table
+            'answers.*.user_answer' => 'required', // Ensure that the user_answer is provided
+            'answers.*.type' => 'required|in:' . implode(',', QuestionTypes::TYPES), // Ensure the answer type is valid
         ]);
 
         if ($validator->fails()) {
@@ -200,11 +230,11 @@ class AssignmentController extends Controller
 
         // Get the assignment and assigned questions
         $assignment = Assignment::find($request->assignment_id);
-        $assignedQuestions = $assignment->questions->pluck('id')->toArray(); // Get the assigned question IDs
-
         if (!$assignment) {
             return $this->notFoundHandler('Assignment not found');
         }
+
+        $assignedQuestions = $assignment->questions->pluck('id')->toArray(); // Get the assigned question IDs
 
         // Initialize score, gems, and answers
         $score = 0;
@@ -377,22 +407,30 @@ class AssignmentController extends Controller
         return false;
     }
 
-    private function checkFillInTheBlankAnswer($question, $userAnswer)
+    public function checkFillInTheBlankAnswer($question, $userAnswer)
     {
         foreach ($question->metadata['blanks'] as $blank) {
-            if (strtolower(trim($blank['correct_answer'])) === strtolower(trim($userAnswer[$blank['blank_number']]))) {
-                return true;
+            $userAnswerForBlank = $userAnswer[$blank['blank_number']] ?? null;
+            if (strtolower(trim($blank['correct_answer'])) !== strtolower(trim($userAnswerForBlank))) {
+                return false;
             }
         }
-        return false;
+
+        return true;
     }
 
     private function checkEditingAnswer($question, $userAnswer)
     {
-        foreach ($question->metadata['questions'] as $edit) {
-            if (strtolower(trim($edit['wrong'])) === strtolower(trim($userAnswer[$edit['box']]))) {
-                return true;
+        try {
+            foreach ($question->metadata['questions'] as $edit) {
+                // Ensure the user's answer for the corresponding box is checked
+                $userAnswerForBox = $userAnswer['box' . $edit['box']] ?? null;
+                if ($userAnswerForBox && strtolower(trim($edit['wrong'])) === strtolower(trim($userAnswerForBox))) {
+                    return true; // If the user answered the wrong word correctly
+                }
             }
+        } catch (\Exception $e) {
+            return false; // Catch any errors with the metadata or answer
         }
         return false;
     }
@@ -401,24 +439,32 @@ class AssignmentController extends Controller
     {
         switch ($type) {
             case QuestionTypes::MCQ:
-                $correctOption = collect($question->metadata['options'])->firstWhere('is_correct', true);
-                return $correctOption['value'] ?? null;
+                return collect($question->metadata['options'])->firstWhere('is_correct', true)['value'] ?? null;
+
             case QuestionTypes::TRUE_FALSE:
                 return $question->metadata['answer']['choice'] ?? null;
+
             case QuestionTypes::LINKING:
                 return $question->metadata['answer'] ?? [];
+
             case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
+            case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
                 return $question->metadata['questions'] ?? [];
+
             case QuestionTypes::COMPREHENSION:
                 return $question->metadata['subquestions'] ?? [];
+
             case QuestionTypes::FILL_IN_THE_BLANK:
                 return $question->metadata['blanks'] ?? [];
+
             case QuestionTypes::EDITING:
                 return $question->metadata['questions'] ?? [];
+
             default:
                 return null;
         }
     }
+
 
     public function getPastResults(Request $request)
     {
