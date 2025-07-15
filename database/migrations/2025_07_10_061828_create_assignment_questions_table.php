@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('assignment_id')->constrained('assignments')->onDelete('cascade');
             $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
-            $table->timestamps();
+            $table->boolean('is_attempt')->default(false);
         });
     }
 
