@@ -55,6 +55,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/create', [AssignmentController::class, 'store']);
             Route::post('/update', [AssignmentController::class, 'update']);
             Route::post('/delete', [AssignmentController::class, 'destroy']);
+            Route::post('/attempt', [AssignmentController::class, 'submitAssignment']);
         });
     });
 });
