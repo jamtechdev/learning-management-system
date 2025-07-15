@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Assignment;
 use App\Http\Resources\AssignmentResource;
+use App\Http\Resources\AssignmentResultResource;
 use App\Models\AssignmentAnswer;
 use App\Models\AssignmentResult;
 use App\Models\Question;
@@ -417,5 +418,30 @@ class AssignmentController extends Controller
             default:
                 return null;
         }
+    }
+
+    public function getPastResults(Request $request)
+    {
+        // Validate the incoming data
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id', // Ensure the user exists
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorHandler($validator->errors());
+        }
+
+        // Get the user's assignment results
+        $userId = $request->input('user_id');
+        $results = AssignmentResult::where('user_id', $userId)
+            ->orderBy('submitted_at', 'desc') // Get the most recent results first
+            ->get();
+
+        if ($results->isEmpty()) {
+            return $this->notFoundHandler('No past results found for this user.');
+        }
+
+        // Use the AssignmentResultResource to format the results
+        return $this->successHandler(AssignmentResultResource::collection($results), 200, 'Past results fetched successfully.');
     }
 }
