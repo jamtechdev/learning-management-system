@@ -495,7 +495,7 @@ class AssignmentController extends Controller
         $userId = $request->input('student_id');
         $assignmentId = $request->input('assignment_id');
 
-        $results = AssignmentResult::where('student_id', $userId)
+        $results = AssignmentResult::where('user_id', $userId)
             ->where('assignment_id', $assignmentId)  // Filter by assignment_id
             ->orderBy('submitted_at', 'desc') // Get the most recent results first
             ->get();
