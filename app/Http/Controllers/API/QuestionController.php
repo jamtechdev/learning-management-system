@@ -6,6 +6,7 @@ use App\Enum\QuestionTypes;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LevelResource;
 use App\Http\Resources\QuestionCollection;
+use App\Http\Resources\QuestionResource;
 use App\Http\Resources\SubjectResource;
 use App\Http\Resources\TopicResource;
 use App\Models\Question;
@@ -17,11 +18,23 @@ use Illuminate\Http\Request;
 class QuestionController extends Controller
 {
     use ApiResponseTrait;
-    public function getAllQuestions()
+    public function getAllQuestions(Request $request)
     {
-        $questions = Question::paginate(10);
-        return $this->successHandler(new QuestionCollection($questions), 200, "Questions fetched successfully!");
+        $validator = Validator::make($request->all(), [
+            'subject_id' => 'required|integer|exists:question_subjects,id',
+        ]);
+        if ($validator->fails()) {
+            return $this->validationErrorHandler($validator->errors());
+        }
+        $subjectId = $request->input('subject_id');
+        $query = Question::query();
+        if ($subjectId) {
+            $query->where('subject_id', $subjectId);
+        }
+        $questions = $query->get();
+        return $this->successHandler(QuestionResource::collection($questions), 200, "Questions fetched successfully!");
     }
+
 
     public function getAllLevels(Request $request)
     {
@@ -31,6 +44,8 @@ class QuestionController extends Controller
 
         return $this->successHandler(LevelResource::collection($levels), 200, "Levels fetched successfully!");
     }
+
+
     public function getAllSubjects(Request $request)
     {
         $levelId = $request->input('level_id');
