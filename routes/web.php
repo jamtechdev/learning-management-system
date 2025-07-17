@@ -12,7 +12,8 @@ use App\Http\Controllers\Admin\{
     ParentController,
     StudentController,
     AssignmentQuestionController,
-    SubscriptionController
+    SubscriptionController,
+    FeedbackController
 };
 
 // Redirect root to login
@@ -132,4 +133,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/plans/{plan}/assign-subjects', [SubscriptionController::class, 'showAssignSubjectsForm'])->name('assignSubjects');
         Route::post('/plans/{plan}/assign-subjects', [SubscriptionController::class, 'assignSubjects'])->name('assignSubjects.store');
     });
+
+    // feedback
+    Route::get('feedback', [FeedbackController::class, 'index'])->name('admin.feedback.index');
+
+
 });

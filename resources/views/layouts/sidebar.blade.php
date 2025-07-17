@@ -86,6 +86,15 @@
                 </x-nav-link>
             </li>
 
+             <!-- feedback -->
+            <li>
+                <x-nav-link href="{{ route('admin.feedback.index') }}" :active="request()->routeIs('admin.feedback.*')"
+                    class="flex items-center w-full gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    💬
+                    <span>Feedback</span>
+                </x-nav-link>
+            </li>
+
         </ul>
     </nav>
 </aside>
