@@ -91,7 +91,7 @@
                 <!-- Due Date -->
                 <div class="mb-6 col-12">
                     <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
-                    <input type="date" id="due_date" name="due_date" x-model="form.due_date"
+                    <input type="date" id="due_date" name="due_date" x-model="form.due_date" min="{{date('Y-m-d')}}"
                         class="mt-2 p-3 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('due_date') border-red-500 @enderror"
                         value="{{ old('due_date') }}" required>
                     @error('due_date')

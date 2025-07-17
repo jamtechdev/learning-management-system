@@ -149,7 +149,7 @@ class QuestionImportController extends Controller
         }
 
         // Return the sample file for download
-        session()->flash('toastr', [
+        session('toastr', [
             'type' => 'success',
             'message' => 'Sample file downloaded successfully!',
         ]);

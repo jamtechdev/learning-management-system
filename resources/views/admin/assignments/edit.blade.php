@@ -82,9 +82,9 @@
                 <!-- Due Date -->
                 <div class="mb-6 col-12">
                     <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
-                    <input type="date" id="due_date" name="due_date" x-model="form.due_date"
+                    <input type="date" id="due_date" name="due_date" x-model="form.due_date" min="{{date('Y-m-d')}}"
                         class="mt-2 p-3 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('due_date') border-red-500 @enderror"
-                        :value="form.due_date" required>
+                         required>
                     @error('due_date')
                         <div class="mt-2 text-sm text-red-500">{{ $message }}</div>
                     @enderror
@@ -169,7 +169,7 @@
                     student_id: '{{ $assignment->student_id }}',
                     subject_id: '{{ $assignment->subject_id }}',
                     description: `{{ $assignment->description }}`,
-                    due_date: '{{ $assignment->due_date }}',
+                    due_date: '{{ \Carbon\Carbon::parse($assignment->due_date)->format('Y-m-d') }}',
                     question_ids: '{{ $assignment->questions->pluck('id')->implode(',') }}',
                 },
                 showQuestionModal: false,
