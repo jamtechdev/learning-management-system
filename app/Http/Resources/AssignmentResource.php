@@ -8,33 +8,35 @@ use Carbon\Carbon;
 
 class AssignmentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
+        $dueDate = $this->due_date ? Carbon::parse($this->due_date)->toDateTimeString() : null;
+        $createdTime = $this->created_at ? Carbon::parse($this->created_at)->diffForHumans() : null;
+        $updatedTime = $this->updated_at ? Carbon::parse($this->updated_at)->diffForHumans() : null;
+
+        $allAttempted = $this->questions->every(function ($question) {
+            return (bool) ($question->pivot->is_attempt ?? false);
+        });
+
         return [
-            'id' => $this?->id,
-            'title' => $this?->title,
-            'description' => $this?->description,
-            'due_date' => Carbon::parse($this->due_date)->toDateTimeString(),
-            'is_recurring' => $this?->is_recurring,
-            'recurrence_rule' => $this?->recurrence_rule
-                ? json_decode($this->recurrence_rule)
-                : null,
-            'student_id' => $this?->student_id,
-            'subject' => new \App\Http\Resources\SubjectResource($this->subject),
+            'id' => $this->id ?? null,
+            'title' => $this->title ?? 'No title provided',
+            'description' => $this->description ?? 'No description provided',
+            'due_date' => $dueDate,
+            'is_recurring' => $this->is_recurring ?? false,
+            'recurrence_rule' => $this->recurrence_rule ? json_decode($this->recurrence_rule) : null,
+            'student_id' => $this->student_id ?? null,
+            'subject' => new \App\Http\Resources\SubjectResource($this->subject ?? []),
             'questions' => $this->questions->map(function ($question) {
                 return [
-                    'id' => $question->id,
-                    'question' => $question->metadata ?? null, // Assuming `metadata` contains the question content
-                    'is_attempt' => (bool)$question->pivot->is_attempt, // Access the 'is_attempt' from the pivot table
+                    'id' => $question->id ?? null,
+                    'question' => $question->metadata ?? 'No question available',
+                    'is_attempt' => (bool)($question->pivot->is_attempt ?? false),
                 ];
             }),
-            'created_time' => $this?->created_at ? Carbon::parse($this->created_at)->diffForHumans() : null,
-            'updated_time' => $this?->updated_at ? Carbon::parse($this->updated_at)->diffForHumans() : null,
+            'assignment_status' => $allAttempted ? 'Assignment Completed' : 'In Progress',
+            'created_time' => $createdTime,
+            'updated_time' => $updatedTime,
         ];
     }
 }
