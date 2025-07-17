@@ -14,10 +14,22 @@ class AssignmentResource extends JsonResource
         $createdTime = $this->created_at ? Carbon::parse($this->created_at)->diffForHumans() : null;
         $updatedTime = $this->updated_at ? Carbon::parse($this->updated_at)->diffForHumans() : null;
 
-        // Check if all questions have is_attempt = true in the pivot table
-        $allAttempted = $this->questions->every(function ($question) {
+        // Count the number of attempted questions
+        $attemptedCount = $this->questions->filter(function ($question) {
             return (bool) ($question->pivot->is_attempt ?? false);
-        });
+        })->count();
+
+        // Check the status based on the number of attempted questions
+        $totalQuestions = $this->questions->count();
+        $assignmentStatus = 'Started'; // Default status
+
+        if ($attemptedCount === 0) {
+            $assignmentStatus = 'Started'; // No questions attempted
+        } elseif ($attemptedCount > 0 && $attemptedCount < $totalQuestions) {
+            $assignmentStatus = 'In Progress'; // Some questions attempted
+        } elseif ($attemptedCount === $totalQuestions) {
+            $assignmentStatus = 'Completed'; // All questions attempted
+        }
 
         return [
             'id' => $this->id ?? null,
@@ -35,7 +47,7 @@ class AssignmentResource extends JsonResource
                     'is_attempt' => (bool)($question->pivot->is_attempt ?? false), // Access pivot 'is_attempt'
                 ];
             }),
-            'assignment_status' => $allAttempted ? 'Assignment Completed' : 'In Progress',
+            'assignment_status' => $assignmentStatus,
             'created_time' => $createdTime,
             'updated_time' => $updatedTime,
         ];
