@@ -310,7 +310,7 @@ class AssignmentController extends Controller
                     // Save individual answer
                     AssignmentAnswer::create([
                         'assignment_id' => $assignment->id,
-                        'user_id' => Auth::id(),
+                        'user_id' => $assignment->student_id,
                         'question_id' => $question->id,
                         'answer_data' => $answerData['user_answer'],
                         'status' => $isCorrect ? 'graded' : 'submitted',
@@ -337,7 +337,7 @@ class AssignmentController extends Controller
                 // Save result
                 return AssignmentResult::create([
                     'assignment_id' => $assignment->id,
-                    'user_id' => Auth::id(),
+                    'user_id' => $assignment->student_id,
                     'score' => $score,
                     'gems' => $gems,
                     'status' => 'graded',
