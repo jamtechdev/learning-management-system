@@ -204,14 +204,16 @@ class AssignmentController extends Controller
             return DB::transaction(function () use ($request) {
                 $assignment_id = $request->input('assignment_id');
                 $assignment = Assignment::find($assignment_id);
-
+                $assignment->questions()->detach();
                 $assignment->delete();
+
                 return $this->successHandler(null, 200, 'Assignment deleted successfully');
             });
         } catch (\Exception $e) {
             return $this->serverErrorHandler($e);
         }
     }
+
 
 
 
@@ -256,7 +258,7 @@ class AssignmentController extends Controller
                     }
 
                     // Check if already attempted globally via pivot table
-                    $attempted = DB::table('assignment_question')
+                    $attempted = DB::table('assignment_questions')
                         ->where('assignment_id', $assignment->id)
                         ->where('question_id', $answerData['question_id'])
                         ->where('is_attempt', true)
