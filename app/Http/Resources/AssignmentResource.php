@@ -25,9 +25,14 @@ class AssignmentResource extends JsonResource
                 ? json_decode($this->recurrence_rule)
                 : null,
             'student_id' => $this?->student_id,
-            // 'student' => new \App\Http\Resources\AuthResource($this->student),
             'subject' => new \App\Http\Resources\SubjectResource($this->subject),
-            'questions' => QuestionResource::collection($this->questions),
+            'questions' => $this->questions->map(function ($question) {
+                return [
+                    'id' => $question->id,
+                    'question' => $question->metadata ?? null, // Assuming `metadata` contains the question content
+                    'is_attempt' => (bool)$question->pivot->is_attempt, // Access the 'is_attempt' from the pivot table
+                ];
+            }),
             'created_time' => $this?->created_at ? Carbon::parse($this->created_at)->diffForHumans() : null,
             'updated_time' => $this?->updated_at ? Carbon::parse($this->updated_at)->diffForHumans() : null,
         ];
