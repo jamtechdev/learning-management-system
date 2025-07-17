@@ -31,6 +31,11 @@ class AssignmentResource extends JsonResource
             $assignmentStatus = 'Completed'; // All questions attempted
         }
 
+        // Update the assignment status if all questions are completed
+        if ($attemptedCount === $totalQuestions) {
+            $this->updateStatusToCompleted();
+        }
+
         return [
             'id' => $this->id ?? null,
             'title' => $this->title ?? 'No title provided',
@@ -51,5 +56,15 @@ class AssignmentResource extends JsonResource
             'created_time' => $createdTime,
             'updated_time' => $updatedTime,
         ];
+    }
+
+    /**
+     * Method to update the assignment status to 'completed'.
+     */
+    private function updateStatusToCompleted()
+    {
+        // Update the status of the assignment in the database to 'completed'
+        $this->status = 'completed';
+        $this->save();
     }
 }
