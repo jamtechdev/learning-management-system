@@ -483,21 +483,25 @@ class AssignmentController extends Controller
     {
         // Validate the incoming data
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // Ensure the user exists
+            'student_id' => 'required|exists:users,id', // Ensure the user exists
+            'assignment_id' => 'required|exists:assignments,id', // Ensure the assignment exists
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorHandler($validator->errors());
         }
 
-        // Get the user's assignment results
-        $userId = $request->input('user_id');
-        $results = AssignmentResult::where('user_id', $userId)
+        // Get the user's assignment results for the specified assignment
+        $userId = $request->input('student_id');
+        $assignmentId = $request->input('assignment_id');
+
+        $results = AssignmentResult::where('student_id', $userId)
+            ->where('assignment_id', $assignmentId)  // Filter by assignment_id
             ->orderBy('submitted_at', 'desc') // Get the most recent results first
             ->get();
 
         if ($results->isEmpty()) {
-            return $this->notFoundHandler('No past results found for this user.');
+            return $this->notFoundHandler('No past results found for this student in the specified assignment.');
         }
 
         // Use the AssignmentResultResource to format the results
