@@ -484,7 +484,6 @@ class AssignmentController extends Controller
         // Validate the incoming data
         $validator = Validator::make($request->all(), [
             'student_id' => 'required|exists:users,id', // Ensure the user exists
-            'assignment_id' => 'required|exists:assignments,id', // Ensure the assignment exists
         ]);
 
         if ($validator->fails()) {
@@ -496,7 +495,6 @@ class AssignmentController extends Controller
         $assignmentId = $request->input('assignment_id');
 
         $results = AssignmentResult::where('user_id', $userId)
-            ->where('assignment_id', $assignmentId)  // Filter by assignment_id
             ->orderBy('submitted_at', 'desc') // Get the most recent results first
             ->get();
 
