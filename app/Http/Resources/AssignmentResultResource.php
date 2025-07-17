@@ -8,19 +8,20 @@ class AssignmentResultResource extends JsonResource
 {
     public function toArray($request)
     {
+        // Safely access assignment properties using optional() to avoid null errors
         return [
-            'assignment_id' => $this->assignment->id,
-            'assignment_name' => $this->assignment->title,
-            'assignment_description' => $this->assignment->description,
-            'assignment_due_date' => $this->assignment->due_date,
-            'assignment_status' => $this->assignment->status,
-            'assignment_subject' => $this->subject->name,
+            'assignment_id' => optional($this->assignment)->id,
+            'assignment_name' => optional($this->assignment)->title,
+            'assignment_description' => optional($this->assignment)->description,
+            'assignment_due_date' => optional($this->assignment)->due_date,
+            'assignment_status' => optional($this->assignment)->status,
+            'assignment_subject' => optional($this->assignment->subject)->name, // Safely access the subject name
 
             'user_id' => $this->user_id,
             'score' => $this->score,
             'gems' => $this->gems,
             'status' => $this->status,
-            'submitted_at' => $this->submitted_at->toDateTimeString(),
+            'submitted_at' => optional($this->submitted_at)->toDateTimeString(), // Safely access submitted_at
 
             'answers' => $this->answers,
             'progress' => $this->calculateProgress(),
@@ -35,7 +36,6 @@ class AssignmentResultResource extends JsonResource
             }),
         ];
     }
-
 
     private function calculateProgress()
     {
