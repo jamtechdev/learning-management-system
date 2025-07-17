@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
 class AssignmentController extends Controller
 {
     use ApiResponseTrait;
@@ -213,148 +214,143 @@ class AssignmentController extends Controller
     }
 
 
+
+
     public function submitAssignment(Request $request)
     {
         // Validate the incoming data
         $validator = Validator::make($request->all(), [
             'assignment_id' => 'required|exists:assignments,id',
-            'answers' => 'required|array', // This ensures 'answers' is an array
-            'answers.*.question_id' => 'required|exists:questions,id', // Ensures each question_id exists in the questions table
-            'answers.*.user_answer' => 'required', // Ensure that the user_answer is provided
-            'answers.*.type' => 'required|in:' . implode(',', QuestionTypes::TYPES), // Ensure the answer type is valid
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|exists:questions,id',
+            'answers.*.user_answer' => 'required',
+            'answers.*.type' => 'required|in:' . implode(',', QuestionTypes::TYPES),
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorHandler($validator->errors());
         }
 
-        // Get the assignment and assigned questions
-        $assignment = Assignment::find($request->assignment_id);
-        if (!$assignment) {
-            return $this->notFoundHandler('Assignment not found');
+        // Wrap everything in a DB transaction
+        try {
+            $result = DB::transaction(function () use ($request) {
+                $assignment = Assignment::find($request->assignment_id);
+                if (!$assignment) {
+                    throw new \Exception('Assignment not found.');
+                }
+
+                $assignedQuestions = $assignment->questions->pluck('id')->toArray();
+
+                $score = 0;
+                $gems = 0;
+                $answers = [];
+
+                foreach ($request->answers as $answerData) {
+                    if (!in_array($answerData['question_id'], $assignedQuestions)) {
+                        throw new \Exception('This question is not part of the assigned paper.');
+                    }
+
+                    $question = Question::find($answerData['question_id']);
+                    if (!$question) {
+                        continue; // skip if not found
+                    }
+
+                    // Check if already attempted globally via pivot table
+                    $attempted = DB::table('assignment_question')
+                        ->where('assignment_id', $assignment->id)
+                        ->where('question_id', $answerData['question_id'])
+                        ->where('is_attempt', true)
+                        ->exists();
+
+                    if ($attempted) {
+                        throw new \Exception('You have already attempted this question.');
+                    }
+
+                    // Check answer correctness
+                    $isCorrect = false;
+                    $correctAnswer = null;
+
+                    switch ($answerData['type']) {
+                        case QuestionTypes::MCQ:
+                            $isCorrect = $this->checkMcqAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::MCQ);
+                            break;
+                        case QuestionTypes::TRUE_FALSE:
+                            $isCorrect = $this->checkTrueFalseAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::TRUE_FALSE);
+                            break;
+                        case QuestionTypes::LINKING:
+                            $isCorrect = $this->checkLinkingAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::LINKING);
+                            break;
+                        case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
+                            $isCorrect = $this->checkOpenClozeWithOptionsAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::OPEN_CLOZE_WITH_OPTIONS);
+                            break;
+                        case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
+                            $isCorrect = $this->checkOpenClozeWithDropdownAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS);
+                            break;
+                        case QuestionTypes::COMPREHENSION:
+                            $isCorrect = $this->checkComprehensionAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::COMPREHENSION);
+                            break;
+                        case QuestionTypes::FILL_IN_THE_BLANK:
+                            $isCorrect = $this->checkFillInTheBlankAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::FILL_IN_THE_BLANK);
+                            break;
+                        case QuestionTypes::EDITING:
+                            $isCorrect = $this->checkEditingAnswer($question, $answerData['user_answer']);
+                            $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::EDITING);
+                            break;
+                    }
+
+                    // Save individual answer
+                    AssignmentAnswer::create([
+                        'assignment_id' => $assignment->id,
+                        'user_id' => Auth::id(),
+                        'question_id' => $question->id,
+                        'answer_data' => $answerData['user_answer'],
+                        'status' => $isCorrect ? 'graded' : 'submitted',
+                    ]);
+
+                    if ($isCorrect) {
+                        $score += 10;
+                        $gems += 10;
+                    }
+
+                    $answers[] = [
+                        'question_id' => $question->id,
+                        'user_answer' => $answerData['user_answer'],
+                        'correct_answer' => $correctAnswer,
+                        'is_correct' => $isCorrect,
+                    ];
+
+                    // Update pivot table to mark as attempted
+                    $assignment->questions()->updateExistingPivot($question->id, [
+                        'is_attempt' => true,
+                    ]);
+                }
+
+                // Save result
+                return AssignmentResult::create([
+                    'assignment_id' => $assignment->id,
+                    'user_id' => Auth::id(),
+                    'score' => $score,
+                    'gems' => $gems,
+                    'status' => 'graded',
+                    'submitted_at' => Carbon::now(),
+                    'answers' => $answers,
+                ]);
+            });
+
+            return $this->successHandler(['result' => $result], 200, 'Assignment submitted and graded successfully!');
+        } catch (\Exception $e) {
+            // Rollback is automatic; return error
+            return $this->validationErrorHandler((object) ['error' => $e->getMessage()]);
         }
-
-        $assignedQuestions = $assignment->questions->pluck('id')->toArray(); // Get the assigned question IDs
-
-        // Initialize score, gems, and answers
-        $score = 0;
-        $gems = 0;
-        $answers = [];
-
-        // Loop through each answer provided by the user
-        foreach ($request->answers as $answerData) {
-            // Check if the question is part of the assigned paper
-            if (!in_array($answerData['question_id'], $assignedQuestions)) {
-                return $this->validationErrorHandler((object) ['error' => 'This question is not part of the assigned paper.']);
-            }
-
-            // Find the question by ID
-            $question = Question::find($answerData['question_id']);
-            if (!$question) {
-                continue; // Skip if question is not found
-            }
-
-            // Check if the question has already been attempted
-            $attempted = $assignment->questions()->wherePivot('question_id', $answerData['question_id'])->wherePivot('is_attempt', true)->exists();
-
-            if ($attempted) {
-                // Return a message if the question has already been attempted
-                return $this->validationErrorHandler((object) ['error' => 'You have already attempted this question.']);
-            }
-
-            // Initialize variables for checking correctness
-            $correctAnswer = null;
-            $isCorrect = false;
-
-            // Switch based on the question type
-            switch ($answerData['type']) {
-                case QuestionTypes::MCQ:
-                    $isCorrect = $this->checkMcqAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::MCQ);
-                    break;
-
-                case QuestionTypes::TRUE_FALSE:
-                    $isCorrect = $this->checkTrueFalseAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::TRUE_FALSE);
-                    break;
-
-                case QuestionTypes::LINKING:
-                    $isCorrect = $this->checkLinkingAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::LINKING);
-                    break;
-
-                case QuestionTypes::OPEN_CLOZE_WITH_OPTIONS:
-                    $isCorrect = $this->checkOpenClozeWithOptionsAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::OPEN_CLOZE_WITH_OPTIONS);
-                    break;
-
-                case QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS:
-                    $isCorrect = $this->checkOpenClozeWithDropdownAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::OPEN_CLOZE_WITH_DROPDOWN_OPTIONS);
-                    break;
-
-                case QuestionTypes::COMPREHENSION:
-                    $isCorrect = $this->checkComprehensionAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::COMPREHENSION);
-                    break;
-
-                case QuestionTypes::FILL_IN_THE_BLANK:
-                    $isCorrect = $this->checkFillInTheBlankAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::FILL_IN_THE_BLANK);
-                    break;
-
-                case QuestionTypes::EDITING:
-                    $isCorrect = $this->checkEditingAnswer($question, $answerData['user_answer']);
-                    $correctAnswer = $this->getCorrectAnswer($question, QuestionTypes::EDITING);
-                    break;
-
-                default:
-                    break;
-            }
-
-            // Save the answer in the database
-            AssignmentAnswer::create([
-                'assignment_id' => $assignment->id,
-                'user_id' => Auth::id(),
-                'question_id' => $question->id,
-                'answer_data' => $answerData['user_answer'],
-                'status' => $isCorrect ? 'graded' : 'submitted',
-            ]);
-
-            // Update score and gems if the answer is correct
-            if ($isCorrect) {
-                $score += 10;
-                $gems += 10;
-            }
-
-            // Add the answer to the result array
-            $answers[] = [
-                'question_id' => $question->id,
-                'user_answer' => $answerData['user_answer'],
-                'correct_answer' => $correctAnswer,
-                'is_correct' => $isCorrect,
-            ];
-
-            // Update the pivot table 'is_attempt' field to true
-            $assignment->questions()->updateExistingPivot($answerData['question_id'], [
-                'is_attempt' => true, // Mark the question as attempted
-            ]);
-        }
-
-        // Store the result in the assignment_results table
-        $result = AssignmentResult::create([
-            'assignment_id' => $assignment->id,
-            'user_id' => Auth::id(),
-            'score' => $score,
-            'gems' => $gems,
-            'status' => 'graded',
-            'submitted_at' => Carbon::now(),
-            'answers' => $answers,
-        ]);
-
-        // Return a success response
-        return $this->successHandler(['result' => $result], 200, 'Assignment submitted and graded successfully!');
     }
+
 
 
 
