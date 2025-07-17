@@ -48,6 +48,6 @@ class Assignment extends Model
      */
     public function questions()
     {
-        return $this->belongsToMany(Question::class, 'assignment_questions');
+        return $this->belongsToMany(Question::class, 'assignment_questions')->withPivot('is_attempt');
     }
 }
