@@ -58,4 +58,9 @@ class Question extends Model
     {
         return $this->belongsTo(QuestionTopic::class, 'topic_id');
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
 }

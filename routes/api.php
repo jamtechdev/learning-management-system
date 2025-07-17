@@ -7,6 +7,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ParentController;
 use App\Http\Controllers\API\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
+use App\Http\Controllers\API\FeedbackController;
 
 Route::get('/parents/{parent_id}/students', [AdminAssignmentController::class, 'getChildrenByParent']);
 
@@ -60,5 +61,13 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/attempt', [AssignmentController::class, 'submitAssignment']);
             Route::post('/getPastResults', [AssignmentController::class, 'getPastResults']);
         });
+
+        // Feedback Routes
+        Route::prefix('feedback')->group(function(){
+            Route::get('/', [FeedbackController::class, 'index']);
+            Route::post('/', [FeedbackController::class, 'store']);
+        });
+
+
     });
 });
