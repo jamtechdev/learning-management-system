@@ -334,6 +334,15 @@ class AssignmentController extends Controller
                     ]);
                 }
 
+                // Check if all questions have been attempted
+                $allAttempted = $assignment->questions->every(function ($question) {
+                    return $question->pivot->is_attempt;
+                });
+
+                if ($allAttempted) {
+                    $assignment->status = 'completed';
+                    $assignment->save();
+                }
                 // Save result
                 return AssignmentResult::create([
                     'assignment_id' => $assignment->id,
