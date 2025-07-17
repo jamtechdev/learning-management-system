@@ -6,12 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AssignmentResultResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
     public function toArray($request)
     {
         return [
@@ -21,22 +15,19 @@ class AssignmentResultResource extends JsonResource
             'gems' => $this->gems,
             'status' => $this->status,
             'submitted_at' => $this->submitted_at->toDateTimeString(),
-            'answers' => $this->answers,  // This will include answers if they are present in the result
-            // You can also include calculated or transformed data:
+            'answers' => $this->answers,
             'progress' => $this->calculateProgress(),
             'feedback' => $this->getFeedback(),
         ];
     }
 
-    // Custom method for calculating progress (percentage)
     private function calculateProgress()
     {
         $totalQuestions = count($this->answers);
         $correctAnswers = collect($this->answers)->where('is_correct', true)->count();
-        return ($correctAnswers / $totalQuestions) * 100;  // Calculate progress as a percentage
+        return ($correctAnswers / $totalQuestions) * 100;
     }
 
-    // Example feedback based on score
     private function getFeedback()
     {
         if ($this->score >= 80) {

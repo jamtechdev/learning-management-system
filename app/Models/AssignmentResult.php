@@ -18,7 +18,10 @@ class AssignmentResult extends Model
 
     protected $casts = [
         'answers' => 'array',
+        'submitted_at' => 'datetime',
     ];
+
+
 
     // Relationship with the assignment
     public function assignment()
