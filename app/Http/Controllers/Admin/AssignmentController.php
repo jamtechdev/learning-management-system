@@ -123,4 +123,18 @@ class AssignmentController extends Controller
         ]);
         return redirect()->route('admin.assignments.index')->with('success', 'Assignment Updated successfully!');
     }
+
+    public function questions($id)
+    {
+        $assignment = Assignment::with('questions')->findOrFail($id);
+        return response()->json([
+            'questions' => $assignment->questions->map(function ($question) {
+                return [
+                    'id' => $question->id,
+                    'title' => $question->title ?? null,
+                    'text' => $question->text ?? null,
+                ];
+            }),
+        ]);
+    }
 }

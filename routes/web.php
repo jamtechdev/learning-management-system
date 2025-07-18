@@ -111,6 +111,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::put('/{id}/update', [\App\Http\Controllers\Admin\AssignmentController::class, 'update'])->name('update');
         Route::delete('/{id}/delete', [\App\Http\Controllers\Admin\AssignmentController::class, 'delete'])->name('delete');
 
+        // Route to get questions for an assignment (for modal)
+        Route::get('/{id}/questions', [\App\Http\Controllers\Admin\AssignmentController::class, 'questions'])->name('questions');
+
         // Alpine.js admin UI for assignments
         Route::get('/alpine', function () {
             return view('admin.assignments.alpine');
