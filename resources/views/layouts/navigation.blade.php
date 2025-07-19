@@ -7,7 +7,7 @@
             <div class="flex items-center shrink-0">
                 <x-user-profile-logo :user="auth()->user()"
                     class="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
-                <div class="items-center hidden space-x-8 sm:flex sm:ms-10">
+                <div class="items-center hidden space-x-8 sm:flex sm:ms-4">
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Welcome,
                         {{ Auth::user()->first_name .' '.Auth::user()->last_name }}!
                     </h3>

@@ -10,49 +10,49 @@
         <div class="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3 sm:px-6 lg:px-8">
             <!-- Total Users -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Users (Include Admin)</h3>
-                    <p class="mt-2 text-3xl font-bold text-teal-600 dark:text-teal-400">{{ $totalUsers }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Users (Include Admin)</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-teal-600 dark:text-teal-400">{{ $totalUsers }}</p>
                 </div>
             </div>
 
             <!-- Total Parents -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Parents</h3>
-                    <p class="mt-2 text-3xl font-bold text-teal-600 dark:text-teal-400">{{ $parentCount }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Parents</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-teal-600 dark:text-teal-400">{{ $parentCount }}</p>
                 </div>
             </div>
 
             <!-- Total Children -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Children</h3>
-                    <p class="mt-2 text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $childCount }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Children</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $childCount }}</p>
                 </div>
             </div>
 
             <!-- Total Levels -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Question Levels</h3>
-                    <p class="mt-2 text-3xl font-bold text-red-600 dark:text-red-400">{{ $levelCount }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Question Levels</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-red-600 dark:text-red-400">{{ $levelCount }}</p>
                 </div>
             </div>
 
             <!-- Total Subjects -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Question Subjects</h3>
-                    <p class="mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $subjectCount }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Question Subjects</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $subjectCount }}</p>
                 </div>
             </div>
 
             <!-- Total Questions -->
             <div class="overflow-hidden bg-white rounded-lg shadow dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Questions</h3>
-                    <p class="mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $totalQuestions }}</p>
+                <div>
+                    <h3 class="p-3 border-b py-2 text-xl font-bold text-black dark:text-white">Total Questions</h3>
+                    <p class="p-3 mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $totalQuestions }}</p>
                 </div>
             </div>
         </div>

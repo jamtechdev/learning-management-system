@@ -5,3 +5,94 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+table {
+    border-collapse: initial;
+    border-radius: 10px;
+    border-spacing: 0 8px !important;
+    overflow: hidden;
+    width: 100%;
+}
+
+table tr > * {
+    padding: 15px !important;
+}
+
+table thead tr th {
+    background: #5977f4 !important;
+    color: #fff !important;
+}
+
+table tr > * {
+    border: none !important;
+}
+
+table td.dt-empty {
+    color: #f44336;
+    background: #efefef !important;
+    border-radius: 12px !important;
+}
+
+table tbody tr > * {
+    background-color: #f9efe5 !important;
+    box-shadow: none !important;
+    font-weight: 600;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: 10px;
+}
+
+table tr > :first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 10px;
+}
+
+table tr > :last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+.pagination {
+    gap: 6px;
+}
+
+.pagination li > * {
+    align-items: center !important;
+    background: #fff !important;
+    border: 1px solid #ddd;
+    color: #000 !important;
+    display: flex !important;
+    font-weight: 600;
+    height: 40px !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    width: 40px !important;
+    border-radius: 8px !important;
+}
+
+.pagination li.page-item.active > * {
+    background: #f7941e !important;
+    border: 1px solid #f7941e !important;
+}
+
+.form-select, .form-control {
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 6px 18px !important;
+    --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+}
+
+.form-select {
+    padding-right: 35px !important;
+}
+
+.btn {
+    padding: 6px 18px !important;
+    border-radius: 8px !important;
+}

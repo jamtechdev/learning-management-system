@@ -70,7 +70,7 @@
                         <label for="subject_id" class="block text-sm font-medium text-gray-700">Choose questions</label>
                         <template x-if="form.subject_id">
                             <button type="button"
-                                class="w-full px-4 py-3 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full px-4 py-3 text-white bg-[#3e80f9] rounded-lg bg-[#f7941e] focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 @click="showQuestionModal = true">
                                 Choose Questions
                             </button>
@@ -103,7 +103,7 @@
                 <div class="flex items-center justify-between col-12">
                     <input type="hidden" name="question_ids" :value="form.question_ids" />
                     <button type="submit"
-                        class="px-6 py-3 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="px-6 py-3 font-semibold text-white bg-[#3e80f9] rounded-lg bg-[#f7941e] focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         Create Assignment
                     </button>
                     <a href="{{ route('admin.assignments.index') }} "
@@ -154,7 +154,7 @@
                         class="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none"
                         @click="showQuestionModal = false">Close</button>
                     <button type="button"
-                        class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none"
+                        class="px-4 py-2 text-sm text-white bg-[#3e80f9] rounded-md bg-[#f7941e] focus:outline-none"
                         @click="applySelectedQuestions">Apply</button>
                 </div>
             </div>

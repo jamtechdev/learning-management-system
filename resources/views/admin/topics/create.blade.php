@@ -71,7 +71,7 @@
                     <div class="flex items-end justify-end mt-6 space-x-2">
                         <!-- Submit Button -->
                         <button type="submit"
-                            class="px-6 py-2 text-white bg-indigo-600 rounded-md shadow-md hover:bg-indigo-700 focus:outline-none">
+                            class="px-6 py-2 text-white bg-[#3e80f9] rounded-md shadow-md bg-[#f7941e] focus:outline-none">
                             Save Topic
                         </button>
                         <!-- Back Button -->

@@ -42,7 +42,7 @@ class SubscriptionPlanDataTable extends DataTable
                 $badges = '';
                 if ($plan->subjects->count()) {
                     foreach ($plan->subjects as $subject) {
-                        $badges .= '<span class="inline-block px-2 py-0.5 text-xs font-semibold text-white bg-indigo-600 rounded mr-1">' . e($subject->name) . '</span>';
+                        $badges .= '<span class="inline-block px-2 py-0.5 text-xs font-semibold text-white bg-[#3e80f9] rounded mr-1">' . e($subject->name) . '</span>';
                     }
                     return $badges;
                 }

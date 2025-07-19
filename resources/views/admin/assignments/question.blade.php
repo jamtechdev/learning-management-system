@@ -13,7 +13,7 @@
                     </h2>
 
                     <a href="{{ route('admin.assignments.questioncreate', $assessment_id) }}"
-                        class="inline-block px-6 py-3 text-sm font-semibold text-white transition bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">
+                        class="inline-block px-6 py-3 text-sm font-semibold text-white transition bg-[#3e80f9] rounded-md shadow-sm bg-[#f7941e] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">
                         + Add Assessment Question
                     </a>
                 </div>

@@ -145,7 +145,7 @@
                     <!-- Button Container -->
                     <div class="mt-6 flex justify-end space-x-2 items-end">
                         <button type="submit"
-                            class="px-6 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md focus:outline-none">
+                            class="px-6 py-2 text-white bg-[#3e80f9] bg-[#f7941e] rounded-md shadow-md focus:outline-none">
                             Update Student
                         </button>
                         <a href="{{ route('admin.student.index', $parent->id) }}"

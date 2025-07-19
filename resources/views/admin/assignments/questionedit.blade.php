@@ -52,7 +52,7 @@
                     <!-- Submit -->
                     <div class="mt-6">
                         <button type="submit"
-                                class="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-300">
+                                class="px-6 py-2 text-white bg-[#3e80f9] rounded-md bg-[#f7941e] focus:outline-none focus:ring focus:ring-indigo-300">
                             Update Selected Questions
                         </button>
                     </div>

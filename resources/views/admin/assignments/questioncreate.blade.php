@@ -73,7 +73,7 @@
                 {{-- Submit --}}
                 <div x-show="filteredQuestions.length > 0">
                     <button type="submit"
-                        class="px-6 py-3 font-semibold text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700">
+                        class="px-6 py-3 font-semibold text-white bg-[#3e80f9] rounded-lg shadow-md bg-[#f7941e]">
                         🚀 Assign Selected Questions
                     </button>
                 </div>

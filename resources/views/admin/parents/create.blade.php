@@ -100,7 +100,7 @@
                 <!-- Submit Button -->
                 <div class="pt-4">
                     <button type="submit"
-                        class="w-full px-6 py-3 text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        class="w-full px-6 py-3 text-white bg-[#3e80f9] rounded-lg shadow bg-[#f7941e] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                         Add Parent
                     </button>
                 </div>

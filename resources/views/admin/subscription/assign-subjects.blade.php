@@ -42,7 +42,7 @@
                         <a href="{{ route('admin.subscriptions.index') }}"
                             class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</a>
                         <button type="submit"
-                            class="px-4 py-2 font-semibold text-white bg-indigo-600 rounded hover:bg-indigo-700">
+                            class="px-4 py-2 font-semibold text-white bg-[#3e80f9] rounded bg-[#f7941e]">
                             Assign Subjects
                         </button>
                     </div>
